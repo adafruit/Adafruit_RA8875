@@ -55,7 +55,6 @@ void Adafruit_RA8875::softReset(void) {
 }
 
 void Adafruit_RA8875::PLLinit(void) {
-// for 480 x 272
   if (_size == RA8875_480x272) {
     writeReg(RA8875_PLLC1, RA8875_PLLC1_PLLDIV1 + 10);
     delay(1);
@@ -70,75 +69,84 @@ void Adafruit_RA8875::PLLinit(void) {
   }
 }
 
-
 void Adafruit_RA8875::initialize(void) {
   PLLinit();
   writeReg(RA8875_SYSR, RA8875_SYSR_16BPP | RA8875_SYSR_MCU8);
 
-  // for 480 x 272
-  uint8_t pixclk, hsync_start, hsync_pw, hsync_finetune, hsync_nondisp, vsync_pw; 
-  uint16_t vsync_nondisp, vsync_start;
-  if (_size == RA8875_480x272) {
-    pixclk = RA8875_PCSR_PDATL | RA8875_PCSR_8CLK;
-    hsync_nondisp = 10;
-    hsync_start = 8;
-    hsync_pw = 48;
-    hsync_finetune = 0;
-    vsync_nondisp = 3;
-    vsync_start = 8;
-    vsync_pw = 10;
-  } else if (_size == RA8875_800x480) {
-    pixclk = RA8875_PCSR_PDATL | RA8875_PCSR_2CLK;
-    hsync_nondisp = 26;
-    hsync_start = 32;
-    hsync_pw = 96;
-    hsync_finetune = 0;
+  /* Timing values */
+  uint8_t pixclk;
+  uint8_t hsync_start;
+  uint8_t hsync_pw;
+  uint8_t hsync_finetune;
+  uint8_t hsync_nondisp;
+  uint8_t vsync_pw; 
+  uint16_t vsync_nondisp;
+  uint16_t vsync_start;
 
-    vsync_nondisp = 32;
-    vsync_start = 23;
-    vsync_pw = 2;
+  /* Set the correct values for the display being used */  
+  if (_size == RA8875_480x272) 
+  {
+    pixclk          = RA8875_PCSR_PDATL | RA8875_PCSR_8CLK;
+    hsync_nondisp   = 10;
+    hsync_start     = 8;
+    hsync_pw        = 48;
+    hsync_finetune  = 0;
+    vsync_nondisp   = 3;
+    vsync_start     = 8;
+    vsync_pw        = 10;
+  } 
+  else if (_size == RA8875_800x480) 
+  {
+    pixclk          = RA8875_PCSR_PDATL | RA8875_PCSR_2CLK;
+    hsync_nondisp   = 26;
+    hsync_start     = 32;
+    hsync_pw        = 96;
+    hsync_finetune  = 0;
+    vsync_nondisp   = 32;
+    vsync_start     = 23;
+    vsync_pw        = 2;
   }
 
   writeReg(RA8875_PCSR, pixclk);
   delay(1);
-  // Horizontal settings registers
-  writeReg(RA8875_HDWR, (_width / 8) - 1);  // H width: (HDWR + 1) * 8 = 480
+  
+  /* Horizontal settings registers */
+  writeReg(RA8875_HDWR, (_width / 8) - 1);                          // H width: (HDWR + 1) * 8 = 480
   writeReg(RA8875_HNDFTR, RA8875_HNDFTR_DE_HIGH + hsync_finetune);
-  writeReg(RA8875_HNDR, (hsync_nondisp - hsync_finetune - 2)/8);   // H non-display: HNDR * 8 + HNDFTR + 2 = 10
-  writeReg(RA8875_HSTR, hsync_start/8 - 1);   // Hsync start: (HSTR + 1)*8 
-  writeReg(RA8875_HPWR, RA8875_HPWR_LOW + (hsync_pw/8 - 1));   // HSync pulse width = (HPWR+1) * 8
-  // Vertical settings registers
+  writeReg(RA8875_HNDR, (hsync_nondisp - hsync_finetune - 2)/8);    // H non-display: HNDR * 8 + HNDFTR + 2 = 10
+  writeReg(RA8875_HSTR, hsync_start/8 - 1);                         // Hsync start: (HSTR + 1)*8 
+  writeReg(RA8875_HPWR, RA8875_HPWR_LOW + (hsync_pw/8 - 1));        // HSync pulse width = (HPWR+1) * 8
+  
+  /* Vertical settings registers */
   writeReg(RA8875_VDHR0, (uint16_t)(_height - 1) & 0xFF);
   writeReg(RA8875_VDHR1, (uint16_t)(_height - 1) >> 8);
-  writeReg(RA8875_VNDR0, vsync_nondisp-1);  // V non-display period = VNDR + 1
+  writeReg(RA8875_VNDR0, vsync_nondisp-1);                          // V non-display period = VNDR + 1
   writeReg(RA8875_VNDR1, vsync_nondisp >> 8);
-  writeReg(RA8875_VSTR0, vsync_start-1);  // Vsync start position = VSTR + 1
+  writeReg(RA8875_VSTR0, vsync_start-1);                            // Vsync start position = VSTR + 1
   writeReg(RA8875_VSTR1, vsync_start >> 8);
-  writeReg(RA8875_VPWR, RA8875_VPWR_LOW + vsync_pw - 1); // Vsync pulse width = VPWR + 1
+  writeReg(RA8875_VPWR, RA8875_VPWR_LOW + vsync_pw - 1);            // Vsync pulse width = VPWR + 1
   
-  // Set active window X
-  writeReg(RA8875_HSAW0, 0); // horizontal start point
+  /* Set active window X */
+  writeReg(RA8875_HSAW0, 0);                                        // horizontal start point
   writeReg(RA8875_HSAW1, 0);
-  writeReg(RA8875_HEAW0, (uint16_t)(_width - 1) & 0xFF); // horizontal end point
+  writeReg(RA8875_HEAW0, (uint16_t)(_width - 1) & 0xFF);            // horizontal end point
   writeReg(RA8875_HEAW1, (uint16_t)(_width - 1) >> 8);
   
-  // Set active window Y
-  writeReg(RA8875_VSAW0, 0); // vertical start point
+  /* Set active window Y */
+  writeReg(RA8875_VSAW0, 0);                                        // vertical start point
   writeReg(RA8875_VSAW1, 0);  
-  writeReg(RA8875_VEAW0, (uint16_t)(_height - 1) & 0xFF); // horizontal end point
+  writeReg(RA8875_VEAW0, (uint16_t)(_height - 1) & 0xFF);           // horizontal end point
   writeReg(RA8875_VEAW1, (uint16_t)(_height - 1) >> 8);
   
-  // touch panel?
+  /* ToDo: Setup touch panel? */
   
-  // clear full window
+  /* Clear the entire window */
   writeReg(RA8875_MCLR, RA8875_MCLR_START | RA8875_MCLR_FULL);
   delay(500); 
 }
 
 uint16_t Adafruit_RA8875::width(void) { return _width; }
 uint16_t Adafruit_RA8875::height(void) { return _height; }
-
-
 
 /************************* Graphics ***********************************/
 
@@ -205,63 +213,69 @@ void Adafruit_RA8875::PWM2config(boolean on, uint8_t clock) {
   }
 }
 
-void Adafruit_RA8875::touchEnable(boolean on) {
-  if (on) {
-     writeReg(RA8875_TPCR0, RA8875_TPCR0_ENABLE | RA8875_TPCR0_WAIT_4096CLK |
-	      RA8875_TPCR0_WAKEDISABLE | RA8875_TPCR0_ADCCLK_DIV4); // 10mhz max!
-     writeReg(RA8875_TPCR1, RA8875_TPCR1_AUTO | RA8875_TPCR1_VREFEXT 
-	      | RA8875_TPCR1_DEBOUNCE);
-     writeReg(RA8875_INTC1, readReg(RA8875_INTC1) | RA8875_INTC1_TP);
-  } else {
+void Adafruit_RA8875::touchEnable(boolean on) 
+{
+  if (on) 
+  {
+    /* Enable Touch Panel (Reg 0x70) */
+    writeReg(RA8875_TPCR0, RA8875_TPCR0_ENABLE        | 
+                           RA8875_TPCR0_WAIT_4096CLK  |
+                           RA8875_TPCR0_WAKEDISABLE   | 
+                           RA8875_TPCR0_ADCCLK_DIV4); // 10mhz max!
+    /* Set Auto Mode      (Reg 0x71) */
+    writeReg(RA8875_TPCR1, RA8875_TPCR1_AUTO    | 
+                           RA8875_TPCR1_VREFEXT | 
+                           RA8875_TPCR1_DEBOUNCE);
+    /* Enable TP INT */
+    writeReg(RA8875_INTC1, readReg(RA8875_INTC1) | RA8875_INTC1_TP);
+  } 
+  else
+  {
+    /* Disable TP INT */
     writeReg(RA8875_INTC1, readReg(RA8875_INTC1) & ~RA8875_INTC1_TP);
+    /* Disable Touch Panel (Reg 0x70) */
     writeReg(RA8875_TPCR0, RA8875_TPCR0_DISABLE);
   }
 }
 
-boolean Adafruit_RA8875::touched(void) {
+boolean Adafruit_RA8875::touched(void) 
+{
   if (readReg(RA8875_INTC2) & RA8875_INTC2_TP) return true;
   return false;
 }
 
-boolean Adafruit_RA8875::touchRead(uint16_t *x, uint16_t *y) {
+boolean Adafruit_RA8875::touchRead(uint16_t *x, uint16_t *y) 
+{
   uint16_t tx, ty;
   uint8_t temp;
   
-  writeCommand(RA8875_TPXH);
-  tx = readData();
-  ty = readData(); 
-  temp = readData();
-  Serial.print("[0x");
-  Serial.print(tx, HEX); Serial.print(", ");
-  Serial.print(ty, HEX); Serial.print(", ");
-  Serial.print(temp, HEX);  Serial.println("]");
-
-  /*
   tx = readReg(RA8875_TPXH);
   ty = readReg(RA8875_TPYH);
   temp = readReg(RA8875_TPXYL);
-  */
   tx <<= 2;
   ty <<= 2;
-  tx |= temp & 0x03; // get the bottom x bits
+  tx |= temp & 0x03;        // get the bottom x bits
   ty |= (temp >> 2) & 0x03; // get the bottom y bits
 
   *x = tx;
   *y = ty;
 
+  /* Clear TP INT Status */
   writeReg(RA8875_INTC2, RA8875_INTC2_TP);
 
   return true;
 }
 
-void Adafruit_RA8875::displayOn(boolean on) {
+void Adafruit_RA8875::displayOn(boolean on) 
+{
  if (on) 
    writeReg(RA8875_PWRR, RA8875_PWRR_NORMAL | RA8875_PWRR_DISPON);
  else
    writeReg(RA8875_PWRR, RA8875_PWRR_NORMAL | RA8875_PWRR_DISPOFF);
 }
 
-void Adafruit_RA8875::sleep(boolean sleep) {
+void Adafruit_RA8875::sleep(boolean sleep) 
+{
  if (sleep) 
    writeReg(RA8875_PWRR, RA8875_PWRR_DISPOFF | RA8875_PWRR_SLEEP);
  else
@@ -270,26 +284,28 @@ void Adafruit_RA8875::sleep(boolean sleep) {
 
 /************************* Low Level ***********************************/
 
-void  Adafruit_RA8875::writeReg(uint8_t reg, uint8_t val) {
+void  Adafruit_RA8875::writeReg(uint8_t reg, uint8_t val) 
+{
   writeCommand(reg);
   writeData(val);
 }
 
-uint8_t  Adafruit_RA8875::readReg(uint8_t reg) {
+uint8_t  Adafruit_RA8875::readReg(uint8_t reg) 
+{
   writeCommand(reg);
   return readData();
 }
 
-void  Adafruit_RA8875::writeData(uint8_t d) {
+void  Adafruit_RA8875::writeData(uint8_t d) 
+{
   digitalWrite(_cs, LOW);
   SPI.transfer(RA8875_DATAWRITE);
   SPI.transfer(d);
   digitalWrite(_cs, HIGH);
-  
-  Serial.print(" = 0x"); Serial.println(d, HEX);
 }
 
-uint8_t  Adafruit_RA8875::readData(void) {
+uint8_t  Adafruit_RA8875::readData(void) 
+{
   digitalWrite(_cs, LOW);
   SPI.transfer(RA8875_DATAREAD);
   uint8_t x = SPI.transfer(0x0);
@@ -297,15 +313,16 @@ uint8_t  Adafruit_RA8875::readData(void) {
   return x;
 }
 
-void  Adafruit_RA8875::writeCommand(uint8_t d) {
-  //Serial.print("$"); Serial.print(d, HEX); 
+void  Adafruit_RA8875::writeCommand(uint8_t d) 
+{
   digitalWrite(_cs, LOW);
   SPI.transfer(RA8875_CMDWRITE);
   SPI.transfer(d);
   digitalWrite(_cs, HIGH);
 }
 
-uint8_t  Adafruit_RA8875::readStatus(void) {
+uint8_t  Adafruit_RA8875::readStatus(void) 
+{
   digitalWrite(_cs, LOW);
   SPI.transfer(RA8875_CMDREAD);
   uint8_t x = SPI.transfer(0x0);
