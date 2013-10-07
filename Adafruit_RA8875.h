@@ -16,6 +16,10 @@ class Adafruit_RA8875 {
   void    graphicsMode(void);
   void    setXY(uint16_t x, uint16_t y);
   void    fillRect(void);
+  
+  /* HW accelerated wrapper functions */
+  void    drawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color);
+  void    fillCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color);
 
   /* Backlight */
   void    GPIOX(boolean on);
@@ -43,6 +47,9 @@ class Adafruit_RA8875 {
  private:
   void PLLinit(void);
   void initialize(void);
+  
+  /* GFX Helper Functions */
+  void circleHelper(int16_t x0, int16_t y0, int16_t r, uint16_t color, bool filled);
 
   uint8_t _cs, _rst;
   uint16_t _width, _height;

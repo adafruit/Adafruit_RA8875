@@ -180,6 +180,63 @@ void Adafruit_RA8875::fillRect(void) {
   writeData(RA8875_DCR_LINESQUTRI_START | RA8875_DCR_FILL | RA8875_DCR_DRAWSQUARE);
 }
 
+void Adafruit_RA8875::circleHelper(int16_t x0, int16_t y0, int16_t r, uint16_t color, bool filled)
+{
+  /* Set X */
+  writeCommand(0x99);
+  writeData(x0);
+  writeCommand(0x9a);
+  writeData(x0 >> 8);
+  
+  /* Set Y */
+  writeCommand(0x9b);
+  writeData(y0); 
+  writeCommand(0x9c);	   
+  writeData(y0 >> 8);
+  
+  /* Set Radius */
+  writeCommand(0x9d);
+  writeData(r);  
+  
+  /* Set Color */
+  writeCommand(0x63);
+  writeData((color & 0xf800) >> 11);
+  writeCommand(0x64);
+  writeData((color & 0x07e0) >> 5);
+  writeCommand(0x65);
+  writeData((color & 0x001f));
+  
+  /* Draw! */
+  writeCommand(RA8875_DCR);
+  if (filled)
+  {
+    writeData(RA8875_DCR_CIRCLE_START | RA8875_DCR_FILL);
+  }
+  else
+  {
+    writeData(RA8875_DCR_CIRCLE_START | RA8875_DCR_NOFILL);
+  }
+  
+  /* Wait for the command to finish */
+  bool finished = false;
+  while (!finished)
+  {
+    uint8_t temp = readReg(RA8875_DCR);
+    if (!(temp & RA8875_DCR_CIRCLE_STATUS))
+      finished = true;
+  }
+}
+
+void Adafruit_RA8875::drawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color)
+{
+  circleHelper(x0, y0, r, color, false);
+}
+
+void Adafruit_RA8875::fillCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color)
+{
+  circleHelper(x0, y0, r, color, true);
+}
+
 /************************* Mid Level ***********************************/
 
 void Adafruit_RA8875::GPIOX(boolean on) {
