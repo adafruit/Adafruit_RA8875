@@ -33,7 +33,7 @@ class Adafruit_RA8875 : public Adafruit_GFX {
   //void    drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color);
   //void    drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color);
   //void    drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color);
-  //void    drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
+  void    drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
   void    fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
   void    fillScreen(uint16_t color);
   
@@ -70,6 +70,7 @@ class Adafruit_RA8875 : public Adafruit_GFX {
   
   /* GFX Helper Functions */
   void circleHelper(int16_t x0, int16_t y0, int16_t r, uint16_t color, bool filled);
+  void rectHelper  (int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color, bool filled);
 
   uint8_t _cs, _rst;
   uint16_t _width, _height;
