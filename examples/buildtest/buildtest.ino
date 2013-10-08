@@ -82,6 +82,9 @@ void setup()
 
 void loop() 
 {
+  float xScale = 1024.0F/tft.width();
+  float yScale = 1024.0F/tft.height();
+
   /* Wait around for touch events */
   if (! digitalRead(RA8875_INT)) 
   {
@@ -90,7 +93,8 @@ void loop()
       Serial.print("Touch: "); 
       tft.touchRead(&tx, &ty);
       Serial.print(tx); Serial.print(", "); Serial.println(ty);
+      /* Draw a circle */
+      tft.fillCircle((uint16_t)(tx/xScale), (uint16_t)(ty/yScale), 10, RA8875_WHITE);
     } 
   }
 }
-
