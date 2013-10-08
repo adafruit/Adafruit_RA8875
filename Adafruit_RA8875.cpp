@@ -194,6 +194,60 @@ void Adafruit_RA8875::drawPixel(int16_t x, int16_t y, uint16_t color)
   digitalWrite(_cs, HIGH);
 }
 
+void Adafruit_RA8875::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
+{
+  /* Set X */
+  writeCommand(0x91);
+  writeData(x);
+  writeCommand(0x92);
+  writeData(x >> 8);
+  
+  /* Set Y */
+  writeCommand(0x93);
+  writeData(y); 
+  writeCommand(0x94);	   
+  writeData(y >> 8);
+  
+  /* Set X1 */
+  writeCommand(0x95);
+  writeData(x+w);
+  writeCommand(0x96);
+  writeData((x+w) >> 8);
+  
+  /* Set Y1 */
+  writeCommand(0x97);
+  writeData(y+h); 
+  writeCommand(0x98);	   
+  writeData((y+h) >> 8);
+
+  /* Set Color */
+  writeCommand(0x63);
+  writeData((color & 0xf800) >> 11);
+  writeCommand(0x64);
+  writeData((color & 0x07e0) >> 5);
+  writeCommand(0x65);
+  writeData((color & 0x001f));
+
+  /* Draw! */
+  writeCommand(RA8875_DCR);
+  /* Square, Filled */
+  writeData(0xB0);
+  
+  /* Wait for the command to finish */
+  bool finished = false;
+  while (!finished)
+  {
+    uint8_t temp = readReg(RA8875_DCR);
+    if (!(temp & RA8875_DCR_LINESQUTRI_STATUS))
+      finished = true;
+  }  
+}
+
+void Adafruit_RA8875::fillScreen(uint16_t color)
+{  
+  fillRect(0, 0, _width-1, _height-1, color);
+}
+
 void Adafruit_RA8875::circleHelper(int16_t x0, int16_t y0, int16_t r, uint16_t color, bool filled)
 {
   /* Set X */
