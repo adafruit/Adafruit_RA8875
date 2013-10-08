@@ -242,6 +242,16 @@ void Adafruit_RA8875::drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, u
   }  
 }
 
+void Adafruit_RA8875::drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color)
+{
+  drawLine(x, y, x, y+h, color);
+}
+
+void Adafruit_RA8875::drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color)
+{
+  drawLine(x, y, x+w, y, color);
+}
+
 void Adafruit_RA8875::drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
 {
   rectHelper(x, y, x+w, y+h, color, false);
@@ -255,6 +265,16 @@ void Adafruit_RA8875::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint1
 void Adafruit_RA8875::fillScreen(uint16_t color)
 {  
   rectHelper(0, 0, _width-1, _height-1, color, true);
+}
+
+void Adafruit_RA8875::drawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color)
+{
+  circleHelper(x0, y0, r, color, false);
+}
+
+void Adafruit_RA8875::fillCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color)
+{
+  circleHelper(x0, y0, r, color, true);
 }
 
 void Adafruit_RA8875::circleHelper(int16_t x0, int16_t y0, int16_t r, uint16_t color, bool filled)
@@ -357,16 +377,6 @@ void Adafruit_RA8875::rectHelper(int16_t x, int16_t y, int16_t w, int16_t h, uin
     if (!(temp & RA8875_DCR_LINESQUTRI_STATUS))
       finished = true;
   }  
-}
-
-void Adafruit_RA8875::drawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color)
-{
-  circleHelper(x0, y0, r, color, false);
-}
-
-void Adafruit_RA8875::fillCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color)
-{
-  circleHelper(x0, y0, r, color, true);
 }
 
 /************************* Mid Level ***********************************/
