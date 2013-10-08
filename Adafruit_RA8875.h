@@ -1,9 +1,20 @@
-#include <Arduino.h>
+#if ARDUINO >= 100
+ #include "Arduino.h"
+ #include "Print.h"
+#else
+ #include "WProgram.h"
+#endif
+
+#ifdef __AVR__
+  #include <avr/pgmspace.h>
+#endif
+
+#include <Adafruit_GFX.h>
 
 // Sizes!
 enum RA8875sizes { RA8875_480x272, RA8875_800x480 };
 
-class Adafruit_RA8875 {
+class Adafruit_RA8875 : public Adafruit_GFX {
  public:
   Adafruit_RA8875(uint8_t cs, uint8_t rst);
   
@@ -16,6 +27,9 @@ class Adafruit_RA8875 {
   void    graphicsMode(void);
   void    setXY(uint16_t x, uint16_t y);
   void    fillRect(void);
+
+  /* Mandatory Adafruit_GFX functions */
+  void    drawPixel(int16_t x, int16_t y, uint16_t color);
   
   /* HW accelerated wrapper functions */
   void    drawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color);

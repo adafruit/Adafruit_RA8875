@@ -2,7 +2,7 @@
 #include <SPI.h>
 #include "Adafruit_RA8875.h"
 
-Adafruit_RA8875::Adafruit_RA8875(uint8_t CS, uint8_t RST) {
+Adafruit_RA8875::Adafruit_RA8875(uint8_t CS, uint8_t RST) : Adafruit_GFX(480, 272) {
   _cs = CS;
   _rst = RST;
 }
@@ -178,6 +178,20 @@ void Adafruit_RA8875::fillRect(void) {
   writeCommand(RA8875_DCR);
   writeData(RA8875_DCR_LINESQUTRI_STOP | RA8875_DCR_DRAWSQUARE);
   writeData(RA8875_DCR_LINESQUTRI_START | RA8875_DCR_FILL | RA8875_DCR_DRAWSQUARE);
+}
+
+void Adafruit_RA8875::drawPixel(int16_t x, int16_t y, uint16_t color)
+{
+  writeReg(RA8875_CURH0, x);
+  writeReg(RA8875_CURH1, x >> 8);
+  writeReg(RA8875_CURV0, y);
+  writeReg(RA8875_CURV1, y >> 8);  
+  writeCommand(RA8875_MRWC);
+  digitalWrite(_cs, LOW);
+  SPI.transfer(RA8875_DATAWRITE);
+  SPI.transfer(color >> 8);
+  SPI.transfer(color);
+  digitalWrite(_cs, HIGH);
 }
 
 void Adafruit_RA8875::circleHelper(int16_t x0, int16_t y0, int16_t r, uint16_t color, bool filled)
