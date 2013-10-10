@@ -78,15 +78,15 @@ int setCalibrationMatrix( tsPoint_t * displayPtr, tsPoint_t * screenPtr, tsMatri
 
 /**************************************************************************/
 /*!
-    @brief  Converts the supplied touch screen location (screenPtr) to
-            a pixel location on the display (displayPtr) using the
+    @brief  Converts raw touch screen locations (screenPtr) into actual
+            pixel locations on the display (displayPtr) using the
             supplied matrix.
             
-    @param[in]  displayPtr  Pointer to the tsPoint_t that will hold the
-                            compensated co-ordinates after calibration (the
-                            actual equivalent pixel location)
-    @param[in]  screenPtr   Pointer to the tsPonint_t that contains the
-                            raw touch screen co-ordinated (pre-cal)
+    @param[out] displayPtr  Pointer to the tsPoint_t object that will hold
+                            the compensated pixel location on the display
+    @param[in]  screenPtr   Pointer to the tsPoint_t object that contains the
+                            raw touch screen co-ordinates (before the
+                            calibration calculations are made)
     @param[in]  matrixPtr   Pointer to the calibration matrix coefficients
                             used during the calibration process (calculated
                             via the tsCalibrate() helper function)
@@ -95,7 +95,7 @@ int setCalibrationMatrix( tsPoint_t * displayPtr, tsPoint_t * screenPtr, tsMatri
            written by Carlos E. Vidales (copyright (c) 2001).
 */
 /**************************************************************************/
-int getDisplayPoint( tsPoint_t * displayPtr, tsPoint_t * screenPtr, tsMatrix_t * matrixPtr )
+int calibrateTSPoint( tsPoint_t * displayPtr, tsPoint_t * screenPtr, tsMatrix_t * matrixPtr )
 {
   int  retValue = 0 ;
   
@@ -163,7 +163,7 @@ void waitForTouchEvent(tsTouchData_t * touchData)
             placed test point and waits for a touch event
 */
 /**************************************************************************/
-tsTouchData_t tsRenderCalibrationScreen(uint16_t x, uint16_t y, uint16_t radius)
+tsTouchData_t renderCalibrationScreen(uint16_t x, uint16_t y, uint16_t radius)
 {
   tft.fillScreen(RA8875_WHITE);
   tft.drawCircle(x, y, radius, RA8875_RED);
@@ -196,12 +196,12 @@ void tsCalibrate(void)
 
   /* --------------- Welcome Screen --------------- */
   Serial.println("Starting the calibration process");
-  data = tsRenderCalibrationScreen(tft.width() / 2, tft.height() / 2, 5);
+  data = renderCalibrationScreen(tft.width() / 2, tft.height() / 2, 5);
   delay(250);
 
   /* ----------------- First Dot ------------------ */
   // 10% over and 10% down
-  data = tsRenderCalibrationScreen(tft.width() / 10, tft.height() / 10, 5);
+  data = renderCalibrationScreen(tft.width() / 10, tft.height() / 10, 5);
   _tsLCDPoints[0].x = tft.width() / 10;
   _tsLCDPoints[0].y = tft.height() / 10;
   _tsTSPoints[0].x = data.xraw;
@@ -219,7 +219,7 @@ void tsCalibrate(void)
 
   /* ---------------- Second Dot ------------------ */
   // 50% over and 90% down
-  data = tsRenderCalibrationScreen(tft.width() / 2, tft.height() - tft.height() / 10, 5);
+  data = renderCalibrationScreen(tft.width() / 2, tft.height() - tft.height() / 10, 5);
   _tsLCDPoints[1].x = tft.width() / 2;
   _tsLCDPoints[1].y = tft.height() - tft.height() / 10;
   _tsTSPoints[1].x = data.xraw;
@@ -237,7 +237,7 @@ void tsCalibrate(void)
 
   /* ---------------- Third Dot ------------------- */
   // 90% over and 50% down
-  data = tsRenderCalibrationScreen(tft.width() - tft.width() / 10, tft.height() / 2, 5);
+  data = renderCalibrationScreen(tft.width() - tft.width() / 10, tft.height() / 2, 5);
   _tsLCDPoints[2].x = tft.width() - tft.width() / 10;
   _tsLCDPoints[2].y = tft.height() / 2;
   _tsTSPoints[2].x = data.xraw;
@@ -329,7 +329,7 @@ void loop()
   Serial.print(raw.y);
   Serial.println("");
   
-  getDisplayPoint(&calibrated, &raw, &_tsMatrix );
+  calibrateTSPoint(&calibrated, &raw, &_tsMatrix );
 
   Serial.print("Cal: ");
   Serial.print(calibrated.x);
