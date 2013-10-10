@@ -124,16 +124,14 @@ int calibrateTSPoint( tsPoint_t * displayPtr, tsPoint_t * screenPtr, tsMatrix_t 
     @brief  Waits for a touch event
 */
 /**************************************************************************/
-void waitForTouchEvent(tsTouchData_t * touchData)
+void waitForTouchEvent(tsPoint_t * point)
 {
-  uint16_t tx, ty;
-  
   /* Clear the touch data object and placeholder variables */
-  memset(touchData, 0, sizeof(touchData));
-  tx = ty = 0;
+  memset(point, 0, sizeof(tsPoint_t));
   
   /* Clear any previous interrupts to avoid false buffered reads */
-  tft.touchRead(&tx, &ty);
+  uint16_t x, y;
+  tft.touchRead(&x, &y);
   delay(1);
 
   /* Wait around for a new touch event (INT pin goes low) */
@@ -144,16 +142,16 @@ void waitForTouchEvent(tsTouchData_t * touchData)
   /* Make sure this is really a touch event */
   if (tft.touched())
   {
-    tft.touchRead(&tx, &ty);
+    tft.touchRead(&x, &y);
+    point->x = x;
+    point->y = y;
     Serial.print("Touch: ");
-    Serial.print(tx); Serial.print(", "); Serial.println(ty);
-    touchData->xraw = tx;
-    touchData->yraw = ty;
-    touchData->valid = true;
+    Serial.print(point->x); Serial.print(", "); Serial.println(point->y);
   }
   else
   {
-    touchData->valid = false;    
+    point->x = 0;
+    point->y = 0;
   }
 }
 
@@ -163,24 +161,27 @@ void waitForTouchEvent(tsTouchData_t * touchData)
             placed test point and waits for a touch event
 */
 /**************************************************************************/
-tsTouchData_t renderCalibrationScreen(uint16_t x, uint16_t y, uint16_t radius)
+tsPoint_t renderCalibrationScreen(uint16_t x, uint16_t y, uint16_t radius)
 {
   tft.fillScreen(RA8875_WHITE);
   tft.drawCircle(x, y, radius, RA8875_RED);
   tft.drawCircle(x, y, radius + 2, 0x8410);  /* 50% Gray */
 
   // Wait for a valid touch events
-  tsTouchData_t data;
+  tsPoint_t point = { 0, 0 };
   
+  /* Keep polling until the TS event flag is valid */
   bool valid = false;
   while (!valid)
   {
-    /* Keep polling until the TS event flag is valid */
-    waitForTouchEvent(&data);
-    valid = data.valid;
+    waitForTouchEvent(&point);
+    if (point.x || point.y) 
+    {
+      valid = true;
+    }
   }
   
-  return data;
+  return point;
 }
 
 /**************************************************************************/
@@ -192,7 +193,7 @@ tsTouchData_t renderCalibrationScreen(uint16_t x, uint16_t y, uint16_t radius)
 /**************************************************************************/
 void tsCalibrate(void)
 {
-  tsTouchData_t data;
+  tsPoint_t data;
 
   /* --------------- Welcome Screen --------------- */
   Serial.println("Starting the calibration process");
@@ -204,8 +205,8 @@ void tsCalibrate(void)
   data = renderCalibrationScreen(tft.width() / 10, tft.height() / 10, 5);
   _tsLCDPoints[0].x = tft.width() / 10;
   _tsLCDPoints[0].y = tft.height() / 10;
-  _tsTSPoints[0].x = data.xraw;
-  _tsTSPoints[0].y = data.yraw;
+  _tsTSPoints[0].x = data.x;
+  _tsTSPoints[0].y = data.y;
   Serial.print("Point 1 - LCD");
   Serial.print(" X: ");
   Serial.print(_tsLCDPoints[0].x);
@@ -215,15 +216,15 @@ void tsCalibrate(void)
   Serial.print(_tsTSPoints[0].x); 
   Serial.print(" Y: ");
   Serial.println(_tsTSPoints[0].y); 
-  delay(750);
+  delay(250);
 
   /* ---------------- Second Dot ------------------ */
   // 50% over and 90% down
   data = renderCalibrationScreen(tft.width() / 2, tft.height() - tft.height() / 10, 5);
   _tsLCDPoints[1].x = tft.width() / 2;
   _tsLCDPoints[1].y = tft.height() - tft.height() / 10;
-  _tsTSPoints[1].x = data.xraw;
-  _tsTSPoints[1].y = data.yraw;
+  _tsTSPoints[1].x = data.x;
+  _tsTSPoints[1].y = data.y;
   Serial.print("Point 2 - LCD");
   Serial.print(" X: ");
   Serial.print(_tsLCDPoints[1].x);
@@ -233,15 +234,15 @@ void tsCalibrate(void)
   Serial.print(_tsTSPoints[1].x);
   Serial.print(" Y: ");
   Serial.println(_tsTSPoints[1].y);
-  delay(750);
+  delay(250);
 
   /* ---------------- Third Dot ------------------- */
   // 90% over and 50% down
   data = renderCalibrationScreen(tft.width() - tft.width() / 10, tft.height() / 2, 5);
   _tsLCDPoints[2].x = tft.width() - tft.width() / 10;
   _tsLCDPoints[2].y = tft.height() / 2;
-  _tsTSPoints[2].x = data.xraw;
-  _tsTSPoints[2].y = data.yraw;
+  _tsTSPoints[2].x = data.x;
+  _tsTSPoints[2].y = data.y;
   Serial.print("Point 3 - LCD");
   Serial.print(" X: ");
   Serial.print(_tsLCDPoints[2].x);
@@ -251,7 +252,7 @@ void tsCalibrate(void)
   Serial.print(_tsTSPoints[2].x);
   Serial.print(" Y: ");
   Serial.println(_tsTSPoints[2].y);
-  delay(750);
+  delay(250);
   
   /* Clear the screen */
   tft.fillScreen(RA8875_WHITE);
@@ -316,26 +317,14 @@ void setup()
 /**************************************************************************/
 void loop() 
 {
-  tsTouchData_t data = { 0 };
-  waitForTouchEvent(&data);
+  tsPoint_t raw;
+  tsPoint_t calibrated;
+
+  /* Wait around for a touch event */
+  waitForTouchEvent(&raw);
   
   /* Calcuate the real X/Y position based on the calibration matrix */
-  tsPoint_t raw = { data.xraw, data.yraw };  /* Raw TS co-ordinates */
-  tsPoint_t calibrated = { 0, 0 };           /* Placeholder for calibrated co-ordinates */
-  
-  Serial.print("Raw: ");
-  Serial.print(raw.x);
-  Serial.print(", ");
-  Serial.print(raw.y);
-  Serial.println("");
-  
   calibrateTSPoint(&calibrated, &raw, &_tsMatrix );
-
-  Serial.print("Cal: ");
-  Serial.print(calibrated.x);
-  Serial.print(", ");
-  Serial.print(calibrated.y);
-  Serial.println("");
   
   /* Draw a single pixel at the calibrated point */
   tft.fillCircle(calibrated.x, calibrated.y, 3, RA8875_BLACK);

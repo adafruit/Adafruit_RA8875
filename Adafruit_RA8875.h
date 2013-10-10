@@ -32,15 +32,6 @@ typedef struct Matrix
           Divider ;
 } tsMatrix_t;
 
-typedef struct
-{
-  uint32_t xraw;  // Touch screen x
-  uint32_t yraw;  // Touch screen Y
-  uint16_t xlcd;  // LCD co-ordinate X
-  uint16_t ylcd;  // LCD co-ordinate Y
-  bool valid;     // Whether this is a valid reading or not
-} tsTouchData_t;
-
 class Adafruit_RA8875 : public Adafruit_GFX {
  public:
   Adafruit_RA8875(uint8_t cs, uint8_t rst);
