@@ -14,6 +14,33 @@
 // Sizes!
 enum RA8875sizes { RA8875_480x272, RA8875_800x480 };
 
+// Touch screen cal structs
+typedef struct Point 
+{
+  int32_t x;
+  int32_t y;
+} tsPoint_t;
+
+typedef struct Matrix 
+{
+  int32_t An,
+          Bn,
+          Cn,
+          Dn,
+          En,
+          Fn,
+          Divider ;
+} tsMatrix_t;
+
+typedef struct
+{
+  uint32_t xraw;  // Touch screen x
+  uint32_t yraw;  // Touch screen Y
+  uint16_t xlcd;  // LCD co-ordinate X
+  uint16_t ylcd;  // LCD co-ordinate Y
+  bool valid;     // Whether this is a valid reading or not
+} tsTouchData_t;
+
 class Adafruit_RA8875 : public Adafruit_GFX {
  public:
   Adafruit_RA8875(uint8_t cs, uint8_t rst);
