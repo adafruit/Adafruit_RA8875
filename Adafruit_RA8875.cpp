@@ -287,6 +287,16 @@ void Adafruit_RA8875::fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y
   triangleHelper(x0, y0, x1, y1, x2, y2, color, true);
 }
 
+void Adafruit_RA8875::drawEllipse(int16_t xCenter, int16_t yCenter, int16_t longAxis, int16_t shortAxis, uint16_t color)
+{
+  ellipseHelper(xCenter, yCenter, longAxis, shortAxis, color, false);
+}
+
+void Adafruit_RA8875::fillEllipse(int16_t xCenter, int16_t yCenter, int16_t longAxis, int16_t shortAxis, uint16_t color)
+{
+  ellipseHelper(xCenter, yCenter, longAxis, shortAxis, color, true);
+}
+
 void Adafruit_RA8875::circleHelper(int16_t x0, int16_t y0, int16_t r, uint16_t color, bool filled)
 {
   /* Set X */
@@ -446,6 +456,57 @@ void Adafruit_RA8875::triangleHelper(int16_t x0, int16_t y0, int16_t x1, int16_t
   {
     uint8_t temp = readReg(RA8875_DCR);
     if (!(temp & RA8875_DCR_LINESQUTRI_STATUS))
+      finished = true;
+  }
+}
+
+void Adafruit_RA8875::ellipseHelper(int16_t xCenter, int16_t yCenter, int16_t longAxis, int16_t shortAxis, uint16_t color, bool filled)
+{
+  /* Set Center Point */
+  writeCommand(0xA5);
+  writeData(xCenter);
+  writeCommand(0xA6);
+  writeData(xCenter >> 8);
+  writeCommand(0xA7);
+  writeData(yCenter); 
+  writeCommand(0xA8);
+  writeData(yCenter >> 8);
+
+  /* Set Long and Short Axis */
+  writeCommand(0xA1);
+  writeData(longAxis);
+  writeCommand(0xA2);
+  writeData(longAxis >> 8);
+  writeCommand(0xA3);
+  writeData(shortAxis); 
+  writeCommand(0xA4);
+  writeData(shortAxis >> 8);
+  
+  /* Set Color */
+  writeCommand(0x63);
+  writeData((color & 0xf800) >> 11);
+  writeCommand(0x64);
+  writeData((color & 0x07e0) >> 5);
+  writeCommand(0x65);
+  writeData((color & 0x001f));
+  
+  /* Draw! */
+  writeCommand(0xA0);
+  if (filled)
+  {
+    writeData(0xC0);
+  }
+  else
+  {
+    writeData(0x80);
+  }
+  
+  /* Wait for the command to finish */
+  bool finished = false;
+  while (!finished)
+  {
+    uint8_t temp = readReg(0xA0);
+    if (!(temp & 0x80))
       finished = true;
   }
 }
