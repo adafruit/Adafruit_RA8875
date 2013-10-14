@@ -64,6 +64,7 @@ class Adafruit_RA8875 : public Adafruit_GFX {
   void    textMode(void);
   void    textColor(uint16_t foreColor, uint16_t bgColor);
   void    textTransparent(uint16_t foreColor);
+  void    textEnlarge(uint8_t scale);
   void    textWrite(uint8_t* buffer, uint16_t len);
   
   void    pushPixels(uint32_t num, uint16_t p);

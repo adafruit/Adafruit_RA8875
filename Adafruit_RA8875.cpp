@@ -293,6 +293,31 @@ void Adafruit_RA8875::textTransparent(uint16_t foreColor)
 
 /**************************************************************************/
 /*!
+      Sets the text enlarge settings, using one of the following values:
+      
+      0 = 1x zoom
+      1 = 2x zoom
+      2 = 3x zoom
+      3 = 4x zoom
+      
+      @args scale[in]   The zoom factor (0..3 for 1-4x zoom)
+*/
+/**************************************************************************/
+void Adafruit_RA8875::textEnlarge(uint8_t scale)
+{
+  if (scale > 3) scale = 3;
+
+  /* Set font size flags */
+  writeCommand(0x22);
+  uint8_t temp = readData();
+  temp &= ~(0xF); // Clears bits 0..3
+  temp |= scale << 2;
+  temp |= scale;
+  writeData(temp);  
+}
+
+/**************************************************************************/
+/*!
       Renders some text on the screen when in text mode
       
       @args buffer[in]    The buffer containing the characters to render

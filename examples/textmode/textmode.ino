@@ -27,9 +27,18 @@ void setup()
   tft.fillScreen(RA8875_BLACK);
   
   tft.textMode();
+  // tft.textEnlarge(0);
+  // tft.textColor(RA8875_WHITE, RA8875_RED);
   tft.textTransparent(RA8875_WHITE);
-  uint8_t string[14] = "Hello, World!";
-  tft.textWrite(string, 14);
+  uint8_t string[15] = "Hello, World! ";
+  tft.textWrite(string, 15);
+  tft.textWrite(string, 15);
+  tft.textWrite(string, 15);
+  tft.textWrite(string, 15);
+  tft.textWrite(string, 15);
+  tft.textWrite(string, 15);
+  tft.textWrite(string, 15);
+  tft.textWrite(string, 15);
 }
 
 void loop() 
