@@ -58,7 +58,9 @@ class Adafruit_RA8875 : public Adafruit_GFX {
   /* HW accelerated wrapper functions (override Adafruit_GFX prototypes) */
   void    drawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color);
   void    fillCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color);
-
+  void    drawTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color);
+  void    fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color);
+  
   /* Backlight */
   void    GPIOX(boolean on);
   void    PWM1config(boolean on, uint8_t clock);
@@ -89,6 +91,7 @@ class Adafruit_RA8875 : public Adafruit_GFX {
   /* GFX Helper Functions */
   void circleHelper(int16_t x0, int16_t y0, int16_t r, uint16_t color, bool filled);
   void rectHelper  (int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color, bool filled);
+  void triangleHelper(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color, bool filled);
 
   uint8_t _cs, _rst;
   uint16_t _width, _height;
@@ -200,6 +203,7 @@ class Adafruit_RA8875 : public Adafruit_GFX {
 #define RA8875_DCR_FILL               0x20
 #define RA8875_DCR_NOFILL             0x00
 #define RA8875_DCR_DRAWLINE           0x00
+#define RA8875_DCR_DRAWTRIANGLE       0x01
 #define RA8875_DCR_DRAWSQUARE         0x10
 
 #define RA8875_MWCR0            0x40

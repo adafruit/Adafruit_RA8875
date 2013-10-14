@@ -2,7 +2,7 @@
 #include <SPI.h>
 #include "Adafruit_RA8875.h"
 
-Adafruit_RA8875::Adafruit_RA8875(uint8_t CS, uint8_t RST) : Adafruit_GFX(480, 272) {
+Adafruit_RA8875::Adafruit_RA8875(uint8_t CS, uint8_t RST) : Adafruit_GFX(800, 480) {
   _cs = CS;
   _rst = RST;
 }
@@ -277,6 +277,16 @@ void Adafruit_RA8875::fillCircle(int16_t x0, int16_t y0, int16_t r, uint16_t col
   circleHelper(x0, y0, r, color, true);
 }
 
+void Adafruit_RA8875::drawTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color)
+{
+  triangleHelper(x0, y0, x1, y1, x2, y2, color, false);
+}
+
+void Adafruit_RA8875::fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color)
+{
+  triangleHelper(x0, y0, x1, y1, x2, y2, color, true);
+}
+
 void Adafruit_RA8875::circleHelper(int16_t x0, int16_t y0, int16_t r, uint16_t color, bool filled)
 {
   /* Set X */
@@ -379,6 +389,67 @@ void Adafruit_RA8875::rectHelper(int16_t x, int16_t y, int16_t w, int16_t h, uin
   }  
 }
 
+void Adafruit_RA8875::triangleHelper(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color, bool filled)
+{
+  /* Set Point 0 */
+  writeCommand(0x91);
+  writeData(x0);
+  writeCommand(0x92);
+  writeData(x0 >> 8);
+  writeCommand(0x93);
+  writeData(y0); 
+  writeCommand(0x94);
+  writeData(y0 >> 8);
+
+  /* Set Point 1 */
+  writeCommand(0x95);
+  writeData(x1);
+  writeCommand(0x96);
+  writeData(x1 >> 8);
+  writeCommand(0x97);
+  writeData(y1); 
+  writeCommand(0x98);
+  writeData(y1 >> 8);
+
+  /* Set Point 2 */
+  writeCommand(0xA9);
+  writeData(x2);
+  writeCommand(0xAA);
+  writeData(x2 >> 8);
+  writeCommand(0xAB);
+  writeData(y2); 
+  writeCommand(0xAC);
+  writeData(y2 >> 8);
+  
+  /* Set Color */
+  writeCommand(0x63);
+  writeData((color & 0xf800) >> 11);
+  writeCommand(0x64);
+  writeData((color & 0x07e0) >> 5);
+  writeCommand(0x65);
+  writeData((color & 0x001f));
+  
+  /* Draw! */
+  writeCommand(RA8875_DCR);
+  if (filled)
+  {
+    writeData(0xA1);
+  }
+  else
+  {
+    writeData(0x81);
+  }
+  
+  /* Wait for the command to finish */
+  bool finished = false;
+  while (!finished)
+  {
+    uint8_t temp = readReg(RA8875_DCR);
+    if (!(temp & RA8875_DCR_LINESQUTRI_STATUS))
+      finished = true;
+  }
+}
+
 /************************* Mid Level ***********************************/
 
 void Adafruit_RA8875::GPIOX(boolean on) {
@@ -423,7 +494,7 @@ void Adafruit_RA8875::touchEnable(boolean on)
                            RA8875_TPCR0_ADCCLK_DIV4); // 10mhz max!
     /* Set Auto Mode      (Reg 0x71) */
     writeReg(RA8875_TPCR1, RA8875_TPCR1_AUTO    | 
-                           RA8875_TPCR1_VREFEXT | 
+                           // RA8875_TPCR1_VREFEXT | 
                            RA8875_TPCR1_DEBOUNCE);
     /* Enable TP INT */
     writeReg(RA8875_INTC1, readReg(RA8875_INTC1) | RA8875_INTC1_TP);
