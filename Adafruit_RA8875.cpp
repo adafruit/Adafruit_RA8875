@@ -212,7 +212,115 @@ uint16_t Adafruit_RA8875::width(void) { return _width; }
 /**************************************************************************/
 uint16_t Adafruit_RA8875::height(void) { return _height; }
 
+/************************* Text Mode ***********************************/
+
+/**************************************************************************/
+/*!
+      Sets the display in text mode (as opposed to graphics mode)
+*/
+/**************************************************************************/
+void Adafruit_RA8875::textMode(void) 
+{
+  /* Set text mode */
+  writeCommand(RA8875_MWCR0);
+  uint8_t temp = readData();
+  temp |= RA8875_MWCR0_TXTMODE; // Set bit 7
+  writeData(temp);
+  
+  /* Select the internal (ROM) font */
+  writeCommand(0x21);
+  temp = readData();
+  temp &= ~((1<<7) | (1<<5)); // Clear bits 7 and 5
+  writeData(temp);
+}
+
+/**************************************************************************/
+/*!
+      Sets the fore and background color when rendering text
+      
+      @args foreColor[in] The RGB565 color to use when rendering the text
+      @args bgColor[in]   The RGB565 colot to use for the background
+*/
+/**************************************************************************/
+void Adafruit_RA8875::textColor(uint16_t foreColor, uint16_t bgColor)
+{
+  /* Set Fore Color */
+  writeCommand(0x63);
+  writeData((foreColor & 0xf800) >> 11);
+  writeCommand(0x64);
+  writeData((foreColor & 0x07e0) >> 5);
+  writeCommand(0x65);
+  writeData((foreColor & 0x001f));
+  
+  /* Set Background Color */
+  writeCommand(0x60);
+  writeData((bgColor & 0xf800) >> 11);
+  writeCommand(0x61);
+  writeData((bgColor & 0x07e0) >> 5);
+  writeCommand(0x62);
+  writeData((bgColor & 0x001f));
+  
+  /* Clear transparency flag */
+  writeCommand(0x22);
+  uint8_t temp = readData();
+  temp &= ~(1<<6); // Clear bit 6
+  writeData(temp);
+}
+
+/**************************************************************************/
+/*!
+      Sets the fore color when rendering text with a transparent bg
+      
+      @args foreColor[in] The RGB565 color to use when rendering the text
+*/
+/**************************************************************************/
+void Adafruit_RA8875::textTransparent(uint16_t foreColor)
+{
+  /* Set Fore Color */
+  writeCommand(0x63);
+  writeData((foreColor & 0xf800) >> 11);
+  writeCommand(0x64);
+  writeData((foreColor & 0x07e0) >> 5);
+  writeCommand(0x65);
+  writeData((foreColor & 0x001f));
+
+  /* Set transparency flag */
+  writeCommand(0x22);
+  uint8_t temp = readData();
+  temp |= (1<<6); // Set bit 6
+  writeData(temp);  
+}
+
+/**************************************************************************/
+/*!
+      Renders some text on the screen when in text mode
+      
+      @args buffer[in]    The buffer containing the characters to render
+      @args len[in]       The size of the buffer in bytes
+*/
+/**************************************************************************/
+void Adafruit_RA8875::textWrite(uint8_t* buffer, uint16_t len) 
+{
+  writeCommand(RA8875_MRWC);
+  for (uint16_t i=0;i<len;i++)
+  {
+    writeData(buffer[i]);
+  }
+}
+
 /************************* Graphics ***********************************/
+
+/**************************************************************************/
+/*!
+      Sets the display in graphics mode (as opposed to text mode)
+*/
+/**************************************************************************/
+void Adafruit_RA8875::graphicsMode(void) {
+  writeCommand(RA8875_MWCR0);
+  uint8_t temp = readData();
+  temp &= ~RA8875_MWCR0_TXTMODE; // bit #7
+  writeData(temp);
+}
 
 /**************************************************************************/
 /*!
@@ -230,18 +338,6 @@ void Adafruit_RA8875::pushPixels(uint32_t num, uint16_t p) {
     SPI.transfer(p);
   }
   digitalWrite(_cs, HIGH);
-}
-
-/**************************************************************************/
-/*!
-      Sets the display in graphics mode (as opposes to tet mode)
-*/
-/**************************************************************************/
-void Adafruit_RA8875::graphicsMode(void) {
-  writeCommand(RA8875_MWCR0);
-  uint8_t temp = readData();
-  temp &= ~RA8875_MWCR0_TXTMODE; // bit #7
-  writeData(temp);
 }
 
 /**************************************************************************/
