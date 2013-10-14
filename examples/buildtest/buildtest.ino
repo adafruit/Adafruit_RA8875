@@ -15,7 +15,7 @@ void setup()
   Serial.println("RA8875 start");
 
   /* Initialise the display using 'RA8875_480x272' or 'RA8875_800x480' */
-  if (!tft.begin(RA8875_480x272)) {
+  if (!tft.begin(RA8875_800x480)) {
     Serial.println("RA8875 Not Found!");
     while (1);
   }
@@ -70,6 +70,13 @@ void setup()
   tft.drawRect(10, 10, 400, 200, RA8875_GREEN);
   tft.fillRect(11, 11, 398, 198, RA8875_BLUE);
   tft.drawLine(10, 10, 200, 100, RA8875_RED);
+  tft.drawTriangle(200, 15, 250, 100, 150, 125, RA8875_BLACK);
+  tft.fillTriangle(200, 16, 249, 99, 151, 124, RA8875_YELLOW);
+  tft.drawEllipse(300, 100, 100, 40, RA8875_BLACK);
+  tft.fillEllipse(300, 100, 98, 38, RA8875_GREEN);
+  // Argument 5 (curvePart) is a 2-bit value to control each corner (select 0, 1, 2, or 3)
+  tft.drawCurve(50, 100, 80, 40, 2, RA8875_BLACK);  
+  tft.fillCurve(50, 100, 78, 38, 2, RA8875_WHITE);
   
   pinMode(RA8875_INT, INPUT);
   digitalWrite(RA8875_INT, HIGH);
