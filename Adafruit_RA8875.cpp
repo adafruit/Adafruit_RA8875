@@ -236,6 +236,27 @@ void Adafruit_RA8875::textMode(void)
 
 /**************************************************************************/
 /*!
+      Sets the display in text mode (as opposed to graphics mode)
+      
+      @args x[in] The x position of the cursor (in pixels, 0..1023)
+      @args y[in] The y position of the cursor (in pixels, 0..511)
+*/
+/**************************************************************************/
+void Adafruit_RA8875::textSetCursor(uint16_t x, uint16_t y) 
+{
+  /* Set cursor location */
+  writeCommand(0x2A);
+  writeData(x & 0xFF);
+  writeCommand(0x2B);
+  writeData(x >> 8);
+  writeCommand(0x2C);
+  writeData(y & 0xFF);
+  writeCommand(0x2D);
+  writeData(y >> 8);
+}
+
+/**************************************************************************/
+/*!
       Sets the fore and background color when rendering text
       
       @args foreColor[in] The RGB565 color to use when rendering the text

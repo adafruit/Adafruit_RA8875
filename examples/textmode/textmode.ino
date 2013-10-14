@@ -25,11 +25,22 @@ void setup()
   tft.PWM1config(true, RA8875_PWM_CLK_DIV1024); // PWM output for backlight
   tft.PWM1out(255);
   tft.fillScreen(RA8875_BLACK);
-  
+
+  /* Switch to text mode */  
   tft.textMode();
+  
+  /* If necessary, enlarge the font */
   // tft.textEnlarge(0);
+  
+  /* Set a solid for + bg color ... */
   // tft.textColor(RA8875_WHITE, RA8875_RED);
+  /* ... or a fore color plus a transparent background */
   tft.textTransparent(RA8875_WHITE);
+  
+  /* Set the cursor location (in pixels) */
+  tft.textSetCursor(10, 10);
+  
+  /* Render some text! */
   uint8_t string[15] = "Hello, World! ";
   tft.textWrite(string, 15);
   tft.textWrite(string, 15);
@@ -37,6 +48,11 @@ void setup()
   tft.textWrite(string, 15);
   tft.textWrite(string, 15);
   tft.textWrite(string, 15);
+
+  /* Change the cursor location and color ... */  
+  tft.textSetCursor(100, 100);
+  tft.textTransparent(RA8875_RED);
+  /* ... and render some more text! */
   tft.textWrite(string, 15);
   tft.textWrite(string, 15);
 }
