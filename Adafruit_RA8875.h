@@ -1,3 +1,22 @@
+/**************************************************************************/
+/*!
+    @file     Adafruit_RA8875.h
+    @author   Limor Friend/Ladyada, K.Townsend/KTOWN for Adafruit Industries
+    @license  BSD license, all text above and below must be included in
+              any redistribution
+
+    Designed specifically to work with the Adafruit RA8875 Breakout 
+    ----> https://www.adafruit.com/products/
+
+    Adafruit invests time and resources providing this open source code, 
+    please support Adafruit and open-source hardware by purchasing 
+    products from Adafruit!
+
+    @section  HISTORY
+    
+    v1.0 - First release
+*/
+/**************************************************************************/
 #if ARDUINO >= 100
  #include "Arduino.h"
  #include "Print.h"
