@@ -67,22 +67,23 @@ class Adafruit_RA8875 : public Adafruit_GFX {
   void    textTransparent(uint16_t foreColor);
   void    textEnlarge(uint8_t scale);
   void    textWrite(uint8_t* buffer, uint16_t len);
-  
-  void    pushPixels(uint32_t num, uint16_t p);
+
+  /* Graphics functions */
   void    graphicsMode(void);
   void    setXY(uint16_t x, uint16_t y);
+  void    pushPixels(uint32_t num, uint16_t p);
   void    fillRect(void);
 
   /* Adafruit_GFX functions */
   void    drawPixel(int16_t x, int16_t y, uint16_t color);
-  void    drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color);
   void    drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color);
   void    drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color);
-  void    drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
-  void    fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
-  void    fillScreen(uint16_t color);
   
   /* HW accelerated wrapper functions (override Adafruit_GFX prototypes) */
+  void    fillScreen(uint16_t color);
+  void    drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color);
+  void    drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
+  void    fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
   void    drawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color);
   void    fillCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color);
   void    drawTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color);

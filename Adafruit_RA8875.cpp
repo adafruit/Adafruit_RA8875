@@ -370,6 +370,21 @@ void Adafruit_RA8875::graphicsMode(void) {
 
 /**************************************************************************/
 /*!
+      Sets the current X/Y position on the display before drawing
+      
+      @args x[in] The 0-based x location
+      @args y[in] The 0-base y location
+*/
+/**************************************************************************/
+void Adafruit_RA8875::setXY(uint16_t x, uint16_t y) {
+  writeReg(RA8875_CURH0, x);
+  writeReg(RA8875_CURH1, x >> 8);
+  writeReg(RA8875_CURV0, y);
+  writeReg(RA8875_CURV1, y >> 8);  
+}
+
+/**************************************************************************/
+/*!
       HW accelerated function to push a chunk of raw pixel data
       
       @args num[in] The number of pixels to push
@@ -384,21 +399,6 @@ void Adafruit_RA8875::pushPixels(uint32_t num, uint16_t p) {
     SPI.transfer(p);
   }
   digitalWrite(_cs, HIGH);
-}
-
-/**************************************************************************/
-/*!
-      Sets the current X/Y position on the display before drawing
-      
-      @args x[in] The 0-based x location
-      @args y[in] The 0-base y location
-*/
-/**************************************************************************/
-void Adafruit_RA8875::setXY(uint16_t x, uint16_t y) {
-  writeReg(RA8875_CURH0, x);
-  writeReg(RA8875_CURH1, x >> 8);
-  writeReg(RA8875_CURV0, y);
-  writeReg(RA8875_CURV1, y >> 8);  
 }
 
 /**************************************************************************/
