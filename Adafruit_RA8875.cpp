@@ -5,12 +5,19 @@
     @license  BSD license, all text above and below must be included in
               any redistribution
 
-    Designed specifically to work with the Adafruit RA8875 Breakout 
-    ----> https://www.adafruit.com/products/
-
-    Adafruit invests time and resources providing this open source code, 
-    please support Adafruit and open-source hardware by purchasing 
-    products from Adafruit!
+ This is the library for the Adafruit RA8875 Driver board for TFT displays
+ ---------------> http://www.adafruit.com/products/1590
+ The RA8875 is a TFT driver for up to 800x480 dotclock'd displays
+ It is tested to work with displays in the Adafruit shop. Other displays
+ may need timing adjustments and are not guanteed to work.
+ 
+ Adafruit invests time and resources providing this open
+ source code, please support Adafruit and open-source hardware
+ by purchasing products from Adafruit!
+ 
+ Written by Limor Fried/Ladyada for Adafruit Industries.
+ BSD license, check license.txt for more information.
+ All text above must be included in any redistribution.
 
     @section  HISTORY
     
@@ -135,7 +142,7 @@ void Adafruit_RA8875::initialize(void) {
   /* Set the correct values for the display being used */  
   if (_size == RA8875_480x272) 
   {
-    pixclk          = RA8875_PCSR_PDATL | RA8875_PCSR_8CLK;
+    pixclk          = RA8875_PCSR_PDATL | RA8875_PCSR_4CLK;
     hsync_nondisp   = 10;
     hsync_start     = 8;
     hsync_pw        = 48;
@@ -335,6 +342,8 @@ void Adafruit_RA8875::textEnlarge(uint8_t scale)
   temp |= scale << 2;
   temp |= scale;
   writeData(temp);  
+
+  _textScale = scale;
 }
 
 /**************************************************************************/
@@ -345,12 +354,14 @@ void Adafruit_RA8875::textEnlarge(uint8_t scale)
       @args len[in]       The size of the buffer in bytes
 */
 /**************************************************************************/
-void Adafruit_RA8875::textWrite(uint8_t* buffer, uint16_t len) 
+void Adafruit_RA8875::textWrite(char* buffer, uint16_t len) 
 {
+  if (len == 0) len = strlen(buffer);
   writeCommand(RA8875_MRWC);
   for (uint16_t i=0;i<len;i++)
   {
     writeData(buffer[i]);
+    if (_textScale > 1) delay(1);
   }
 }
 
@@ -367,6 +378,23 @@ void Adafruit_RA8875::graphicsMode(void) {
   temp &= ~RA8875_MWCR0_TXTMODE; // bit #7
   writeData(temp);
 }
+
+/**************************************************************************/
+/*!
+      Waits for screen to finish by polling the status!
+*/
+/**************************************************************************/
+boolean Adafruit_RA8875::waitPoll(uint8_t regname, uint8_t waitflag) {
+  /* Wait for the command to finish */
+  while (1)
+  {
+    uint8_t temp = readReg(regname);
+    if (!(temp & waitflag))
+      return true;
+  }  
+  return false; // MEMEFIX: yeah i know, unreached! - add timeout?
+}
+
 
 /**************************************************************************/
 /*!
@@ -485,13 +513,7 @@ void Adafruit_RA8875::drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, u
   writeData(0x80);
   
   /* Wait for the command to finish */
-  bool finished = false;
-  while (!finished)
-  {
-    uint8_t temp = readReg(RA8875_DCR);
-    if (!(temp & RA8875_DCR_LINESQUTRI_STATUS))
-      finished = true;
-  }  
+  waitPoll(RA8875_DCR, RA8875_DCR_LINESQUTRI_STATUS);
 }
 
 /**************************************************************************/
@@ -741,13 +763,7 @@ void Adafruit_RA8875::circleHelper(int16_t x0, int16_t y0, int16_t r, uint16_t c
   }
   
   /* Wait for the command to finish */
-  bool finished = false;
-  while (!finished)
-  {
-    uint8_t temp = readReg(RA8875_DCR);
-    if (!(temp & RA8875_DCR_CIRCLE_STATUS))
-      finished = true;
-  }
+  waitPoll(RA8875_DCR, RA8875_DCR_CIRCLE_STATUS);
 }
 
 /**************************************************************************/
@@ -801,13 +817,7 @@ void Adafruit_RA8875::rectHelper(int16_t x, int16_t y, int16_t w, int16_t h, uin
   }
   
   /* Wait for the command to finish */
-  bool finished = false;
-  while (!finished)
-  {
-    uint8_t temp = readReg(RA8875_DCR);
-    if (!(temp & RA8875_DCR_LINESQUTRI_STATUS))
-      finished = true;
-  }  
+  waitPoll(RA8875_DCR, RA8875_DCR_LINESQUTRI_STATUS);
 }
 
 /**************************************************************************/
@@ -867,13 +877,7 @@ void Adafruit_RA8875::triangleHelper(int16_t x0, int16_t y0, int16_t x1, int16_t
   }
   
   /* Wait for the command to finish */
-  bool finished = false;
-  while (!finished)
-  {
-    uint8_t temp = readReg(RA8875_DCR);
-    if (!(temp & RA8875_DCR_LINESQUTRI_STATUS))
-      finished = true;
-  }
+  waitPoll(RA8875_DCR, RA8875_DCR_LINESQUTRI_STATUS);
 }
 
 /**************************************************************************/
@@ -923,13 +927,7 @@ void Adafruit_RA8875::ellipseHelper(int16_t xCenter, int16_t yCenter, int16_t lo
   }
   
   /* Wait for the command to finish */
-  bool finished = false;
-  while (!finished)
-  {
-    uint8_t temp = readReg(0xA0);
-    if (!(temp & 0x80))
-      finished = true;
-  }
+  waitPoll(RA8875_ELLIPSE, RA8875_ELLIPSE_STATUS);
 }
 
 /**************************************************************************/
@@ -979,13 +977,7 @@ void Adafruit_RA8875::curveHelper(int16_t xCenter, int16_t yCenter, int16_t long
   }
   
   /* Wait for the command to finish */
-  bool finished = false;
-  while (!finished)
-  {
-    uint8_t temp = readReg(0xA0);
-    if (!(temp & 0x80))
-      finished = true;
-  }
+  waitPoll(RA8875_ELLIPSE, RA8875_ELLIPSE_STATUS);
 }
 
 /************************* Mid Level ***********************************/

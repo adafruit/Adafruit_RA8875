@@ -1,22 +1,29 @@
 /**************************************************************************/
 /*!
-    @file     Adafruit_RA8875.h
+    @file     Adafruit_RA8875.cpp
     @author   Limor Friend/Ladyada, K.Townsend/KTOWN for Adafruit Industries
     @license  BSD license, all text above and below must be included in
               any redistribution
 
-    Designed specifically to work with the Adafruit RA8875 Breakout 
-    ----> https://www.adafruit.com/products/
-
-    Adafruit invests time and resources providing this open source code, 
-    please support Adafruit and open-source hardware by purchasing 
-    products from Adafruit!
+ This is the library for the Adafruit RA8875 Driver board for TFT displays
+ ---------------> http://www.adafruit.com/products/1590
+ The RA8875 is a TFT driver for up to 800x480 dotclock'd displays
+ It is tested to work with displays in the Adafruit shop. Other displays
+ may need timing adjustments and are not guanteed to work.
+ 
+ Adafruit invests time and resources providing this open
+ source code, please support Adafruit and open-source hardware
+ by purchasing products from Adafruit!
+ 
+ Written by Limor Fried/Ladyada for Adafruit Industries.
+ BSD license, check license.txt for more information.
+ All text above must be included in any redistribution.
 
     @section  HISTORY
     
     v1.0 - First release
 */
-/**************************************************************************/
+
 #if ARDUINO >= 100
  #include "Arduino.h"
  #include "Print.h"
@@ -66,7 +73,7 @@ class Adafruit_RA8875 : public Adafruit_GFX {
   void    textColor(uint16_t foreColor, uint16_t bgColor);
   void    textTransparent(uint16_t foreColor);
   void    textEnlarge(uint8_t scale);
-  void    textWrite(uint8_t* buffer, uint16_t len);
+  void    textWrite(char* buffer, uint16_t len=0);
 
   /* Graphics functions */
   void    graphicsMode(void);
@@ -112,7 +119,7 @@ class Adafruit_RA8875 : public Adafruit_GFX {
   uint8_t readData(void);
   void    writeCommand(uint8_t d);
   uint8_t readStatus(void);
-
+  boolean waitPoll(uint8_t r, uint8_t f);
   uint16_t width(void);
   uint16_t height(void);
 
@@ -129,6 +136,7 @@ class Adafruit_RA8875 : public Adafruit_GFX {
 
   uint8_t _cs, _rst;
   uint16_t _width, _height;
+  uint8_t _textScale;
   enum RA8875sizes _size;
 };
 
@@ -239,6 +247,10 @@ class Adafruit_RA8875 : public Adafruit_GFX {
 #define RA8875_DCR_DRAWLINE           0x00
 #define RA8875_DCR_DRAWTRIANGLE       0x01
 #define RA8875_DCR_DRAWSQUARE         0x10
+
+
+#define RA8875_ELLIPSE                0xA0
+#define RA8875_ELLIPSE_STATUS         0x80
 
 #define RA8875_MWCR0            0x40
 #define RA8875_MWCR0_GFXMODE    0x00
