@@ -361,7 +361,13 @@ void Adafruit_RA8875::textWrite(char* buffer, uint16_t len)
   for (uint16_t i=0;i<len;i++)
   {
     writeData(buffer[i]);
+#if defined(__AVR__)
     if (_textScale > 1) delay(1);
+#elif defined(__arm__)
+    // This delay is needed with textEnlarge(1) because
+    // Teensy 3.X is much faster than Arduino Uno
+    if (_textScale > 0) delay(1);
+#endif
   }
 }
 
