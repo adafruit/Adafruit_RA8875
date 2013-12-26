@@ -37,6 +37,9 @@
 
 #include <Adafruit_GFX.h>
 
+#ifndef _ADAFRUIT_RA8875_H
+#define _ADAFRUIT_RA8875_H
+
 // Sizes!
 enum RA8875sizes { RA8875_480x272, RA8875_800x480 };
 
@@ -352,3 +355,5 @@ class Adafruit_RA8875 : public Adafruit_GFX {
 #define RA8875_INTC2_DMA        0x08
 #define RA8875_INTC2_TP         0x04
 #define RA8875_INTC2_BTE        0x02
+
+#endif
