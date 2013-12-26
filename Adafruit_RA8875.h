@@ -126,6 +126,7 @@ class Adafruit_RA8875 : public Adafruit_GFX {
   uint16_t width(void);
   uint16_t height(void);
 
+  /* Play nice with Arduino's Print class */
   virtual size_t write(uint8_t b) {
     textWrite((const char *)&b, 1);
     return 1;
