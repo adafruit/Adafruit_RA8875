@@ -73,7 +73,7 @@ class Adafruit_RA8875 : public Adafruit_GFX {
   void    textColor(uint16_t foreColor, uint16_t bgColor);
   void    textTransparent(uint16_t foreColor);
   void    textEnlarge(uint8_t scale);
-  void    textWrite(char* buffer, uint16_t len=0);
+  void    textWrite(const char* buffer, uint16_t len=0);
 
   /* Graphics functions */
   void    graphicsMode(void);
@@ -122,6 +122,15 @@ class Adafruit_RA8875 : public Adafruit_GFX {
   boolean waitPoll(uint8_t r, uint8_t f);
   uint16_t width(void);
   uint16_t height(void);
+
+  virtual size_t write(uint8_t b) {
+    textWrite((const char *)&b, 1);
+    return 1;
+  }
+  virtual size_t write(const uint8_t *buffer, size_t size) {
+    textWrite((const char *)buffer, size);
+    return size;
+  }
 
  private:
   void PLLinit(void);
