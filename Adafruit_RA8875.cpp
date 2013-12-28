@@ -354,7 +354,7 @@ void Adafruit_RA8875::textEnlarge(uint8_t scale)
       @args len[in]       The size of the buffer in bytes
 */
 /**************************************************************************/
-void Adafruit_RA8875::textWrite(char* buffer, uint16_t len) 
+void Adafruit_RA8875::textWrite(const char* buffer, uint16_t len) 
 {
   if (len == 0) len = strlen(buffer);
   writeCommand(RA8875_MRWC);
