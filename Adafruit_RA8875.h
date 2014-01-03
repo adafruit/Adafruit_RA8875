@@ -50,7 +50,7 @@ typedef struct Point
   int32_t y;
 } tsPoint_t;
 
-typedef struct Matrix 
+typedef struct //Matrix
 {
   int32_t An,
           Bn,

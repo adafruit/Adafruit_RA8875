@@ -72,8 +72,10 @@ boolean Adafruit_RA8875::begin(enum RA8875sizes s) {
   delay(100);
   
   SPI.begin();
+#ifdef __AVR__
   SPI.setClockDivider(SPI_CLOCK_DIV128);
   SPI.setDataMode(SPI_MODE0);
+#endif
   
   if (readReg(0) != 0x75) {
     return false;
@@ -81,8 +83,9 @@ boolean Adafruit_RA8875::begin(enum RA8875sizes s) {
 
   initialize();
 
+#ifdef __AVR__
   SPI.setClockDivider(SPI_CLOCK_DIV4);
-
+#endif
   return true;
 }
 
