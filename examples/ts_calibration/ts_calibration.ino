@@ -1,4 +1,5 @@
 #include <SPI.h>
+#include <EEPROM.h>
 #include "Adafruit_GFX.h"
 #include "Adafruit_RA8875.h"
 
@@ -10,6 +11,8 @@ Adafruit_RA8875 tft = Adafruit_RA8875(RA8875_CS, RA8875_RESET);
 tsPoint_t       _tsLCDPoints[3]; 
 tsPoint_t       _tsTSPoints[3]; 
 tsMatrix_t      _tsMatrix;
+
+#define EEPROMLOCATION 100
 
 /**************************************************************************/
 /*!
@@ -62,15 +65,8 @@ int setCalibrationMatrix( tsPoint_t * displayPtr, tsPoint_t * screenPtr, tsMatri
                     (screenPtr[0].x * displayPtr[2].y - screenPtr[2].x * displayPtr[0].y) * screenPtr[1].y +
                     (screenPtr[1].x * displayPtr[0].y - screenPtr[0].x * displayPtr[1].y) * screenPtr[2].y ;
 
-    // Persist data to EEPROM
-    // eepromWriteS32(CFG_EEPROM_TOUCHSCREEN_CAL_AN, matrixPtr->An);
-    // eepromWriteS32(CFG_EEPROM_TOUCHSCREEN_CAL_BN, matrixPtr->Bn);
-    // eepromWriteS32(CFG_EEPROM_TOUCHSCREEN_CAL_CN, matrixPtr->Cn);
-    // eepromWriteS32(CFG_EEPROM_TOUCHSCREEN_CAL_DN, matrixPtr->Dn);
-    // eepromWriteS32(CFG_EEPROM_TOUCHSCREEN_CAL_EN, matrixPtr->En);
-    // eepromWriteS32(CFG_EEPROM_TOUCHSCREEN_CAL_FN, matrixPtr->Fn);
-    // eepromWriteS32(CFG_EEPROM_TOUCHSCREEN_CAL_DIVIDER, matrixPtr->Divider);
-    // eepromWriteU8(CFG_EEPROM_TOUCHSCREEN_CALIBRATED, 1);
+    // Write the calibration matrix to the EEPROM
+    tft.writeCalibration(EEPROMLOCATION, matrixPtr);
   }
 
   return( retValue ) ;
@@ -304,7 +300,12 @@ void setup()
   delay(100);
     
   /* Start the calibration process */
-  tsCalibrate();  
+  if (tft.readCalibration(EEPROMLOCATION, &_tsMatrix) == false ){
+    Serial.println("Calibration not found.  Calibrating..\n");
+    tsCalibrate();  
+  }
+  else
+    Serial.println("Calibration found\n");
   
   /* _tsMatrix should now be populated with the correct coefficients! */
   Serial.println("Waiting for touch events ...");
