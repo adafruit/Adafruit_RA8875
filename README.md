@@ -7,4 +7,5 @@ Lcstyle Added:
 
 Display Cursor
 Blink Cursor
+
 tft.cursorBlink(rate) // rate is in seconds, the lower the number the faster it will blink
