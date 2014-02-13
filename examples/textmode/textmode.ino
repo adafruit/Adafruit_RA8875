@@ -14,7 +14,7 @@
  All text above must be included in any redistribution.
  ******************************************************************/
 
-
+#include <EEPROM.h>
 #include <SPI.h>
 #include "Adafruit_GFX.h"
 #include "Adafruit_RA8875.h"
@@ -49,7 +49,7 @@ void setup()
 
   /* Switch to text mode */  
   tft.textMode();
-  
+  tft.cursorBlink(32);
 
   
   /* Set a solid for + bg color ... */
