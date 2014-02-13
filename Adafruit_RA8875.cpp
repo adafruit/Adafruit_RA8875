@@ -24,6 +24,7 @@
     v1.0 - First release
 */
 /**************************************************************************/
+#include <EEPROM.h>
 #include <SPI.h>
 #include "Adafruit_RA8875.h"
 
@@ -64,11 +65,13 @@ boolean Adafruit_RA8875::begin(enum RA8875sizes s) {
   pinMode(_cs, OUTPUT);
   digitalWrite(_cs, HIGH);
   pinMode(_rst, OUTPUT); 
+  
   digitalWrite(_rst, LOW);
 
   digitalWrite(_rst, LOW);
   delay(100);
   digitalWrite(_rst, HIGH);
+  
   delay(100);
   
   SPI.begin();
@@ -78,6 +81,7 @@ boolean Adafruit_RA8875::begin(enum RA8875sizes s) {
 #endif
   
   if (readReg(0) != 0x75) {
+      Serial.println(readReg(0));
     return false;
   }
 
@@ -336,15 +340,16 @@ void Adafruit_RA8875::textTransparent(uint16_t foreColor)
 /**************************************************************************/
 void Adafruit_RA8875::textEnlarge(uint8_t scale)
 {
-  if (scale > 3) scale = 3;
+  if (scale > 3) scale = 3; // highest setting is 3
 
   /* Set font size flags */
   writeCommand(0x22);
   uint8_t temp = readData();
-  temp &= ~(0xF); // Clears bits 0..3
-  temp |= scale << 2;
-  temp |= scale;
-  writeData(temp);  
+  temp &= ~(0xF); // Clears bits 0..3 
+  temp |= scale << 2; 
+  temp |= scale; 
+  
+  writeData(temp);  //
 
   _textScale = scale;
 }
@@ -384,10 +389,40 @@ void Adafruit_RA8875::textWrite(const char* buffer, uint16_t len)
 void Adafruit_RA8875::graphicsMode(void) {
   writeCommand(RA8875_MWCR0);
   uint8_t temp = readData();
-  temp &= ~RA8875_MWCR0_TXTMODE; // bit #7
+  temp &= ~RA8875_MWCR0_TXTMODE; // bit #7 == 128 bit
   writeData(temp);
 }
 
+
+/**************************************************************************/
+/*!
+	Enable Cursor Visibility and Blink
+	Here we set bits 6 and 5 in 40h
+	As well as the set the blink rate in 44h
+	The rate is 0 through max 255
+	the lower the number the faster it blinks (00h is 1 frame time, 
+	FFh is 256 Frames time.
+	Blink Time (sec) = BTCR[44h]x(1/Frame_rate)
+*/
+/**************************************************************************/
+
+void Adafruit_RA8875::cursorBlink(uint8_t rate){
+	
+	writeCommand(RA8875_MWCR0);
+	uint8_t temp = readData(); 
+	temp |= RA8875_MWCR0_CURSOR; 
+	writeData(temp);
+	
+	writeCommand(RA8875_MWCR0);
+	temp = readData();
+	temp |= RA8875_MWCR0_BLINK; 
+	writeData(temp);
+
+	if (rate > 255) rate = 255;
+	writeCommand(RA8875_MWCR0_BLINK_RATE);
+	writeData(rate);	
+}
+	
 /**************************************************************************/
 /*!
       Waits for screen to finish by polling the status!
@@ -1227,3 +1262,71 @@ uint8_t  Adafruit_RA8875::readStatus(void)
   digitalWrite(_cs, HIGH);
   return x;
 }
+
+/**************************************************************************/
+/*!
+ Touchscreen Calibration Persistence Functions
+ */
+/**************************************************************************/
+
+uint32_t Adafruit_RA8875::eepromReadS32(int location){
+    uint32_t value = ((uint32_t)EEPROM.read(location))<<24;
+    value = value | ((uint32_t)EEPROM.read(location+1))<<16;
+    value = value | ((uint32_t)EEPROM.read(location+2))<<8;
+    value = value | ((uint32_t)EEPROM.read(location+3));
+    return value;
+}
+
+/**************************************************************************/
+/*!
+ 
+ */
+/**************************************************************************/
+void Adafruit_RA8875::eepromWriteS32(int location, int32_t value){
+    EEPROM.write(location,   (value >> 24)&0xff);
+    EEPROM.write(location+1, (value >> 16)&0xff);
+    EEPROM.write(location+2, (value >> 8)&0xff);
+    EEPROM.write(location+3, (value )&0xff);
+}
+
+/**************************************************************************/
+/*!
+ 
+ */
+/**************************************************************************/
+bool Adafruit_RA8875::readCalibration(int location, tsMatrix_t * matrixPtr){
+    if (location+sizeof(tsMatrix_t) > EEPROMSIZE){
+        return false; //readCalibration::Calibration location outside of EEPROM memory bound
+    }
+    if (EEPROM.read(location+CFG_EEPROM_TOUCHSCREEN_CALIBRATED) == 1){
+        matrixPtr->An = eepromReadS32(location+CFG_EEPROM_TOUCHSCREEN_CAL_AN);
+        matrixPtr->Bn = eepromReadS32(location+CFG_EEPROM_TOUCHSCREEN_CAL_BN);
+        matrixPtr->Cn = eepromReadS32(location+CFG_EEPROM_TOUCHSCREEN_CAL_CN);
+        matrixPtr->Dn = eepromReadS32(location+CFG_EEPROM_TOUCHSCREEN_CAL_DN);
+        matrixPtr->En = eepromReadS32(location+CFG_EEPROM_TOUCHSCREEN_CAL_EN);
+        matrixPtr->Fn = eepromReadS32(location+CFG_EEPROM_TOUCHSCREEN_CAL_FN);
+        matrixPtr->Divider = eepromReadS32(location+CFG_EEPROM_TOUCHSCREEN_CAL_DIVIDER);
+        return true;
+    }
+    return false;
+}
+
+/**************************************************************************/
+/*!
+ 
+ */
+/**************************************************************************/
+void Adafruit_RA8875::writeCalibration(int location, tsMatrix_t * matrixPtr){
+    if (location+sizeof(tsMatrix_t) < EEPROMSIZE){    // Check to see it calibration location outside of EEPROM memory bound
+        eepromWriteS32(location+CFG_EEPROM_TOUCHSCREEN_CAL_AN, matrixPtr->An);
+        eepromWriteS32(location+CFG_EEPROM_TOUCHSCREEN_CAL_BN, matrixPtr->Bn);
+        eepromWriteS32(location+CFG_EEPROM_TOUCHSCREEN_CAL_CN, matrixPtr->Cn);
+        eepromWriteS32(location+CFG_EEPROM_TOUCHSCREEN_CAL_DN, matrixPtr->Dn);
+        eepromWriteS32(location+CFG_EEPROM_TOUCHSCREEN_CAL_EN, matrixPtr->En);
+        eepromWriteS32(location+CFG_EEPROM_TOUCHSCREEN_CAL_FN, matrixPtr->Fn);
+        eepromWriteS32(location+CFG_EEPROM_TOUCHSCREEN_CAL_DIVIDER, matrixPtr->Divider);
+        EEPROM.write(location+CFG_EEPROM_TOUCHSCREEN_CALIBRATED, 1);
+    }
+}
+
+
