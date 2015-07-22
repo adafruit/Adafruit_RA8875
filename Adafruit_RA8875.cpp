@@ -989,6 +989,50 @@ void Adafruit_RA8875::curveHelper(int16_t xCenter, int16_t yCenter, int16_t long
   waitPoll(RA8875_ELLIPSE, RA8875_ELLIPSE_STATUS);
 }
 
+void Adafruit_RA8875::setScrollWindow(int16_t x, int16_t y, int16_t w, int16_t h, uint8_t mode) {
+  // Horizontal Start point of Scroll Window
+  writeCommand(0x38);
+  writeData(x);
+  writeCommand(0x39);
+  writeData(x>>8);
+	
+  // Vertical Start Point of Scroll Window
+  writeCommand(0x3a);
+  writeData(y);
+  writeCommand(0x3b);
+  writeData(y>>8);
+	
+  // Horizontal End Point of Scroll Window
+  writeCommand(0x3c);
+  writeData(x+w);
+  writeCommand(0x3d);
+  writeData((x+w)>>8);
+  
+  // Vertical End Point of Scroll Window
+  writeCommand(0x3e);
+  writeData(y+h);
+  writeCommand(0x3f);
+  writeData((y+h)>>8);
+  
+  // Scroll function setting
+  writeCommand(0x52);
+  writeData(0x00);
+}
+
+void Adafruit_RA8875::scrollX(int16_t dist) {
+  writeCommand(0x24);
+  writeData(dist);
+  writeCommand(0x25);
+  writeData(dist>>8);
+}
+
+void Adafruit_RA8875::scrollY(int16_t dist) {
+  writeCommand(0x26);
+  writeData(dist);
+  writeCommand(0x27);
+  writeData(dist>>8);
+}
+
 /************************* Mid Level ***********************************/
 
 /**************************************************************************/
