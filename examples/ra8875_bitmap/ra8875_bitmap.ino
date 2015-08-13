@@ -1,5 +1,3 @@
-
-
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <SPI.h>
 #include <Wire.h>   
@@ -164,7 +162,7 @@ void bmpDraw(char *filename, int x, int y) {
             if (buffidx >= sizeof(sdbuffer)) { // Indeed
               // Push LCD buffer to the display first
               if(lcdidx > 0) {
-                tft.drawPixel(col, row, lcdbuffer[lcdidx]);
+                tft.drawPixel(col+x, row+y, lcdbuffer[lcdidx]);
                 lcdidx = 0;
                 first  = false;
               }
@@ -178,14 +176,14 @@ void bmpDraw(char *filename, int x, int y) {
             g = sdbuffer[buffidx++];
             r = sdbuffer[buffidx++];
             lcdbuffer[lcdidx] = color565(r,g,b);
-            tft.drawPixel(col, row, lcdbuffer[lcdidx]);
+            tft.drawPixel(col+x, row+y, lcdbuffer[lcdidx]);
           } // end pixel
 
         } // end scanline
 
         // Write any remaining data to LCD
         if(lcdidx > 0) {
-          tft.drawPixel(col, row, lcdbuffer[lcdidx]);
+          tft.drawPixel(col+x, row+y, lcdbuffer[lcdidx]);
         } 
 
         Serial.print(F("Loaded in "));
