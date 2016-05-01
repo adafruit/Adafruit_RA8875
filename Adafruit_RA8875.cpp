@@ -27,6 +27,31 @@
 #include <SPI.h>
 #include "Adafruit_RA8875.h"
 
+#if defined (ARDUINO_ARCH_ARC32)
+  uint32_t spi_speed = 12000000;
+#else
+  uint32_t spi_speed = 4000000;
+#endif
+
+// If the SPI library has transaction support, these functions
+// establish settings and protect from interference from other
+// libraries.  Otherwise, they simply do nothing.
+#ifdef SPI_HAS_TRANSACTION
+    static inline void spi_begin(void) __attribute__((always_inline));
+    static inline void spi_begin(void) {
+        // max speed!
+        SPI.beginTransaction(SPISettings(spi_speed, MSBFIRST, SPI_MODE0));
+    }
+    static inline void spi_end(void) __attribute__((always_inline));
+    static inline void spi_end(void) {
+        SPI.endTransaction();
+    }
+#else
+    #define spi_begin()
+    #define spi_end()
+#endif
+
+
 /**************************************************************************/
 /*!
       Constructor for a new RA8875 instance
@@ -63,29 +88,48 @@ boolean Adafruit_RA8875::begin(enum RA8875sizes s) {
 
   pinMode(_cs, OUTPUT);
   digitalWrite(_cs, HIGH);
-  pinMode(_rst, OUTPUT); 
-  digitalWrite(_rst, LOW);
-
+  pinMode(_rst, OUTPUT);
+    
   digitalWrite(_rst, LOW);
   delay(100);
   digitalWrite(_rst, HIGH);
   delay(100);
   
   SPI.begin();
-#ifdef __AVR__
-  SPI.setClockDivider(SPI_CLOCK_DIV128);
-  SPI.setDataMode(SPI_MODE0);
+    
+#ifdef SPI_HAS_TRANSACTION
+    #if defined (ARDUINO_ARCH_ARC32)
+        spi_speed = 2000000;
+    #else
+        spi_speed = 125000;
+    #endif
+#else
+    #ifdef __AVR__
+        SPI.setClockDivider(SPI_CLOCK_DIV128);
+        SPI.setDataMode(SPI_MODE0);
+    #endif
 #endif
-  
-  if (readReg(0) != 0x75) {
-    return false;
-  }
+
+    uint8_t x = readReg(0);
+//    Serial.print("x = 0x"); Serial.println(x,HEX);
+    if (x != 0x75) {
+        return false;
+    }
 
   initialize();
 
-#ifdef __AVR__
-  SPI.setClockDivider(SPI_CLOCK_DIV4);
+#ifdef SPI_HAS_TRANSACTION
+    #if defined (ARDUINO_ARCH_ARC32)
+        spi_speed = 12000000L;
+    #else
+        spi_speed = 4000000L;
+    #endif
+#else
+    #ifdef __AVR__
+        SPI.setClockDivider(SPI_CLOCK_DIV4);
+    #endif
 #endif
+    
   return true;
 }
 
@@ -1182,8 +1226,10 @@ uint8_t  Adafruit_RA8875::readReg(uint8_t reg)
 void  Adafruit_RA8875::writeData(uint8_t d) 
 {
   digitalWrite(_cs, LOW);
+    spi_begin();
   SPI.transfer(RA8875_DATAWRITE);
   SPI.transfer(d);
+    spi_end();
   digitalWrite(_cs, HIGH);
 }
 
@@ -1195,8 +1241,12 @@ void  Adafruit_RA8875::writeData(uint8_t d)
 uint8_t  Adafruit_RA8875::readData(void) 
 {
   digitalWrite(_cs, LOW);
+    spi_begin();
+
   SPI.transfer(RA8875_DATAREAD);
   uint8_t x = SPI.transfer(0x0);
+    spi_end();
+
   digitalWrite(_cs, HIGH);
   return x;
 }
@@ -1209,8 +1259,12 @@ uint8_t  Adafruit_RA8875::readData(void)
 void  Adafruit_RA8875::writeCommand(uint8_t d) 
 {
   digitalWrite(_cs, LOW);
+    spi_begin();
+
   SPI.transfer(RA8875_CMDWRITE);
   SPI.transfer(d);
+    spi_end();
+
   digitalWrite(_cs, HIGH);
 }
 
@@ -1222,8 +1276,11 @@ void  Adafruit_RA8875::writeCommand(uint8_t d)
 uint8_t  Adafruit_RA8875::readStatus(void) 
 {
   digitalWrite(_cs, LOW);
+    spi_begin();
   SPI.transfer(RA8875_CMDREAD);
   uint8_t x = SPI.transfer(0x0);
+    spi_end();
+
   digitalWrite(_cs, HIGH);
   return x;
 }
