@@ -1098,20 +1098,25 @@ void Adafruit_RA8875::PWM2config(boolean on, uint8_t clock) {
 /**************************************************************************/
 void Adafruit_RA8875::touchEnable(boolean on) 
 {
-  if (on) 
+  uint8_t   adcClk = (uint8_t) RA8875_TPCR0_ADCCLK_DIV4;
+
+  if ( _size == RA8875_800x480 ) //match up touch size with LCD size
+    adcClk = (uint8_t) RA8875_TPCR0_ADCCLK_DIV16;
+
+  if (on)
   {
     /* Enable Touch Panel (Reg 0x70) */
-    writeReg(RA8875_TPCR0, RA8875_TPCR0_ENABLE        | 
+    writeReg(RA8875_TPCR0, RA8875_TPCR0_ENABLE        |
                            RA8875_TPCR0_WAIT_4096CLK  |
-                           RA8875_TPCR0_WAKEDISABLE   | 
-                           RA8875_TPCR0_ADCCLK_DIV4); // 10mhz max!
+                           RA8875_TPCR0_WAKEENABLE   |
+                           adcClk); // 10mhz max!
     /* Set Auto Mode      (Reg 0x71) */
-    writeReg(RA8875_TPCR1, RA8875_TPCR1_AUTO    | 
-                           // RA8875_TPCR1_VREFEXT | 
+    writeReg(RA8875_TPCR1, RA8875_TPCR1_AUTO    |
+                           // RA8875_TPCR1_VREFEXT |
                            RA8875_TPCR1_DEBOUNCE);
     /* Enable TP INT */
     writeReg(RA8875_INTC1, readReg(RA8875_INTC1) | RA8875_INTC1_TP);
-  } 
+  }
   else
   {
     /* Disable TP INT */
