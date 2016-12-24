@@ -81,9 +81,12 @@ boolean Adafruit_RA8875::begin(enum RA8875sizes s) {
     _width = 480;
     _height = 272;
   } 
-  if (_size == RA8875_800x480) {
+  else if (_size == RA8875_800x480) {
     _width = 800;
     _height = 480;
+  }
+  else {
+    return false;
   }
 
   pinMode(_cs, OUTPUT);
@@ -159,7 +162,7 @@ void Adafruit_RA8875::PLLinit(void) {
     writeReg(RA8875_PLLC2, RA8875_PLLC2_DIV4);
     delay(1);
   }
-  if (_size == RA8875_800x480) {
+  else /* (_size == RA8875_800x480) */ {
     writeReg(RA8875_PLLC1, RA8875_PLLC1_PLLDIV1 + 10);
     delay(1);
     writeReg(RA8875_PLLC2, RA8875_PLLC2_DIV4);
@@ -198,7 +201,7 @@ void Adafruit_RA8875::initialize(void) {
     vsync_start     = 8;
     vsync_pw        = 10;
   } 
-  else if (_size == RA8875_800x480) 
+  else // (_size == RA8875_800x480)
   {
     pixclk          = RA8875_PCSR_PDATL | RA8875_PCSR_2CLK;
     hsync_nondisp   = 26;
