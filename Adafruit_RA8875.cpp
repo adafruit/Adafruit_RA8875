@@ -301,6 +301,13 @@ void Adafruit_RA8875::textMode(void)
 /**************************************************************************/
 void Adafruit_RA8875::textSetCursor(uint16_t x, uint16_t y) 
 {
+  switch(rotation) {
+      case 2:
+          x = WIDTH  - 1 - x;
+          y = HEIGHT - 1 - y;
+          break;
+  }
+
   /* Set cursor location */
   writeCommand(0x2A);
   writeData(x & 0xFF);
@@ -507,6 +514,13 @@ void Adafruit_RA8875::fillRect(void) {
 /**************************************************************************/
 void Adafruit_RA8875::drawPixel(int16_t x, int16_t y, uint16_t color)
 {
+  switch(rotation) {
+      case 2:
+          x = WIDTH  - 1 - x;
+          y = HEIGHT - 1 - y;
+          break;
+  }
+
   writeReg(RA8875_CURH0, x);
   writeReg(RA8875_CURH1, x >> 8);
   writeReg(RA8875_CURV0, y);
@@ -532,6 +546,15 @@ void Adafruit_RA8875::drawPixel(int16_t x, int16_t y, uint16_t color)
 /**************************************************************************/
 void Adafruit_RA8875::drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color)
 {
+  switch(rotation) {
+      case 2:
+          x0 = WIDTH  - 1 - x0;
+          y0 = HEIGHT - 1 - y0;
+          x1 = WIDTH  - 1 - x1;
+          y1 = HEIGHT - 1 - y1;
+          break;
+  }
+
   /* Set X */
   writeCommand(0x91);
   writeData(x0);
@@ -783,6 +806,13 @@ void Adafruit_RA8875::fillCurve(int16_t xCenter, int16_t yCenter, int16_t longAx
 /**************************************************************************/
 void Adafruit_RA8875::circleHelper(int16_t x0, int16_t y0, int16_t r, uint16_t color, bool filled)
 {
+  switch(rotation) {
+      case 2:
+          x0 = WIDTH  - 1 - x0;
+          y0 = HEIGHT - 1 - y0;
+          break;
+  }
+
   /* Set X */
   writeCommand(0x99);
   writeData(x0);
@@ -827,31 +857,40 @@ void Adafruit_RA8875::circleHelper(int16_t x0, int16_t y0, int16_t r, uint16_t c
       Helper function for higher level rectangle drawing code
 */
 /**************************************************************************/
-void Adafruit_RA8875::rectHelper(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color, bool filled)
+void Adafruit_RA8875::rectHelper(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color, bool filled)
 {
+  switch(rotation) {
+      case 2:
+          x0 = WIDTH  - 1 - x0;
+          y0 = HEIGHT - 1 - y0;
+          x1 = WIDTH  - 1 - x1;
+          y1 = HEIGHT - 1 - y1;
+          break;
+  }
+
   /* Set X */
   writeCommand(0x91);
-  writeData(x);
+  writeData(x0);
   writeCommand(0x92);
-  writeData(x >> 8);
+  writeData(x0 >> 8);
   
   /* Set Y */
   writeCommand(0x93);
-  writeData(y); 
+  writeData(y0); 
   writeCommand(0x94);	   
-  writeData(y >> 8);
+  writeData(y0 >> 8);
   
   /* Set X1 */
   writeCommand(0x95);
-  writeData(w);
+  writeData(x1);
   writeCommand(0x96);
-  writeData((w) >> 8);
+  writeData((x1) >> 8);
   
   /* Set Y1 */
   writeCommand(0x97);
-  writeData(h); 
+  writeData(y1); 
   writeCommand(0x98);
-  writeData((h) >> 8);
+  writeData((y1) >> 8);
 
   /* Set Color */
   writeCommand(0x63);
@@ -883,6 +922,17 @@ void Adafruit_RA8875::rectHelper(int16_t x, int16_t y, int16_t w, int16_t h, uin
 /**************************************************************************/
 void Adafruit_RA8875::triangleHelper(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color, bool filled)
 {
+  switch(rotation) {
+      case 2:
+          x0 = WIDTH  - 1 - x0;
+          y0 = HEIGHT - 1 - y0;
+          x1 = WIDTH  - 1 - x1;
+          y1 = HEIGHT - 1 - y1;
+          x2 = WIDTH  - 1 - x2;
+          y2 = HEIGHT - 1 - y2;
+          break;
+  }
+
   /* Set Point 0 */
   writeCommand(0x91);
   writeData(x0);
@@ -943,6 +993,13 @@ void Adafruit_RA8875::triangleHelper(int16_t x0, int16_t y0, int16_t x1, int16_t
 /**************************************************************************/
 void Adafruit_RA8875::ellipseHelper(int16_t xCenter, int16_t yCenter, int16_t longAxis, int16_t shortAxis, uint16_t color, bool filled)
 {
+  switch(rotation) {
+      case 2:
+          xCenter = WIDTH  - 1 - xCenter;
+          yCenter = HEIGHT - 1 - yCenter;
+          break;
+  }
+
   /* Set Center Point */
   writeCommand(0xA5);
   writeData(xCenter);
@@ -993,6 +1050,13 @@ void Adafruit_RA8875::ellipseHelper(int16_t xCenter, int16_t yCenter, int16_t lo
 /**************************************************************************/
 void Adafruit_RA8875::curveHelper(int16_t xCenter, int16_t yCenter, int16_t longAxis, int16_t shortAxis, uint8_t curvePart, uint16_t color, bool filled)
 {
+  switch(rotation) {
+      case 2:
+          xCenter = WIDTH  - 1 - xCenter;
+          yCenter = HEIGHT - 1 - yCenter;
+          break;
+  }
+
   /* Set Center Point */
   writeCommand(0xA5);
   writeData(xCenter);
