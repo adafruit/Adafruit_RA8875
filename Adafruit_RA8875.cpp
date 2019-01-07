@@ -521,6 +521,33 @@ void Adafruit_RA8875::drawPixel(int16_t x, int16_t y, uint16_t color)
 
 /**************************************************************************/
 /*!
+ Draws a series of pixels at the specified location without the overhead
+ 
+ @args p[in]     An array of RGB565 color pixels
+ @args num[in]   The number of the pixels to draw
+ @args x[in]     The 0-based x location
+ @args y[in]     The 0-base y location
+ */
+/**************************************************************************/
+void Adafruit_RA8875::drawPixels(uint16_t * p, uint32_t num, int16_t x, int16_t y)
+{
+    writeReg(RA8875_CURH0, x);
+    writeReg(RA8875_CURH1, x >> 8);
+    writeReg(RA8875_CURV0, y);
+    writeReg(RA8875_CURV1, y >> 8);
+    writeCommand(RA8875_MRWC);
+    digitalWrite(_cs, LOW);
+    SPI.transfer(RA8875_DATAWRITE);
+    while (num--) {
+        SPI.transfer(*p >> 8);
+        SPI.transfer(*p & 0xFF);
+        p++;
+    }
+    digitalWrite(_cs, HIGH);
+}
+
+/**************************************************************************/
+/*!
       Draws a HW accelerated line on the display
     
       @args x0[in]    The 0-based starting x location
