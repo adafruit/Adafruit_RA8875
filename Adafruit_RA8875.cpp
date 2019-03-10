@@ -771,10 +771,10 @@ void Adafruit_RA8875::fillEllipse(int16_t xCenter, int16_t yCenter, int16_t long
       @args longAxis[in]  The size in pixels of the ellipse's long axis
       @args shortAxis[in] The size in pixels of the ellipse's short axis
       @args curvePart[in] The corner to draw, where in clock-wise motion:
-                            0 = 180-270º
-                            1 = 270-0º
-                            2 = 0-90º
-                            3 = 90-180º
+                            0 = 180-270°
+                            1 = 270-0°
+                            2 = 0-90°
+                            3 = 90-180°
       @args color[in]     The RGB565 color to use when drawing the pixel
 */
 /**************************************************************************/
@@ -792,10 +792,10 @@ void Adafruit_RA8875::drawCurve(int16_t xCenter, int16_t yCenter, int16_t longAx
       @args longAxis[in]  The size in pixels of the ellipse's long axis
       @args shortAxis[in] The size in pixels of the ellipse's short axis
       @args curvePart[in] The corner to draw, where in clock-wise motion:
-                            0 = 180-270º
-                            1 = 270-0º
-                            2 = 0-90º
-                            3 = 90-180º
+                            0 = 180-270°
+                            1 = 270-0°
+                            2 = 0-90°
+                            3 = 90-180°
       @args color[in]     The RGB565 color to use when drawing the pixel
 */
 /**************************************************************************/
