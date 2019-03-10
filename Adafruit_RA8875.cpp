@@ -10,17 +10,17 @@
  The RA8875 is a TFT driver for up to 800x480 dotclock'd displays
  It is tested to work with displays in the Adafruit shop. Other displays
  may need timing adjustments and are not guanteed to work.
- 
+
  Adafruit invests time and resources providing this open
  source code, please support Adafruit and open-source hardware
  by purchasing products from Adafruit!
- 
+
  Written by Limor Fried/Ladyada for Adafruit Industries.
  BSD license, check license.txt for more information.
  All text above must be included in any redistribution.
 
     @section  HISTORY
-    
+
     v1.0 - First release
 */
 /**************************************************************************/
@@ -55,7 +55,7 @@
 /**************************************************************************/
 /*!
       Constructor for a new RA8875 instance
-      
+
       @args CS[in]  Location of the SPI chip select pin
       @args RST[in] Location of the reset pin
 */
@@ -68,7 +68,7 @@ Adafruit_RA8875::Adafruit_RA8875(uint8_t CS, uint8_t RST) : Adafruit_GFX(800, 48
 /**************************************************************************/
 /*!
       Initialises the LCD driver and any HW required by the display
-      
+
       @args s[in] The display size, which can be either:
                   'RA8875_480x272' (4.3" displays) r
                   'RA8875_800x480' (5" and 7" displays)
@@ -80,7 +80,7 @@ boolean Adafruit_RA8875::begin(enum RA8875sizes s) {
   if (_size == RA8875_480x272) {
     _width = 480;
     _height = 272;
-  } 
+  }
   else if (_size == RA8875_800x480) {
     _width = 800;
     _height = 480;
@@ -92,14 +92,14 @@ boolean Adafruit_RA8875::begin(enum RA8875sizes s) {
   pinMode(_cs, OUTPUT);
   digitalWrite(_cs, HIGH);
   pinMode(_rst, OUTPUT);
-    
+
   digitalWrite(_rst, LOW);
   delay(100);
   digitalWrite(_rst, HIGH);
   delay(100);
-  
+
   SPI.begin();
-    
+
 #ifdef SPI_HAS_TRANSACTION
     #if defined (ARDUINO_ARCH_ARC32)
         spi_speed = 2000000;
@@ -132,7 +132,7 @@ boolean Adafruit_RA8875::begin(enum RA8875sizes s) {
         SPI.setClockDivider(SPI_CLOCK_DIV4);
     #endif
 #endif
-    
+
   return true;
 }
 
@@ -185,12 +185,12 @@ void Adafruit_RA8875::initialize(void) {
   uint8_t hsync_pw;
   uint8_t hsync_finetune;
   uint8_t hsync_nondisp;
-  uint8_t vsync_pw; 
+  uint8_t vsync_pw;
   uint16_t vsync_nondisp;
   uint16_t vsync_start;
 
-  /* Set the correct values for the display being used */  
-  if (_size == RA8875_480x272) 
+  /* Set the correct values for the display being used */
+  if (_size == RA8875_480x272)
   {
     pixclk          = RA8875_PCSR_PDATL | RA8875_PCSR_4CLK;
     hsync_nondisp   = 10;
@@ -200,7 +200,7 @@ void Adafruit_RA8875::initialize(void) {
     vsync_nondisp   = 3;
     vsync_start     = 8;
     vsync_pw        = 10;
-  } 
+  }
   else // (_size == RA8875_800x480)
   {
     pixclk          = RA8875_PCSR_PDATL | RA8875_PCSR_2CLK;
@@ -215,14 +215,14 @@ void Adafruit_RA8875::initialize(void) {
 
   writeReg(RA8875_PCSR, pixclk);
   delay(1);
-  
+
   /* Horizontal settings registers */
   writeReg(RA8875_HDWR, (_width / 8) - 1);                          // H width: (HDWR + 1) * 8 = 480
   writeReg(RA8875_HNDFTR, RA8875_HNDFTR_DE_HIGH + hsync_finetune);
   writeReg(RA8875_HNDR, (hsync_nondisp - hsync_finetune - 2)/8);    // H non-display: HNDR * 8 + HNDFTR + 2 = 10
-  writeReg(RA8875_HSTR, hsync_start/8 - 1);                         // Hsync start: (HSTR + 1)*8 
+  writeReg(RA8875_HSTR, hsync_start/8 - 1);                         // Hsync start: (HSTR + 1)*8
   writeReg(RA8875_HPWR, RA8875_HPWR_LOW + (hsync_pw/8 - 1));        // HSync pulse width = (HPWR+1) * 8
-  
+
   /* Vertical settings registers */
   writeReg(RA8875_VDHR0, (uint16_t)(_height - 1) & 0xFF);
   writeReg(RA8875_VDHR1, (uint16_t)(_height - 1) >> 8);
@@ -231,30 +231,30 @@ void Adafruit_RA8875::initialize(void) {
   writeReg(RA8875_VSTR0, vsync_start-1);                            // Vsync start position = VSTR + 1
   writeReg(RA8875_VSTR1, vsync_start >> 8);
   writeReg(RA8875_VPWR, RA8875_VPWR_LOW + vsync_pw - 1);            // Vsync pulse width = VPWR + 1
-  
+
   /* Set active window X */
   writeReg(RA8875_HSAW0, 0);                                        // horizontal start point
   writeReg(RA8875_HSAW1, 0);
   writeReg(RA8875_HEAW0, (uint16_t)(_width - 1) & 0xFF);            // horizontal end point
   writeReg(RA8875_HEAW1, (uint16_t)(_width - 1) >> 8);
-  
+
   /* Set active window Y */
   writeReg(RA8875_VSAW0, 0);                                        // vertical start point
-  writeReg(RA8875_VSAW1, 0);  
+  writeReg(RA8875_VSAW1, 0);
   writeReg(RA8875_VEAW0, (uint16_t)(_height - 1) & 0xFF);           // horizontal end point
   writeReg(RA8875_VEAW1, (uint16_t)(_height - 1) >> 8);
-  
+
   /* ToDo: Setup touch panel? */
-  
+
   /* Clear the entire window */
   writeReg(RA8875_MCLR, RA8875_MCLR_START | RA8875_MCLR_FULL);
-  delay(500); 
+  delay(500);
 }
 
 /**************************************************************************/
 /*!
       Returns the display width in pixels
-      
+
       @returns  The 1-based display width in pixels
 */
 /**************************************************************************/
@@ -276,14 +276,14 @@ uint16_t Adafruit_RA8875::height(void) { return _height; }
       Sets the display in text mode (as opposed to graphics mode)
 */
 /**************************************************************************/
-void Adafruit_RA8875::textMode(void) 
+void Adafruit_RA8875::textMode(void)
 {
   /* Set text mode */
   writeCommand(RA8875_MWCR0);
   uint8_t temp = readData();
   temp |= RA8875_MWCR0_TXTMODE; // Set bit 7
   writeData(temp);
-  
+
   /* Select the internal (ROM) font */
   writeCommand(0x21);
   temp = readData();
@@ -294,12 +294,12 @@ void Adafruit_RA8875::textMode(void)
 /**************************************************************************/
 /*!
       Sets the display in text mode (as opposed to graphics mode)
-      
+
       @args x[in] The x position of the cursor (in pixels, 0..1023)
       @args y[in] The y position of the cursor (in pixels, 0..511)
 */
 /**************************************************************************/
-void Adafruit_RA8875::textSetCursor(uint16_t x, uint16_t y) 
+void Adafruit_RA8875::textSetCursor(uint16_t x, uint16_t y)
 {
   /* Set cursor location */
   writeCommand(0x2A);
@@ -315,7 +315,7 @@ void Adafruit_RA8875::textSetCursor(uint16_t x, uint16_t y)
 /**************************************************************************/
 /*!
       Sets the fore and background color when rendering text
-      
+
       @args foreColor[in] The RGB565 color to use when rendering the text
       @args bgColor[in]   The RGB565 colot to use for the background
 */
@@ -329,7 +329,7 @@ void Adafruit_RA8875::textColor(uint16_t foreColor, uint16_t bgColor)
   writeData((foreColor & 0x07e0) >> 5);
   writeCommand(0x65);
   writeData((foreColor & 0x001f));
-  
+
   /* Set Background Color */
   writeCommand(0x60);
   writeData((bgColor & 0xf800) >> 11);
@@ -337,7 +337,7 @@ void Adafruit_RA8875::textColor(uint16_t foreColor, uint16_t bgColor)
   writeData((bgColor & 0x07e0) >> 5);
   writeCommand(0x62);
   writeData((bgColor & 0x001f));
-  
+
   /* Clear transparency flag */
   writeCommand(0x22);
   uint8_t temp = readData();
@@ -348,7 +348,7 @@ void Adafruit_RA8875::textColor(uint16_t foreColor, uint16_t bgColor)
 /**************************************************************************/
 /*!
       Sets the fore color when rendering text with a transparent bg
-      
+
       @args foreColor[in] The RGB565 color to use when rendering the text
 */
 /**************************************************************************/
@@ -366,18 +366,18 @@ void Adafruit_RA8875::textTransparent(uint16_t foreColor)
   writeCommand(0x22);
   uint8_t temp = readData();
   temp |= (1<<6); // Set bit 6
-  writeData(temp);  
+  writeData(temp);
 }
 
 /**************************************************************************/
 /*!
       Sets the text enlarge settings, using one of the following values:
-      
+
       0 = 1x zoom
       1 = 2x zoom
       2 = 3x zoom
       3 = 4x zoom
-      
+
       @args scale[in]   The zoom factor (0..3 for 1-4x zoom)
 */
 /**************************************************************************/
@@ -391,7 +391,7 @@ void Adafruit_RA8875::textEnlarge(uint8_t scale)
   temp &= ~(0xF); // Clears bits 0..3
   temp |= scale << 2;
   temp |= scale;
-  writeData(temp);  
+  writeData(temp);
 
   _textScale = scale;
 }
@@ -399,24 +399,25 @@ void Adafruit_RA8875::textEnlarge(uint8_t scale)
 /**************************************************************************/
 /*!
       Renders some text on the screen when in text mode
-      
+
       @args buffer[in]    The buffer containing the characters to render
       @args len[in]       The size of the buffer in bytes
 */
 /**************************************************************************/
-void Adafruit_RA8875::textWrite(const char* buffer, uint16_t len) 
+void Adafruit_RA8875::textWrite(const char* buffer, uint16_t len)
 {
   if (len == 0) len = strlen(buffer);
   writeCommand(RA8875_MRWC);
   for (uint16_t i=0;i<len;i++)
   {
     writeData(buffer[i]);
-#if defined(__AVR__)
-    if (_textScale > 1) delay(1);
-#elif defined(__arm__)
+#if defined(__arm__)
     // This delay is needed with textEnlarge(1) because
     // Teensy 3.X is much faster than Arduino Uno
     if (_textScale > 0) delay(1);
+#else
+    // For others, delay starting with textEnlarge(2)
+    if (_textScale > 1) delay(1);
 #endif
   }
 }
@@ -447,7 +448,7 @@ boolean Adafruit_RA8875::waitPoll(uint8_t regname, uint8_t waitflag) {
     uint8_t temp = readReg(regname);
     if (!(temp & waitflag))
       return true;
-  }  
+  }
   return false; // MEMEFIX: yeah i know, unreached! - add timeout?
 }
 
@@ -455,7 +456,7 @@ boolean Adafruit_RA8875::waitPoll(uint8_t regname, uint8_t waitflag) {
 /**************************************************************************/
 /*!
       Sets the current X/Y position on the display before drawing
-      
+
       @args x[in] The 0-based x location
       @args y[in] The 0-base y location
 */
@@ -464,13 +465,13 @@ void Adafruit_RA8875::setXY(uint16_t x, uint16_t y) {
   writeReg(RA8875_CURH0, x);
   writeReg(RA8875_CURH1, x >> 8);
   writeReg(RA8875_CURV0, y);
-  writeReg(RA8875_CURV1, y >> 8);  
+  writeReg(RA8875_CURV1, y >> 8);
 }
 
 /**************************************************************************/
 /*!
       HW accelerated function to push a chunk of raw pixel data
-      
+
       @args num[in] The number of pixels to push
       @args p[in]   The pixel color to use
 */
@@ -510,7 +511,7 @@ void Adafruit_RA8875::drawPixel(int16_t x, int16_t y, uint16_t color)
   writeReg(RA8875_CURH0, x);
   writeReg(RA8875_CURH1, x >> 8);
   writeReg(RA8875_CURV0, y);
-  writeReg(RA8875_CURV1, y >> 8);  
+  writeReg(RA8875_CURV1, y >> 8);
   writeCommand(RA8875_MRWC);
   digitalWrite(_cs, LOW);
   SPI.transfer(RA8875_DATAWRITE);
@@ -522,7 +523,7 @@ void Adafruit_RA8875::drawPixel(int16_t x, int16_t y, uint16_t color)
 /**************************************************************************/
 /*!
  Draws a series of pixels at the specified location without the overhead
- 
+
  @args p[in]     An array of RGB565 color pixels
  @args num[in]   The number of the pixels to draw
  @args x[in]     The 0-based x location
@@ -549,7 +550,7 @@ void Adafruit_RA8875::drawPixels(uint16_t * p, uint32_t num, int16_t x, int16_t 
 /**************************************************************************/
 /*!
       Draws a HW accelerated line on the display
-    
+
       @args x0[in]    The 0-based starting x location
       @args y0[in]    The 0-base starting y location
       @args x1[in]    The 0-based ending x location
@@ -564,25 +565,25 @@ void Adafruit_RA8875::drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, u
   writeData(x0);
   writeCommand(0x92);
   writeData(x0 >> 8);
-  
+
   /* Set Y */
   writeCommand(0x93);
-  writeData(y0); 
+  writeData(y0);
   writeCommand(0x94);
   writeData(y0 >> 8);
-  
+
   /* Set X1 */
   writeCommand(0x95);
   writeData(x1);
   writeCommand(0x96);
   writeData((x1) >> 8);
-  
+
   /* Set Y1 */
   writeCommand(0x97);
-  writeData(y1); 
+  writeData(y1);
   writeCommand(0x98);
   writeData((y1) >> 8);
-  
+
   /* Set Color */
   writeCommand(0x63);
   writeData((color & 0xf800) >> 11);
@@ -594,7 +595,7 @@ void Adafruit_RA8875::drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, u
   /* Draw! */
   writeCommand(RA8875_DCR);
   writeData(0x80);
-  
+
   /* Wait for the command to finish */
   waitPoll(RA8875_DCR, RA8875_DCR_LINESQUTRI_STATUS);
 }
@@ -659,7 +660,7 @@ void Adafruit_RA8875::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint1
 */
 /**************************************************************************/
 void Adafruit_RA8875::fillScreen(uint16_t color)
-{  
+{
   rectHelper(0, 0, _width-1, _height-1, color, true);
 }
 
@@ -770,10 +771,10 @@ void Adafruit_RA8875::fillEllipse(int16_t xCenter, int16_t yCenter, int16_t long
       @args longAxis[in]  The size in pixels of the ellipse's long axis
       @args shortAxis[in] The size in pixels of the ellipse's short axis
       @args curvePart[in] The corner to draw, where in clock-wise motion:
-                            0 = 180-270�
-                            1 = 270-0�
-                            2 = 0-90�
-                            3 = 90-180�
+                            0 = 180-270째
+                            1 = 270-0째
+                            2 = 0-90째
+                            3 = 90-180째
       @args color[in]     The RGB565 color to use when drawing the pixel
 */
 /**************************************************************************/
@@ -791,10 +792,10 @@ void Adafruit_RA8875::drawCurve(int16_t xCenter, int16_t yCenter, int16_t longAx
       @args longAxis[in]  The size in pixels of the ellipse's long axis
       @args shortAxis[in] The size in pixels of the ellipse's short axis
       @args curvePart[in] The corner to draw, where in clock-wise motion:
-                            0 = 180-270�
-                            1 = 270-0�
-                            2 = 0-90�
-                            3 = 90-180�
+                            0 = 180-270째
+                            1 = 270-0째
+                            2 = 0-90째
+                            3 = 90-180째
       @args color[in]     The RGB565 color to use when drawing the pixel
 */
 /**************************************************************************/
@@ -815,17 +816,17 @@ void Adafruit_RA8875::circleHelper(int16_t x0, int16_t y0, int16_t r, uint16_t c
   writeData(x0);
   writeCommand(0x9a);
   writeData(x0 >> 8);
-  
+
   /* Set Y */
   writeCommand(0x9b);
-  writeData(y0); 
-  writeCommand(0x9c);	   
+  writeData(y0);
+  writeCommand(0x9c);
   writeData(y0 >> 8);
-  
+
   /* Set Radius */
   writeCommand(0x9d);
-  writeData(r);  
-  
+  writeData(r);
+
   /* Set Color */
   writeCommand(0x63);
   writeData((color & 0xf800) >> 11);
@@ -833,7 +834,7 @@ void Adafruit_RA8875::circleHelper(int16_t x0, int16_t y0, int16_t r, uint16_t c
   writeData((color & 0x07e0) >> 5);
   writeCommand(0x65);
   writeData((color & 0x001f));
-  
+
   /* Draw! */
   writeCommand(RA8875_DCR);
   if (filled)
@@ -844,7 +845,7 @@ void Adafruit_RA8875::circleHelper(int16_t x0, int16_t y0, int16_t r, uint16_t c
   {
     writeData(RA8875_DCR_CIRCLE_START | RA8875_DCR_NOFILL);
   }
-  
+
   /* Wait for the command to finish */
   waitPoll(RA8875_DCR, RA8875_DCR_CIRCLE_STATUS);
 }
@@ -861,22 +862,22 @@ void Adafruit_RA8875::rectHelper(int16_t x, int16_t y, int16_t w, int16_t h, uin
   writeData(x);
   writeCommand(0x92);
   writeData(x >> 8);
-  
+
   /* Set Y */
   writeCommand(0x93);
-  writeData(y); 
-  writeCommand(0x94);	   
+  writeData(y);
+  writeCommand(0x94);
   writeData(y >> 8);
-  
+
   /* Set X1 */
   writeCommand(0x95);
   writeData(w);
   writeCommand(0x96);
   writeData((w) >> 8);
-  
+
   /* Set Y1 */
   writeCommand(0x97);
-  writeData(h); 
+  writeData(h);
   writeCommand(0x98);
   writeData((h) >> 8);
 
@@ -898,7 +899,7 @@ void Adafruit_RA8875::rectHelper(int16_t x, int16_t y, int16_t w, int16_t h, uin
   {
     writeData(0x90);
   }
-  
+
   /* Wait for the command to finish */
   waitPoll(RA8875_DCR, RA8875_DCR_LINESQUTRI_STATUS);
 }
@@ -916,7 +917,7 @@ void Adafruit_RA8875::triangleHelper(int16_t x0, int16_t y0, int16_t x1, int16_t
   writeCommand(0x92);
   writeData(x0 >> 8);
   writeCommand(0x93);
-  writeData(y0); 
+  writeData(y0);
   writeCommand(0x94);
   writeData(y0 >> 8);
 
@@ -926,7 +927,7 @@ void Adafruit_RA8875::triangleHelper(int16_t x0, int16_t y0, int16_t x1, int16_t
   writeCommand(0x96);
   writeData(x1 >> 8);
   writeCommand(0x97);
-  writeData(y1); 
+  writeData(y1);
   writeCommand(0x98);
   writeData(y1 >> 8);
 
@@ -936,10 +937,10 @@ void Adafruit_RA8875::triangleHelper(int16_t x0, int16_t y0, int16_t x1, int16_t
   writeCommand(0xAA);
   writeData(x2 >> 8);
   writeCommand(0xAB);
-  writeData(y2); 
+  writeData(y2);
   writeCommand(0xAC);
   writeData(y2 >> 8);
-  
+
   /* Set Color */
   writeCommand(0x63);
   writeData((color & 0xf800) >> 11);
@@ -947,7 +948,7 @@ void Adafruit_RA8875::triangleHelper(int16_t x0, int16_t y0, int16_t x1, int16_t
   writeData((color & 0x07e0) >> 5);
   writeCommand(0x65);
   writeData((color & 0x001f));
-  
+
   /* Draw! */
   writeCommand(RA8875_DCR);
   if (filled)
@@ -958,7 +959,7 @@ void Adafruit_RA8875::triangleHelper(int16_t x0, int16_t y0, int16_t x1, int16_t
   {
     writeData(0x81);
   }
-  
+
   /* Wait for the command to finish */
   waitPoll(RA8875_DCR, RA8875_DCR_LINESQUTRI_STATUS);
 }
@@ -976,7 +977,7 @@ void Adafruit_RA8875::ellipseHelper(int16_t xCenter, int16_t yCenter, int16_t lo
   writeCommand(0xA6);
   writeData(xCenter >> 8);
   writeCommand(0xA7);
-  writeData(yCenter); 
+  writeData(yCenter);
   writeCommand(0xA8);
   writeData(yCenter >> 8);
 
@@ -986,10 +987,10 @@ void Adafruit_RA8875::ellipseHelper(int16_t xCenter, int16_t yCenter, int16_t lo
   writeCommand(0xA2);
   writeData(longAxis >> 8);
   writeCommand(0xA3);
-  writeData(shortAxis); 
+  writeData(shortAxis);
   writeCommand(0xA4);
   writeData(shortAxis >> 8);
-  
+
   /* Set Color */
   writeCommand(0x63);
   writeData((color & 0xf800) >> 11);
@@ -997,7 +998,7 @@ void Adafruit_RA8875::ellipseHelper(int16_t xCenter, int16_t yCenter, int16_t lo
   writeData((color & 0x07e0) >> 5);
   writeCommand(0x65);
   writeData((color & 0x001f));
-  
+
   /* Draw! */
   writeCommand(0xA0);
   if (filled)
@@ -1008,7 +1009,7 @@ void Adafruit_RA8875::ellipseHelper(int16_t xCenter, int16_t yCenter, int16_t lo
   {
     writeData(0x80);
   }
-  
+
   /* Wait for the command to finish */
   waitPoll(RA8875_ELLIPSE, RA8875_ELLIPSE_STATUS);
 }
@@ -1026,7 +1027,7 @@ void Adafruit_RA8875::curveHelper(int16_t xCenter, int16_t yCenter, int16_t long
   writeCommand(0xA6);
   writeData(xCenter >> 8);
   writeCommand(0xA7);
-  writeData(yCenter); 
+  writeData(yCenter);
   writeCommand(0xA8);
   writeData(yCenter >> 8);
 
@@ -1036,10 +1037,10 @@ void Adafruit_RA8875::curveHelper(int16_t xCenter, int16_t yCenter, int16_t long
   writeCommand(0xA2);
   writeData(longAxis >> 8);
   writeCommand(0xA3);
-  writeData(shortAxis); 
+  writeData(shortAxis);
   writeCommand(0xA4);
   writeData(shortAxis >> 8);
-  
+
   /* Set Color */
   writeCommand(0x63);
   writeData((color & 0xf800) >> 11);
@@ -1058,7 +1059,7 @@ void Adafruit_RA8875::curveHelper(int16_t xCenter, int16_t yCenter, int16_t long
   {
     writeData(0x90 | (curvePart & 0x03));
   }
-  
+
   /* Wait for the command to finish */
   waitPoll(RA8875_ELLIPSE, RA8875_ELLIPSE_STATUS);
 }
@@ -1073,7 +1074,7 @@ void Adafruit_RA8875::curveHelper(int16_t xCenter, int16_t yCenter, int16_t long
 void Adafruit_RA8875::GPIOX(boolean on) {
   if (on)
     writeReg(RA8875_GPIOX, 1);
-  else 
+  else
     writeReg(RA8875_GPIOX, 0);
 }
 
@@ -1126,7 +1127,7 @@ void Adafruit_RA8875::PWM2config(boolean on, uint8_t clock) {
       Enables or disables the on-chip touch screen controller
 */
 /**************************************************************************/
-void Adafruit_RA8875::touchEnable(boolean on) 
+void Adafruit_RA8875::touchEnable(boolean on)
 {
   uint8_t   adcClk = (uint8_t) RA8875_TPCR0_ADCCLK_DIV4;
 
@@ -1159,12 +1160,12 @@ void Adafruit_RA8875::touchEnable(boolean on)
 /**************************************************************************/
 /*!
       Checks if a touch event has occured
-      
+
       @returns  True is a touch event has occured (reading it via
                 touchRead() will clear the interrupt in memory)
 */
 /**************************************************************************/
-boolean Adafruit_RA8875::touched(void) 
+boolean Adafruit_RA8875::touched(void)
 {
   if (readReg(RA8875_INTC2) & RA8875_INTC2_TP) return true;
   return false;
@@ -1173,19 +1174,19 @@ boolean Adafruit_RA8875::touched(void)
 /**************************************************************************/
 /*!
       Reads the last touch event
-      
+
       @args x[out]  Pointer to the uint16_t field to assign the raw X value
       @args y[out]  Pointer to the uint16_t field to assign the raw Y value
-      
+
       @note Calling this function will clear the touch panel interrupt on
             the RA8875, resetting the flag used by the 'touched' function
 */
 /**************************************************************************/
-boolean Adafruit_RA8875::touchRead(uint16_t *x, uint16_t *y) 
+boolean Adafruit_RA8875::touchRead(uint16_t *x, uint16_t *y)
 {
   uint16_t tx, ty;
   uint8_t temp;
-  
+
   tx = readReg(RA8875_TPXH);
   ty = readReg(RA8875_TPYH);
   temp = readReg(RA8875_TPXYL);
@@ -1208,9 +1209,9 @@ boolean Adafruit_RA8875::touchRead(uint16_t *x, uint16_t *y)
       Turns the display on or off
 */
 /**************************************************************************/
-void Adafruit_RA8875::displayOn(boolean on) 
+void Adafruit_RA8875::displayOn(boolean on)
 {
- if (on) 
+ if (on)
    writeReg(RA8875_PWRR, RA8875_PWRR_NORMAL | RA8875_PWRR_DISPON);
  else
    writeReg(RA8875_PWRR, RA8875_PWRR_NORMAL | RA8875_PWRR_DISPOFF);
@@ -1221,9 +1222,9 @@ void Adafruit_RA8875::displayOn(boolean on)
     Puts the display in sleep mode, or disables sleep mode if enabled
 */
 /**************************************************************************/
-void Adafruit_RA8875::sleep(boolean sleep) 
+void Adafruit_RA8875::sleep(boolean sleep)
 {
- if (sleep) 
+ if (sleep)
    writeReg(RA8875_PWRR, RA8875_PWRR_DISPOFF | RA8875_PWRR_SLEEP);
  else
    writeReg(RA8875_PWRR, RA8875_PWRR_DISPOFF);
@@ -1236,7 +1237,7 @@ void Adafruit_RA8875::sleep(boolean sleep)
 
 */
 /**************************************************************************/
-void  Adafruit_RA8875::writeReg(uint8_t reg, uint8_t val) 
+void  Adafruit_RA8875::writeReg(uint8_t reg, uint8_t val)
 {
   writeCommand(reg);
   writeData(val);
@@ -1247,7 +1248,7 @@ void  Adafruit_RA8875::writeReg(uint8_t reg, uint8_t val)
 
 */
 /**************************************************************************/
-uint8_t  Adafruit_RA8875::readReg(uint8_t reg) 
+uint8_t  Adafruit_RA8875::readReg(uint8_t reg)
 {
   writeCommand(reg);
   return readData();
@@ -1258,7 +1259,7 @@ uint8_t  Adafruit_RA8875::readReg(uint8_t reg)
 
 */
 /**************************************************************************/
-void  Adafruit_RA8875::writeData(uint8_t d) 
+void  Adafruit_RA8875::writeData(uint8_t d)
 {
   digitalWrite(_cs, LOW);
     spi_begin();
@@ -1273,7 +1274,7 @@ void  Adafruit_RA8875::writeData(uint8_t d)
 
 */
 /**************************************************************************/
-uint8_t  Adafruit_RA8875::readData(void) 
+uint8_t  Adafruit_RA8875::readData(void)
 {
   digitalWrite(_cs, LOW);
     spi_begin();
@@ -1291,7 +1292,7 @@ uint8_t  Adafruit_RA8875::readData(void)
 
 */
 /**************************************************************************/
-void  Adafruit_RA8875::writeCommand(uint8_t d) 
+void  Adafruit_RA8875::writeCommand(uint8_t d)
 {
   digitalWrite(_cs, LOW);
     spi_begin();
@@ -1308,7 +1309,7 @@ void  Adafruit_RA8875::writeCommand(uint8_t d)
 
 */
 /**************************************************************************/
-uint8_t  Adafruit_RA8875::readStatus(void) 
+uint8_t  Adafruit_RA8875::readStatus(void)
 {
   digitalWrite(_cs, LOW);
     spi_begin();
