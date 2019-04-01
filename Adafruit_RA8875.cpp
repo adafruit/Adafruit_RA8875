@@ -633,7 +633,7 @@ void Adafruit_RA8875::drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t co
 /**************************************************************************/
 void Adafruit_RA8875::drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
 {
-  rectHelper(x, y, x+w, y+h, color, false);
+  rectHelper(x, y, x+w-1, y+h-1, color, false);
 }
 
 /**************************************************************************/
@@ -649,7 +649,7 @@ void Adafruit_RA8875::drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint1
 /**************************************************************************/
 void Adafruit_RA8875::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
 {
-  rectHelper(x, y, x+w, y+h, color, true);
+  rectHelper(x, y, x+w-1, y+h-1, color, true);
 }
 
 /**************************************************************************/
