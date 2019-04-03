@@ -67,7 +67,7 @@ void loop()
 
 #define BUFFPIXEL 20
 
-void bmpDraw(char *filename, int x, int y) {
+void bmpDraw(const char *filename, int x, int y) {
   File     bmpFile;
   int      bmpWidth, bmpHeight;   // W+H in pixels
   uint8_t  bmpDepth;              // Bit depth (currently must be 24)
@@ -92,7 +92,7 @@ void bmpDraw(char *filename, int x, int y) {
   Serial.println('\'');
 
   // Open requested file on SD card
-  if ((bmpFile = SD.open(filename)) == NULL) {
+  if ((bmpFile = SD.open(filename)) == false) {
     Serial.println(F("File not found"));
     return;
   }

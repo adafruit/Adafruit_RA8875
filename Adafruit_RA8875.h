@@ -124,6 +124,11 @@ class Adafruit_RA8875 : public Adafruit_GFX {
   void    fillEllipse(int16_t xCenter, int16_t yCenter, int16_t longAxis, int16_t shortAxis, uint16_t color);
   void    drawCurve(int16_t xCenter, int16_t yCenter, int16_t longAxis, int16_t shortAxis, uint8_t curvePart, uint16_t color);
   void    fillCurve(int16_t xCenter, int16_t yCenter, int16_t longAxis, int16_t shortAxis, uint8_t curvePart, uint16_t color);
+
+  /* Scroll */
+  void    setScrollWindow(int16_t x, int16_t y, int16_t w, int16_t h, uint8_t mode);
+  void    scrollX(int16_t dist);
+  void    scrollY(int16_t dist);
   
   /* Backlight */
   void    GPIOX(boolean on);
@@ -387,5 +392,10 @@ class Adafruit_RA8875 : public Adafruit_GFX {
 #define RA8875_INTC2_DMA        0x08
 #define RA8875_INTC2_TP         0x04
 #define RA8875_INTC2_BTE        0x02
+
+#define RA8875_SCROLL_BOTH	0x00
+#define RA8875_SCROLL_LAYER1	0x40
+#define RA8875_SCROLL_LAYER2	0x80
+#define RA8875_SCROLL_BUFFER	0xC0
 
 #endif
