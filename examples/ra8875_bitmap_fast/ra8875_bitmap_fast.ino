@@ -1,6 +1,6 @@
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <SPI.h>
-#include <Wire.h>   
+#include <Wire.h>
 #include <SD.h>
 #include "Adafruit_RA8875.h"
 #include <Adafruit_STMPE610.h>
@@ -19,7 +19,7 @@ Adafruit_RA8875 tft = Adafruit_RA8875(RA8875_CS, RA8875_RESET);
 void setup () {
   Serial.begin(9600);
 
-  if (!SD.begin(sd_cs)) 
+  if (!SD.begin(sd_cs))
   {
     Serial.println("initialization failed!");
     return;
@@ -42,20 +42,20 @@ void setup () {
   tft.PWM1config(true, RA8875_PWM_CLK_DIV1024); // PWM output for backlight
   tft.PWM1out(255);
 
-  Serial.print("("); 
+  Serial.print("(");
   Serial.print(tft.width());
-  Serial.print(", "); 
+  Serial.print(", ");
   Serial.print(tft.height());
   Serial.println(")");
   tft.graphicsMode();                 // go back to graphics mode
   tft.fillScreen(RA8875_BLACK);
-  tft.graphicsMode();     
+  tft.graphicsMode();
   bmpDraw("parrot.bmp", 0, 0);
 }
 
 void loop()
 {
-}    
+}
 
 // This function opens a Windows Bitmap (BMP) file and
 // displays it at the given coordinates.  It's sped up
@@ -67,7 +67,7 @@ void loop()
 
 #define BUFFPIXEL 20
 
-void bmpDraw(char *filename, int x, int y) {
+void bmpDraw(const char *filename, int x, int y) {
   File     bmpFile;
   int      bmpWidth, bmpHeight;   // W+H in pixels
   uint8_t  bmpDepth;              // Bit depth (currently must be 24)
@@ -92,29 +92,29 @@ void bmpDraw(char *filename, int x, int y) {
   Serial.println('\'');
 
   // Open requested file on SD card
-  if ((bmpFile = SD.open(filename)) == NULL) {
+  if ((bmpFile = SD.open(filename)) == false) {
     Serial.println(F("File not found"));
     return;
   }
 
   // Parse BMP header
   if(read16(bmpFile) == 0x4D42) { // BMP signature
-    Serial.println(F("File size: ")); 
+    Serial.println(F("File size: "));
     Serial.println(read32(bmpFile));
     (void)read32(bmpFile); // Read & ignore creator bytes
     bmpImageoffset = read32(bmpFile); // Start of image data
-    Serial.print(F("Image Offset: ")); 
+    Serial.print(F("Image Offset: "));
     Serial.println(bmpImageoffset, DEC);
 
     // Read DIB header
-    Serial.print(F("Header size: ")); 
+    Serial.print(F("Header size: "));
     Serial.println(read32(bmpFile));
     bmpWidth  = read32(bmpFile);
     bmpHeight = read32(bmpFile);
 
     if(read16(bmpFile) == 1) { // # planes -- must be '1'
       bmpDepth = read16(bmpFile); // bits per pixel
-      Serial.print(F("Bit Depth: ")); 
+      Serial.print(F("Bit Depth: "));
       Serial.println(bmpDepth);
       if((bmpDepth == 24) && (read32(bmpFile) == 0)) { // 0 = uncompressed
         goodBmp = true; // Supported BMP format -- proceed!
@@ -152,7 +152,7 @@ void bmpDraw(char *filename, int x, int y) {
             pos = bmpImageoffset + (bmpHeight - 1 - row) * rowSize;
           else     // Bitmap is stored top-to-bottom
             pos = bmpImageoffset + row * rowSize;
-          
+
           if(bmpFile.position() != pos) { // Need seek?
             bmpFile.seek(pos);
             buffidx = sizeof(sdbuffer); // Force buffer reload
@@ -181,13 +181,13 @@ void bmpDraw(char *filename, int x, int y) {
               tft.drawPixels(lcdbuffer, lcdidx, col+x, row+y);
             }
           } // end pixel
-            
+
         } // end scanline
 
         // Write any remaining data to LCD
         if(lcdidx > 0) {
           tft.drawPixels(lcdbuffer, lcdidx, col+x, row+y);
-        } 
+        }
 
         Serial.print(F("Loaded in "));
         Serial.print(millis() - startTime);

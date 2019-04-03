@@ -393,9 +393,9 @@ class Adafruit_RA8875 : public Adafruit_GFX {
 #define RA8875_INTC2_TP         0x04
 #define RA8875_INTC2_BTE        0x02
 
-#define RA8875_SCROLL_BOTH	0x00
-#define RA8875_SCROLL_LAYER1	0x40
-#define RA8875_SCROLL_LAYER2	0x80
-#define RA8875_SCROLL_BUFFER	0xC0
+#define RA8875_SCROLL_BOTH      0x00
+#define RA8875_SCROLL_LAYER1    0x40
+#define RA8875_SCROLL_LAYER2    0x80
+#define RA8875_SCROLL_BUFFER    0xC0
 
 #endif
