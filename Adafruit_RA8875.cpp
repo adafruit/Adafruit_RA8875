@@ -24,6 +24,7 @@
     v1.0 - First release
 */
 /**************************************************************************/
+#include <EEPROM.h>
 #include <SPI.h>
 #include "Adafruit_RA8875.h"
 
@@ -116,6 +117,7 @@ boolean Adafruit_RA8875::begin(enum RA8875sizes s) {
     uint8_t x = readReg(0);
 //    Serial.print("x = 0x"); Serial.println(x,HEX);
     if (x != 0x75) {
+        Serial.println(x);
         return false;
     }
 
@@ -1319,4 +1321,70 @@ uint8_t  Adafruit_RA8875::readStatus(void)
 
   digitalWrite(_cs, HIGH);
   return x;
+}
+
+/**************************************************************************/
+/*!
+ Touchscreen Calibration Persistence Functions
+ */
+/**************************************************************************/
+
+uint32_t Adafruit_RA8875::eepromReadS32(int location){
+    uint32_t value = ((uint32_t)EEPROM.read(location))<<24;
+    value = value | ((uint32_t)EEPROM.read(location+1))<<16;
+    value = value | ((uint32_t)EEPROM.read(location+2))<<8;
+    value = value | ((uint32_t)EEPROM.read(location+3));
+    return value;
+}
+
+/**************************************************************************/
+/*!
+ 
+ */
+/**************************************************************************/
+void Adafruit_RA8875::eepromWriteS32(int location, int32_t value){
+    EEPROM.write(location,   (value >> 24)&0xff);
+    EEPROM.write(location+1, (value >> 16)&0xff);
+    EEPROM.write(location+2, (value >> 8)&0xff);
+    EEPROM.write(location+3, (value )&0xff);
+}
+
+/**************************************************************************/
+/*!
+ 
+ */
+/**************************************************************************/
+bool Adafruit_RA8875::readCalibration(int location, tsMatrix_t * matrixPtr){
+    if (location+sizeof(tsMatrix_t) > EEPROMSIZE){
+        return false; //readCalibration::Calibration location outside of EEPROM memory bound
+    }
+    if (EEPROM.read(location+CFG_EEPROM_TOUCHSCREEN_CALIBRATED) == 1){
+        matrixPtr->An = eepromReadS32(location+CFG_EEPROM_TOUCHSCREEN_CAL_AN);
+        matrixPtr->Bn = eepromReadS32(location+CFG_EEPROM_TOUCHSCREEN_CAL_BN);
+        matrixPtr->Cn = eepromReadS32(location+CFG_EEPROM_TOUCHSCREEN_CAL_CN);
+        matrixPtr->Dn = eepromReadS32(location+CFG_EEPROM_TOUCHSCREEN_CAL_DN);
+        matrixPtr->En = eepromReadS32(location+CFG_EEPROM_TOUCHSCREEN_CAL_EN);
+        matrixPtr->Fn = eepromReadS32(location+CFG_EEPROM_TOUCHSCREEN_CAL_FN);
+        matrixPtr->Divider = eepromReadS32(location+CFG_EEPROM_TOUCHSCREEN_CAL_DIVIDER);
+        return true;
+    }
+    return false;
+}
+
+/**************************************************************************/
+/*!
+ 
+ */
+/**************************************************************************/
+void Adafruit_RA8875::writeCalibration(int location, tsMatrix_t * matrixPtr){
+    if (location+sizeof(tsMatrix_t) < EEPROMSIZE){    // Check to see it calibration location outside of EEPROM memory bound
+        eepromWriteS32(location+CFG_EEPROM_TOUCHSCREEN_CAL_AN, matrixPtr->An);
+        eepromWriteS32(location+CFG_EEPROM_TOUCHSCREEN_CAL_BN, matrixPtr->Bn);
+        eepromWriteS32(location+CFG_EEPROM_TOUCHSCREEN_CAL_CN, matrixPtr->Cn);
+        eepromWriteS32(location+CFG_EEPROM_TOUCHSCREEN_CAL_DN, matrixPtr->Dn);
+        eepromWriteS32(location+CFG_EEPROM_TOUCHSCREEN_CAL_EN, matrixPtr->En);
+        eepromWriteS32(location+CFG_EEPROM_TOUCHSCREEN_CAL_FN, matrixPtr->Fn);
+        eepromWriteS32(location+CFG_EEPROM_TOUCHSCREEN_CAL_DIVIDER, matrixPtr->Divider);
+        EEPROM.write(location+CFG_EEPROM_TOUCHSCREEN_CALIBRATED, 1);
+    }
 }

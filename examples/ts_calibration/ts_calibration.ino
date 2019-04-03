@@ -1,4 +1,5 @@
 #include <SPI.h>
+#include <EEPROM.h>
 #include "Adafruit_GFX.h"
 #include "Adafruit_RA8875.h"
 
@@ -7,9 +8,14 @@
 #define RA8875_RESET   9
 
 Adafruit_RA8875 tft = Adafruit_RA8875(RA8875_CS, RA8875_RESET);
-tsPoint_t       _tsLCDPoints[3]; 
-tsPoint_t       _tsTSPoints[3]; 
+tsPoint_t       _tsLCDPoints[3];
+tsPoint_t       _tsTSPoints[3];
 tsMatrix_t      _tsMatrix;
+
+#define EEPROMLOCATION 100
+
+// Use to force a recalibration
+#define FORCE_CALIBRATION false
 
 /**************************************************************************/
 /*!
@@ -32,56 +38,49 @@ tsMatrix_t      _tsMatrix;
 int setCalibrationMatrix( tsPoint_t * displayPtr, tsPoint_t * screenPtr, tsMatrix_t * matrixPtr)
 {
   int  retValue = 0;
-  
-  matrixPtr->Divider = ((screenPtr[0].x - screenPtr[2].x) * (screenPtr[1].y - screenPtr[2].y)) - 
+
+  matrixPtr->Divider = ((screenPtr[0].x - screenPtr[2].x) * (screenPtr[1].y - screenPtr[2].y)) -
                        ((screenPtr[1].x - screenPtr[2].x) * (screenPtr[0].y - screenPtr[2].y)) ;
-  
+
   if( matrixPtr->Divider == 0 )
   {
     retValue = -1 ;
   }
   else
   {
-    matrixPtr->An = ((displayPtr[0].x - displayPtr[2].x) * (screenPtr[1].y - screenPtr[2].y)) - 
+    matrixPtr->An = ((displayPtr[0].x - displayPtr[2].x) * (screenPtr[1].y - screenPtr[2].y)) -
                     ((displayPtr[1].x - displayPtr[2].x) * (screenPtr[0].y - screenPtr[2].y)) ;
-  
-    matrixPtr->Bn = ((screenPtr[0].x - screenPtr[2].x) * (displayPtr[1].x - displayPtr[2].x)) - 
+
+    matrixPtr->Bn = ((screenPtr[0].x - screenPtr[2].x) * (displayPtr[1].x - displayPtr[2].x)) -
                     ((displayPtr[0].x - displayPtr[2].x) * (screenPtr[1].x - screenPtr[2].x)) ;
-  
+
     matrixPtr->Cn = (screenPtr[2].x * displayPtr[1].x - screenPtr[1].x * displayPtr[2].x) * screenPtr[0].y +
                     (screenPtr[0].x * displayPtr[2].x - screenPtr[2].x * displayPtr[0].x) * screenPtr[1].y +
                     (screenPtr[1].x * displayPtr[0].x - screenPtr[0].x * displayPtr[1].x) * screenPtr[2].y ;
-  
-    matrixPtr->Dn = ((displayPtr[0].y - displayPtr[2].y) * (screenPtr[1].y - screenPtr[2].y)) - 
+
+    matrixPtr->Dn = ((displayPtr[0].y - displayPtr[2].y) * (screenPtr[1].y - screenPtr[2].y)) -
                     ((displayPtr[1].y - displayPtr[2].y) * (screenPtr[0].y - screenPtr[2].y)) ;
-  
-    matrixPtr->En = ((screenPtr[0].x - screenPtr[2].x) * (displayPtr[1].y - displayPtr[2].y)) - 
+
+    matrixPtr->En = ((screenPtr[0].x - screenPtr[2].x) * (displayPtr[1].y - displayPtr[2].y)) -
                     ((displayPtr[0].y - displayPtr[2].y) * (screenPtr[1].x - screenPtr[2].x)) ;
-  
+
     matrixPtr->Fn = (screenPtr[2].x * displayPtr[1].y - screenPtr[1].x * displayPtr[2].y) * screenPtr[0].y +
                     (screenPtr[0].x * displayPtr[2].y - screenPtr[2].x * displayPtr[0].y) * screenPtr[1].y +
                     (screenPtr[1].x * displayPtr[0].y - screenPtr[0].x * displayPtr[1].y) * screenPtr[2].y ;
 
-    // Persist data to EEPROM
-    // eepromWriteS32(CFG_EEPROM_TOUCHSCREEN_CAL_AN, matrixPtr->An);
-    // eepromWriteS32(CFG_EEPROM_TOUCHSCREEN_CAL_BN, matrixPtr->Bn);
-    // eepromWriteS32(CFG_EEPROM_TOUCHSCREEN_CAL_CN, matrixPtr->Cn);
-    // eepromWriteS32(CFG_EEPROM_TOUCHSCREEN_CAL_DN, matrixPtr->Dn);
-    // eepromWriteS32(CFG_EEPROM_TOUCHSCREEN_CAL_EN, matrixPtr->En);
-    // eepromWriteS32(CFG_EEPROM_TOUCHSCREEN_CAL_FN, matrixPtr->Fn);
-    // eepromWriteS32(CFG_EEPROM_TOUCHSCREEN_CAL_DIVIDER, matrixPtr->Divider);
-    // eepromWriteU8(CFG_EEPROM_TOUCHSCREEN_CALIBRATED, 1);
+    // Write the calibration matrix to the EEPROM
+    tft.writeCalibration(EEPROMLOCATION, matrixPtr);
   }
 
   return( retValue ) ;
-} 
+}
 
 /**************************************************************************/
 /*!
     @brief  Converts raw touch screen locations (screenPtr) into actual
             pixel locations on the display (displayPtr) using the
             supplied matrix.
-            
+
     @param[out] displayPtr  Pointer to the tsPoint_t object that will hold
                             the compensated pixel location on the display
     @param[in]  screenPtr   Pointer to the tsPoint_t object that contains the
@@ -98,17 +97,17 @@ int setCalibrationMatrix( tsPoint_t * displayPtr, tsPoint_t * screenPtr, tsMatri
 int calibrateTSPoint( tsPoint_t * displayPtr, tsPoint_t * screenPtr, tsMatrix_t * matrixPtr )
 {
   int  retValue = 0 ;
-  
+
   if( matrixPtr->Divider != 0 )
   {
-    displayPtr->x = ( (matrixPtr->An * screenPtr->x) + 
-                      (matrixPtr->Bn * screenPtr->y) + 
-                       matrixPtr->Cn 
+    displayPtr->x = ( (matrixPtr->An * screenPtr->x) +
+                      (matrixPtr->Bn * screenPtr->y) +
+                       matrixPtr->Cn
                     ) / matrixPtr->Divider ;
 
-    displayPtr->y = ( (matrixPtr->Dn * screenPtr->x) + 
-                      (matrixPtr->En * screenPtr->y) + 
-                       matrixPtr->Fn 
+    displayPtr->y = ( (matrixPtr->Dn * screenPtr->x) +
+                      (matrixPtr->En * screenPtr->y) +
+                       matrixPtr->Fn
                     ) / matrixPtr->Divider ;
   }
   else
@@ -128,7 +127,7 @@ void waitForTouchEvent(tsPoint_t * point)
 {
   /* Clear the touch data object and placeholder variables */
   memset(point, 0, sizeof(tsPoint_t));
-  
+
   /* Clear any previous interrupts to avoid false buffered reads */
   uint16_t x, y;
   tft.touchRead(&x, &y);
@@ -138,7 +137,7 @@ void waitForTouchEvent(tsPoint_t * point)
   while (digitalRead(RA8875_INT))
   {
   }
-  
+
   /* Make sure this is really a touch event */
   if (tft.touched())
   {
@@ -169,25 +168,25 @@ tsPoint_t renderCalibrationScreen(uint16_t x, uint16_t y, uint16_t radius)
 
   // Wait for a valid touch events
   tsPoint_t point = { 0, 0 };
-  
+
   /* Keep polling until the TS event flag is valid */
   bool valid = false;
   while (!valid)
   {
     waitForTouchEvent(&point);
-    if (point.x || point.y) 
+    if (point.x || point.y)
     {
       valid = true;
     }
   }
-  
+
   return point;
 }
 
 /**************************************************************************/
 /*!
     @brief  Starts the screen calibration process.  Each corner will be
-            tested, meaning that each boundary (top, left, right and 
+            tested, meaning that each boundary (top, left, right and
             bottom) will be tested twice and the readings averaged.
 */
 /**************************************************************************/
@@ -211,11 +210,11 @@ void tsCalibrate(void)
   Serial.print(" X: ");
   Serial.print(_tsLCDPoints[0].x);
   Serial.print(" Y: ");
-  Serial.print(_tsLCDPoints[0].y); 
+  Serial.print(_tsLCDPoints[0].y);
   Serial.print(" TS X: ");
-  Serial.print(_tsTSPoints[0].x); 
+  Serial.print(_tsTSPoints[0].x);
   Serial.print(" Y: ");
-  Serial.println(_tsTSPoints[0].y); 
+  Serial.println(_tsTSPoints[0].y);
   delay(250);
 
   /* ---------------- Second Dot ------------------ */
@@ -253,7 +252,7 @@ void tsCalibrate(void)
   Serial.print(" Y: ");
   Serial.println(_tsTSPoints[2].y);
   delay(250);
-  
+
   /* Clear the screen */
   tft.fillScreen(RA8875_WHITE);
 
@@ -266,13 +265,13 @@ void tsCalibrate(void)
 
 */
 /**************************************************************************/
-void setup() 
+void setup()
 {
   Serial.begin(9600);
   Serial.println("Hello, RA8875!");
 
   /* Initialise the display using 'RA8875_480x272' or 'RA8875_800x480' */
-    if (!tft.begin(RA8875_480x272)) 
+    if (!tft.begin(RA8875_480x272))
   {
     Serial.println("RA8875 not found ... check your wires!");
     while (1);
@@ -299,13 +298,18 @@ void setup()
   //tft.drawRect(10, 10, 400, 200, RA8875_GREEN);
   //tft.fillRect(11, 11, 398, 198, RA8875_BLUE);
   //tft.drawLine(10, 10, 200, 100, RA8875_RED);
-  
+
   tft.fillScreen(RA8875_WHITE);
   delay(100);
-    
+
   /* Start the calibration process */
-  tsCalibrate();  
-  
+  if (FORCE_CALIBRATION || tft.readCalibration(EEPROMLOCATION, &_tsMatrix) == false ){
+    Serial.println("Calibration not found.  Calibrating..\n");
+    tsCalibrate();
+  }
+  else
+    Serial.println("Calibration found\n");
+
   /* _tsMatrix should now be populated with the correct coefficients! */
   Serial.println("Waiting for touch events ...");
 }
@@ -315,18 +319,17 @@ void setup()
 
 */
 /**************************************************************************/
-void loop() 
+void loop()
 {
   tsPoint_t raw;
   tsPoint_t calibrated;
 
   /* Wait around for a touch event */
   waitForTouchEvent(&raw);
-  
+
   /* Calcuate the real X/Y position based on the calibration matrix */
   calibrateTSPoint(&calibrated, &raw, &_tsMatrix );
-  
+
   /* Draw a single pixel at the calibrated point */
   tft.fillCircle(calibrated.x, calibrated.y, 3, RA8875_BLACK);
 }
-

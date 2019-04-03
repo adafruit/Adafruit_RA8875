@@ -42,6 +42,24 @@
 #ifndef _ADAFRUIT_RA8875_H
 #define _ADAFRUIT_RA8875_H
 
+// Touchscreen Calibration and EEPROM Storage Defines
+#define CFG_EEPROM_TOUCHSCREEN_CAL_AN 0
+#define CFG_EEPROM_TOUCHSCREEN_CAL_BN 4
+#define CFG_EEPROM_TOUCHSCREEN_CAL_CN 8
+#define CFG_EEPROM_TOUCHSCREEN_CAL_DN 12
+#define CFG_EEPROM_TOUCHSCREEN_CAL_EN 16
+#define CFG_EEPROM_TOUCHSCREEN_CAL_FN 20
+#define CFG_EEPROM_TOUCHSCREEN_CAL_DIVIDER 24
+#define CFG_EEPROM_TOUCHSCREEN_CALIBRATED 28
+
+#if defined(__AVR_ATmega328P__)
+#define EEPROMSIZE 1024
+#elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+#define EEPROMSIZE 4096
+#else
+#define EEPROMSIZE 512
+#endif
+
 // Sizes!
 enum RA8875sizes { RA8875_480x272, RA8875_800x480 };
 
@@ -117,6 +135,12 @@ class Adafruit_RA8875 : public Adafruit_GFX {
   void    touchEnable(boolean on);
   boolean touched(void);
   boolean touchRead(uint16_t *x, uint16_t *y);
+
+  /* Touch screen calibration persistence*/
+  uint32_t eepromReadS32(int location);
+  void eepromWriteS32(int location, int32_t value);
+  bool readCalibration(int location, tsMatrix_t * matrixPtr);
+  void writeCalibration(int location, tsMatrix_t * matrixPtr);
 
   /* Low level access */
   void    writeReg(uint8_t reg, uint8_t val);
