@@ -97,6 +97,7 @@ class Adafruit_RA8875 : public Adafruit_GFX {
   void    textTransparent(uint16_t foreColor);
   void    textEnlarge(uint8_t scale);
   void    textWrite(const char* buffer, uint16_t len=0);
+  void    cursorBlink(uint8_t rate);
 
   /* Graphics functions */
   void    graphicsMode(void);
@@ -295,6 +296,9 @@ class Adafruit_RA8875 : public Adafruit_GFX {
 #define RA8875_MWCR0            0x40
 #define RA8875_MWCR0_GFXMODE    0x00
 #define RA8875_MWCR0_TXTMODE    0x80
+#define RA8875_MWCR0_CURSOR     0x40
+#define RA8875_MWCR0_BLINK      0x20
+#define RA8875_MWCR0_BLINK_RATE 0x44
 
 #define RA8875_CURH0            0x46
 #define RA8875_CURH1            0x47

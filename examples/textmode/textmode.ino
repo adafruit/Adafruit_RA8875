@@ -4,11 +4,11 @@
  The RA8875 is a TFT driver for up to 800x480 dotclock'd displays
  It is tested to work with displays in the Adafruit shop. Other displays
  may need timing adjustments and are not guanteed to work.
- 
+
  Adafruit invests time and resources providing this open
  source code, please support Adafruit and open-source hardware
  by purchasing products from Adafruit!
- 
+
  Written by Limor Fried/Ladyada for Adafruit Industries.
  BSD license, check license.txt for more information.
  All text above must be included in any redistribution.
@@ -30,7 +30,7 @@
 Adafruit_RA8875 tft = Adafruit_RA8875(RA8875_CS, RA8875_RESET);
 uint16_t tx, ty;
 
-void setup() 
+void setup()
 {
   Serial.begin(9600);
   Serial.println("RA8875 start");
@@ -47,19 +47,19 @@ void setup()
   tft.PWM1out(255);
   tft.fillScreen(RA8875_BLACK);
 
-  /* Switch to text mode */  
+  /* Switch to text mode */
   tft.textMode();
-  
+  tft.cursorBlink(32);
 
-  
+
   /* Set a solid for + bg color ... */
-  
+
   /* ... or a fore color plus a transparent background */
 
   
   /* Set the cursor location (in pixels) */
   tft.textSetCursor(10, 10);
-  
+
   /* Render some text! */
   char string[15] = "Hello, World! ";
   tft.textTransparent(RA8875_WHITE);
@@ -75,7 +75,7 @@ void setup()
   tft.textColor(RA8875_BLACK, RA8875_MAGENTA);
   tft.textWrite(string);
 
-  /* Change the cursor location and color ... */  
+  /* Change the cursor location and color ... */
   tft.textSetCursor(100, 100);
   tft.textTransparent(RA8875_RED);
   /* If necessary, enlarge the font */
@@ -87,6 +87,6 @@ void setup()
   tft.textWrite(string);
 }
 
-void loop() 
+void loop()
 {
 }

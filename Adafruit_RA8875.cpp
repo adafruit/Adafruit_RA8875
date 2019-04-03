@@ -385,7 +385,7 @@ void Adafruit_RA8875::textTransparent(uint16_t foreColor)
 /**************************************************************************/
 void Adafruit_RA8875::textEnlarge(uint8_t scale)
 {
-  if (scale > 3) scale = 3;
+  if (scale > 3) scale = 3; // highest setting is 3
 
   /* Set font size flags */
   writeCommand(0x22);
@@ -393,9 +393,39 @@ void Adafruit_RA8875::textEnlarge(uint8_t scale)
   temp &= ~(0xF); // Clears bits 0..3
   temp |= scale << 2;
   temp |= scale;
+
   writeData(temp);
 
   _textScale = scale;
+}
+
+/**************************************************************************/
+/*!
+ Enable Cursor Visibility and Blink
+ Here we set bits 6 and 5 in 40h
+ As well as the set the blink rate in 44h
+ The rate is 0 through max 255
+ the lower the number the faster it blinks (00h is 1 frame time,
+ FFh is 256 Frames time.
+ Blink Time (sec) = BTCR[44h]x(1/Frame_rate)
+ */
+/**************************************************************************/
+
+void Adafruit_RA8875::cursorBlink(uint8_t rate){
+    
+    writeCommand(RA8875_MWCR0);
+    uint8_t temp = readData();
+    temp |= RA8875_MWCR0_CURSOR;
+    writeData(temp);
+    
+    writeCommand(RA8875_MWCR0);
+    temp = readData();
+    temp |= RA8875_MWCR0_BLINK;
+    writeData(temp);
+    
+    if (rate > 255) rate = 255;
+    writeCommand(RA8875_MWCR0_BLINK_RATE);
+    writeData(rate);
 }
 
 /**************************************************************************/
