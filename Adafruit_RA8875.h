@@ -89,7 +89,7 @@ class Adafruit_RA8875 : public Adafruit_GFX {
   void    softReset(void);
   void    displayOn(boolean on);
   void    sleep(boolean sleep);
-
+    
   /* Text functions */
   void    textMode(void);
   void    textSetCursor(uint16_t x, uint16_t y);
@@ -104,7 +104,7 @@ class Adafruit_RA8875 : public Adafruit_GFX {
   void    setXY(uint16_t x, uint16_t y);
   void    pushPixels(uint32_t num, uint16_t p);
   void    fillRect(void);
-
+    
   /* Adafruit_GFX functions */
   void    drawPixel(int16_t x, int16_t y, uint16_t color);
   void    drawPixels(uint16_t * p, uint32_t count, int16_t x, int16_t y);
@@ -158,7 +158,9 @@ class Adafruit_RA8875 : public Adafruit_GFX {
   boolean waitPoll(uint8_t r, uint8_t f);
   uint16_t width(void);
   uint16_t height(void);
-
+  void    setRotation(int8_t rotation);
+  int8_t  getRotation(void);
+    
   /* Play nice with Arduino's Print class */
   virtual size_t write(uint8_t b) {
     textWrite((const char *)&b, 1);
@@ -180,9 +182,14 @@ class Adafruit_RA8875 : public Adafruit_GFX {
   void ellipseHelper(int16_t xCenter, int16_t yCenter, int16_t longAxis, int16_t shortAxis, uint16_t color, bool filled);
   void curveHelper(int16_t xCenter, int16_t yCenter, int16_t longAxis, int16_t shortAxis, uint8_t curvePart, uint16_t color, bool filled);
 
+  /* Rotation Functions */
+  int16_t applyRotationX(int16_t x);
+  int16_t applyRotationY(int16_t y);
+
   uint8_t _cs, _rst;
   uint16_t _width, _height;
   uint8_t _textScale;
+  uint8_t _rotation;
   enum RA8875sizes _size;
 };
 
@@ -303,8 +310,14 @@ class Adafruit_RA8875 : public Adafruit_GFX {
 #define RA8875_MWCR0_TXTMODE    0x80
 #define RA8875_MWCR0_CURSOR     0x40
 #define RA8875_MWCR0_BLINK      0x20
-#define RA8875_MWCR0_BLINK_RATE 0x44
 
+#define RA8875_MWCR0_DIRMASK    0x0C
+#define RA8875_MWCR0_LRTD       0x00
+#define RA8875_MWCR0_RLTD       0x04
+#define RA8875_MWCR0_TDLR       0x08
+#define RA8875_MWCR0_DTLR       0x0C
+
+#define RA8875_BTCR             0x44
 #define RA8875_CURH0            0x46
 #define RA8875_CURH1            0x47
 #define RA8875_CURV0            0x48

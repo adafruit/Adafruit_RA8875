@@ -78,7 +78,7 @@ void bmpDraw(const char *filename, int x, int y) {
   uint8_t  buffidx = sizeof(sdbuffer); // Current position in sdbuffer
   boolean  goodBmp = false;       // Set to true on valid header parse
   boolean  flip    = true;        // BMP is stored bottom-to-top
-  int      w, h, row, col;
+  int      w, h, row, col, xpos, ypos;
   uint8_t  r, g, b;
   uint32_t pos = 0, startTime = millis();
   uint8_t  lcdidx = 0;
@@ -140,7 +140,7 @@ void bmpDraw(const char *filename, int x, int y) {
         if((y+h-1) >= tft.height()) h = tft.height() - y;
 
         // Set TFT address window to clipped image bounds
-
+        ypos = y;
         for (row=0; row<h; row++) { // For each scanline...
           // Seek to start of scan line.  It might seem labor-
           // intensive to be doing this on every line, but this
@@ -153,17 +153,18 @@ void bmpDraw(const char *filename, int x, int y) {
           else     // Bitmap is stored top-to-bottom
             pos = bmpImageoffset + row * rowSize;
 
-          if(bmpFile.position() != pos) { // Need seek?
+          if (bmpFile.position() != pos) { // Need seek?
             bmpFile.seek(pos);
             buffidx = sizeof(sdbuffer); // Force buffer reload
           }
-
+          xpos = x;
           for (col=0; col<w; col++) { // For each column...
             // Time to read more pixel data?
             if (buffidx >= sizeof(sdbuffer)) { // Indeed
               // Push LCD buffer to the display first
               if(lcdidx > 0) {
-                tft.drawPixels(lcdbuffer, lcdidx, col+x, row+y);
+                tft.drawPixels(lcdbuffer, lcdidx, xpos, ypos);
+                xpos += lcdidx;
                 lcdidx = 0;
                 first  = false;
               }
@@ -177,16 +178,19 @@ void bmpDraw(const char *filename, int x, int y) {
             g = sdbuffer[buffidx++];
             r = sdbuffer[buffidx++];
             lcdbuffer[lcdidx++] = color565(r,g,b);
-            if (lcdidx >= sizeof(lcdbuffer)) {
-              tft.drawPixels(lcdbuffer, lcdidx, col+x, row+y);
+            if (lcdidx >= sizeof(lcdbuffer) || (xpos - x + lcdidx) >= w) {
+              tft.drawPixels(lcdbuffer, lcdidx, xpos, ypos);
+              lcdidx = 0;
+              xpos += lcdidx;
             }
           } // end pixel
-
+            ypos++;
         } // end scanline
 
         // Write any remaining data to LCD
         if(lcdidx > 0) {
-          tft.drawPixels(lcdbuffer, lcdidx, col+x, row+y);
+          tft.drawPixels(lcdbuffer, lcdidx, xpos, ypos);
+          xpos += lcdidx;
         }
 
         Serial.print(F("Loaded in "));

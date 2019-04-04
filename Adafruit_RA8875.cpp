@@ -89,7 +89,7 @@ boolean Adafruit_RA8875::begin(enum RA8875sizes s) {
   else {
     return false;
   }
-
+  _rotation = 0;
   pinMode(_cs, OUTPUT);
   digitalWrite(_cs, HIGH);
   pinMode(_rst, OUTPUT);
@@ -271,6 +271,27 @@ uint16_t Adafruit_RA8875::width(void) { return _width; }
 /**************************************************************************/
 uint16_t Adafruit_RA8875::height(void) { return _height; }
 
+
+/**************************************************************************/
+/*!
+ Returns the current rotation (0-3)
+ 
+ @returns  The Rotation Setting
+ */
+/**************************************************************************/
+int8_t  Adafruit_RA8875::getRotation(void) { return _rotation; }
+
+void Adafruit_RA8875::setRotation(int8_t rotation) {
+    switch (rotation) {
+        case 2:
+            _rotation = rotation;
+            break;
+        default:
+            _rotation = 0;
+            break;
+    }
+}
+
 /************************* Text Mode ***********************************/
 
 /**************************************************************************/
@@ -303,6 +324,9 @@ void Adafruit_RA8875::textMode(void)
 /**************************************************************************/
 void Adafruit_RA8875::textSetCursor(uint16_t x, uint16_t y)
 {
+  x = applyRotationX(x);
+  y = applyRotationY(y);
+
   /* Set cursor location */
   writeCommand(0x2A);
   writeData(x & 0xFF);
@@ -424,7 +448,7 @@ void Adafruit_RA8875::cursorBlink(uint8_t rate){
     writeData(temp);
     
     if (rate > 255) rate = 255;
-    writeCommand(RA8875_MWCR0_BLINK_RATE);
+    writeCommand(RA8875_BTCR);
     writeData(rate);
 }
 
@@ -529,6 +553,37 @@ void Adafruit_RA8875::fillRect(void) {
   writeData(RA8875_DCR_LINESQUTRI_START | RA8875_DCR_FILL | RA8875_DCR_DRAWSQUARE);
 }
 
+
+/**************************************************************************/
+/*!
+ 
+ */
+/**************************************************************************/
+int16_t Adafruit_RA8875::applyRotationX(int16_t x) {
+    switch(_rotation) {
+        case 2:
+            x = WIDTH - 1 - x;
+            break;
+    }
+    
+    return x;
+}
+
+/**************************************************************************/
+/*!
+ 
+ */
+/**************************************************************************/
+int16_t Adafruit_RA8875::applyRotationY(int16_t y) {
+    switch(_rotation) {
+        case 2:
+            y = HEIGHT - 1 - y;
+            break;
+    }
+    
+    return y;
+}
+
 /**************************************************************************/
 /*!
       Draws a single pixel at the specified location
@@ -540,6 +595,9 @@ void Adafruit_RA8875::fillRect(void) {
 /**************************************************************************/
 void Adafruit_RA8875::drawPixel(int16_t x, int16_t y, uint16_t color)
 {
+  x = applyRotationX(x);
+  y = applyRotationY(y);
+
   writeReg(RA8875_CURH0, x);
   writeReg(RA8875_CURH1, x >> 8);
   writeReg(RA8875_CURV0, y);
@@ -564,10 +622,20 @@ void Adafruit_RA8875::drawPixel(int16_t x, int16_t y, uint16_t color)
 /**************************************************************************/
 void Adafruit_RA8875::drawPixels(uint16_t * p, uint32_t num, int16_t x, int16_t y)
 {
+    x = applyRotationX(x);
+    y = applyRotationY(y);
+
     writeReg(RA8875_CURH0, x);
     writeReg(RA8875_CURH1, x >> 8);
     writeReg(RA8875_CURV0, y);
     writeReg(RA8875_CURV1, y >> 8);
+    
+    uint8_t dir = RA8875_MWCR0_LRTD;
+    if (_rotation == 2) {
+        dir = RA8875_MWCR0_RLTD;
+        writeReg(RA8875_MWCR0, (readReg(RA8875_MWCR0) & ~RA8875_MWCR0_DIRMASK) | dir);
+    }
+    
     writeCommand(RA8875_MRWC);
     digitalWrite(_cs, LOW);
     SPI.transfer(RA8875_DATAWRITE);
@@ -592,6 +660,11 @@ void Adafruit_RA8875::drawPixels(uint16_t * p, uint32_t num, int16_t x, int16_t 
 /**************************************************************************/
 void Adafruit_RA8875::drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color)
 {
+  x0 = applyRotationX(x0);
+  y0 = applyRotationY(y0);
+  x1 = applyRotationX(x1);
+  y1 = applyRotationY(y1);
+
   /* Set X */
   writeCommand(0x91);
   writeData(x0);
@@ -843,6 +916,9 @@ void Adafruit_RA8875::fillCurve(int16_t xCenter, int16_t yCenter, int16_t longAx
 /**************************************************************************/
 void Adafruit_RA8875::circleHelper(int16_t x0, int16_t y0, int16_t r, uint16_t color, bool filled)
 {
+  x0 = applyRotationX(x0);
+  y0 = applyRotationY(y0);
+
   /* Set X */
   writeCommand(0x99);
   writeData(x0);
@@ -889,6 +965,11 @@ void Adafruit_RA8875::circleHelper(int16_t x0, int16_t y0, int16_t r, uint16_t c
 /**************************************************************************/
 void Adafruit_RA8875::rectHelper(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color, bool filled)
 {
+  x = applyRotationX(x);
+  y = applyRotationY(y);
+  w = applyRotationX(w);
+  h = applyRotationY(h);
+
   /* Set X */
   writeCommand(0x91);
   writeData(x);
@@ -943,6 +1024,13 @@ void Adafruit_RA8875::rectHelper(int16_t x, int16_t y, int16_t w, int16_t h, uin
 /**************************************************************************/
 void Adafruit_RA8875::triangleHelper(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color, bool filled)
 {
+  x0 = applyRotationX(x0);
+  y0 = applyRotationY(y0);
+  x1 = applyRotationX(x1);
+  y1 = applyRotationY(y1);
+  x2 = applyRotationX(x2);
+  y2 = applyRotationY(y2);
+
   /* Set Point 0 */
   writeCommand(0x91);
   writeData(x0);
@@ -1003,6 +1091,9 @@ void Adafruit_RA8875::triangleHelper(int16_t x0, int16_t y0, int16_t x1, int16_t
 /**************************************************************************/
 void Adafruit_RA8875::ellipseHelper(int16_t xCenter, int16_t yCenter, int16_t longAxis, int16_t shortAxis, uint16_t color, bool filled)
 {
+  xCenter = applyRotationX(xCenter);
+  yCenter = applyRotationY(yCenter);
+    
   /* Set Center Point */
   writeCommand(0xA5);
   writeData(xCenter);
@@ -1053,6 +1144,10 @@ void Adafruit_RA8875::ellipseHelper(int16_t xCenter, int16_t yCenter, int16_t lo
 /**************************************************************************/
 void Adafruit_RA8875::curveHelper(int16_t xCenter, int16_t yCenter, int16_t longAxis, int16_t shortAxis, uint8_t curvePart, uint16_t color, bool filled)
 {
+  xCenter = applyRotationX(xCenter);
+  yCenter = applyRotationY(yCenter);
+  curvePart = (curvePart + _rotation) % 4;
+
   /* Set Center Point */
   writeCommand(0xA5);
   writeData(xCenter);
@@ -1097,47 +1192,47 @@ void Adafruit_RA8875::curveHelper(int16_t xCenter, int16_t yCenter, int16_t long
 }
 
 void Adafruit_RA8875::setScrollWindow(int16_t x, int16_t y, int16_t w, int16_t h, uint8_t mode) {
-  // Horizontal Start point of Scroll Window
-  writeCommand(0x38);
-  writeData(x);
-  writeCommand(0x39);
-  writeData(x>>8);
-	
-  // Vertical Start Point of Scroll Window
-  writeCommand(0x3a);
-  writeData(y);
-  writeCommand(0x3b);
-  writeData(y>>8);
-	
-  // Horizontal End Point of Scroll Window
-  writeCommand(0x3c);
-  writeData(x+w);
-  writeCommand(0x3d);
-  writeData((x+w)>>8);
-  
-  // Vertical End Point of Scroll Window
-  writeCommand(0x3e);
-  writeData(y+h);
-  writeCommand(0x3f);
-  writeData((y+h)>>8);
-  
-  // Scroll function setting
-  writeCommand(0x52);
-  writeData(0x00);
+    // Horizontal Start point of Scroll Window
+    writeCommand(0x38);
+    writeData(x);
+    writeCommand(0x39);
+    writeData(x>>8);
+    
+    // Vertical Start Point of Scroll Window
+    writeCommand(0x3a);
+    writeData(y);
+    writeCommand(0x3b);
+    writeData(y>>8);
+    
+    // Horizontal End Point of Scroll Window
+    writeCommand(0x3c);
+    writeData(x+w);
+    writeCommand(0x3d);
+    writeData((x+w)>>8);
+    
+    // Vertical End Point of Scroll Window
+    writeCommand(0x3e);
+    writeData(y+h);
+    writeCommand(0x3f);
+    writeData((y+h)>>8);
+    
+    // Scroll function setting
+    writeCommand(0x52);
+    writeData(0x00);
 }
 
 void Adafruit_RA8875::scrollX(int16_t dist) {
-  writeCommand(0x24);
-  writeData(dist);
-  writeCommand(0x25);
-  writeData(dist>>8);
+    writeCommand(0x24);
+    writeData(dist);
+    writeCommand(0x25);
+    writeData(dist>>8);
 }
 
 void Adafruit_RA8875::scrollY(int16_t dist) {
-  writeCommand(0x26);
-  writeData(dist);
-  writeCommand(0x27);
-  writeData(dist>>8);
+    writeCommand(0x26);
+    writeData(dist);
+    writeCommand(0x27);
+    writeData(dist>>8);
 }
 
 /************************* Mid Level ***********************************/
