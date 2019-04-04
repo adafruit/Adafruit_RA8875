@@ -633,9 +633,9 @@ void Adafruit_RA8875::drawPixels(uint16_t * p, uint32_t num, int16_t x, int16_t 
     uint8_t dir = RA8875_MWCR0_LRTD;
     if (_rotation == 2) {
         dir = RA8875_MWCR0_RLTD;
-        writeReg(RA8875_MWCR0, (readReg(RA8875_MWCR0) & ~RA8875_MWCR0_DIRMASK) | dir);
     }
-    
+    writeReg(RA8875_MWCR0, (readReg(RA8875_MWCR0) & ~RA8875_MWCR0_DIRMASK) | dir);
+
     writeCommand(RA8875_MRWC);
     digitalWrite(_cs, LOW);
     SPI.transfer(RA8875_DATAWRITE);
