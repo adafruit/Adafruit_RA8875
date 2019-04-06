@@ -1,6 +1,5 @@
 #include <SPI.h>
 #include <Wire.h>
-#include <EEPROM.h>
 #include "Adafruit_GFX.h"
 #include "Adafruit_RA8875.h"
 
@@ -39,10 +38,10 @@ void setup() {
 void loop() {
   static int Scroll=0;
   static int Dir=1;
-  
+
   tft.scrollX(Scroll);
   tft.scrollY(Scroll);
-  
+
   Scroll+=Dir;
   if(Scroll >= 250) {
     Dir=-1;;
@@ -52,4 +51,3 @@ void loop() {
 
   delay(10);
 }
-
