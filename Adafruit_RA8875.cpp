@@ -24,9 +24,13 @@
     v1.0 - First release
 */
 /**************************************************************************/
-#include <EEPROM.h>
-#include <SPI.h>
 #include "Adafruit_RA8875.h"
+
+#if defined(EEPROM_SUPPORTED)
+#include <EEPROM.h>
+#endif
+
+#include <SPI.h>
 
 #if defined (ARDUINO_ARCH_ARC32)
   uint32_t spi_speed = 12000000;
@@ -1496,6 +1500,7 @@ uint8_t  Adafruit_RA8875::readStatus(void)
   return x;
 }
 
+#if defined(EEPROM_SUPPORTED)
 /**************************************************************************/
 /*!
  Touchscreen Calibration Persistence Functions
@@ -1561,3 +1566,4 @@ void Adafruit_RA8875::writeCalibration(int location, tsMatrix_t * matrixPtr){
         EEPROM.write(location+CFG_EEPROM_TOUCHSCREEN_CALIBRATED, 1);
     }
 }
+#endif

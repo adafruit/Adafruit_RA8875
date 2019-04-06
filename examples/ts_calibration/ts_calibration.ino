@@ -1,7 +1,9 @@
 #include <SPI.h>
-#include <EEPROM.h>
 #include "Adafruit_GFX.h"
 #include "Adafruit_RA8875.h"
+#if defined(EEPROM_SUPPORTED)
+  #include <EEPROM.h>
+#endif
 
 #define RA8875_INT     3
 #define RA8875_CS      10
@@ -68,8 +70,11 @@ int setCalibrationMatrix( tsPoint_t * displayPtr, tsPoint_t * screenPtr, tsMatri
                     (screenPtr[0].x * displayPtr[2].y - screenPtr[2].x * displayPtr[0].y) * screenPtr[1].y +
                     (screenPtr[1].x * displayPtr[0].y - screenPtr[0].x * displayPtr[1].y) * screenPtr[2].y ;
 
-    // Write the calibration matrix to the EEPROM
+#if defined(EEPROM_SUPPORTED)
+     // Write the calibration matrix to the EEPROM
     tft.writeCalibration(EEPROMLOCATION, matrixPtr);
+#endif
+
   }
 
   return( retValue ) ;
@@ -302,6 +307,7 @@ void setup()
   tft.fillScreen(RA8875_WHITE);
   delay(100);
 
+#if defined(EEPROM_SUPPORTED)
   /* Start the calibration process */
   if (FORCE_CALIBRATION || tft.readCalibration(EEPROMLOCATION, &_tsMatrix) == false ){
     Serial.println("Calibration not found.  Calibrating..\n");
@@ -309,7 +315,9 @@ void setup()
   }
   else
     Serial.println("Calibration found\n");
-
+#else
+  tsCalibrate();
+#endif
   /* _tsMatrix should now be populated with the correct coefficients! */
   Serial.println("Waiting for touch events ...");
 }
