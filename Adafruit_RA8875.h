@@ -61,7 +61,7 @@
 #endif
 
 // Sizes!
-enum RA8875sizes { RA8875_480x272, RA8875_800x480 };
+enum RA8875sizes { RA8875_480x128, RA8875_480x272, RA8875_800x480 };
 
 // Touch screen cal structs
 typedef struct Point 

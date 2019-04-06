@@ -78,7 +78,11 @@ Adafruit_RA8875::Adafruit_RA8875(uint8_t CS, uint8_t RST) : Adafruit_GFX(800, 48
 boolean Adafruit_RA8875::begin(enum RA8875sizes s) {
   _size = s;
 
-  if (_size == RA8875_480x272) {
+  if (_size == RA8875_480x128) {
+    _width = 480;
+    _height = 128;
+  }
+  else if (_size == RA8875_480x272) {
     _width = 480;
     _height = 272;
   }
@@ -158,7 +162,7 @@ void Adafruit_RA8875::softReset(void) {
 */
 /**************************************************************************/
 void Adafruit_RA8875::PLLinit(void) {
-  if (_size == RA8875_480x272) {
+  if (_size == RA8875_480x128 || _size == RA8875_480x272) {
     writeReg(RA8875_PLLC1, RA8875_PLLC1_PLLDIV1 + 10);
     delay(1);
     writeReg(RA8875_PLLC2, RA8875_PLLC2_DIV4);
@@ -192,7 +196,7 @@ void Adafruit_RA8875::initialize(void) {
   uint16_t vsync_start;
 
   /* Set the correct values for the display being used */
-  if (_size == RA8875_480x272)
+  if (_size == RA8875_480x128 || _size == RA8875_480x272)
   {
     pixclk          = RA8875_PCSR_PDATL | RA8875_PCSR_4CLK;
     hsync_nondisp   = 10;
