@@ -1,29 +1,37 @@
 /**************************************************************************/
 /*!
-    @file     Adafruit_RA8875.cpp
-    @author   Limor Friend/Ladyada, K.Townsend/KTOWN for Adafruit Industries
-    @license  BSD license, all text above and below must be included in
-              any redistribution
-
+ @file     Adafruit_RA8875.cpp
+ @author   Limor Friend/Ladyada, K.Townsend/KTOWN for Adafruit Industries
+ 
+ 
+ @section intro_sec Introduction
+ 
  This is the library for the Adafruit RA8875 Driver board for TFT displays
  ---------------> http://www.adafruit.com/products/1590
  The RA8875 is a TFT driver for up to 800x480 dotclock'd displays
  It is tested to work with displays in the Adafruit shop. Other displays
  may need timing adjustments and are not guanteed to work.
-
+ 
  Adafruit invests time and resources providing this open
  source code, please support Adafruit and open-source hardware
  by purchasing products from Adafruit!
-
+ 
+ @section author Author
+ 
  Written by Limor Fried/Ladyada for Adafruit Industries.
+ 
+ @section license License
+ 
  BSD license, check license.txt for more information.
  All text above must be included in any redistribution.
+ 
+ @section  HISTORY
+ 
+ v1.0 - First release
 
-    @section  HISTORY
-
-    v1.0 - First release
-*/
+ */
 /**************************************************************************/
+
 #include "Adafruit_RA8875.h"
 
 #if defined(EEPROM_SUPPORTED)
@@ -33,9 +41,9 @@
 #include <SPI.h>
 
 #if defined (ARDUINO_ARCH_ARC32)
-  uint32_t spi_speed = 12000000;
+  uint32_t spi_speed = 12000000;  /*!< 12MHz */
 #else
-  uint32_t spi_speed = 4000000;
+  uint32_t spi_speed = 4000000;   /*!< 4MHz */
 #endif
 
 // If the SPI library has transaction support, these functions
@@ -52,8 +60,8 @@
         SPI.endTransaction();
     }
 #else
-    #define spi_begin()
-    #define spi_end()
+    #define spi_begin()   ///< Create dummy Macro Function
+    #define spi_end()     ///< Create dummy Macro Function
 #endif
 
 
@@ -61,8 +69,8 @@
 /*!
       Constructor for a new RA8875 instance
 
-      @args CS[in]  Location of the SPI chip select pin
-      @args RST[in] Location of the reset pin
+      @param CS  Location of the SPI chip select pin
+      @param RST Location of the reset pin
 */
 /**************************************************************************/
 Adafruit_RA8875::Adafruit_RA8875(uint8_t CS, uint8_t RST) : Adafruit_GFX(800, 480) {
@@ -74,9 +82,12 @@ Adafruit_RA8875::Adafruit_RA8875(uint8_t CS, uint8_t RST) : Adafruit_GFX(800, 48
 /*!
       Initialises the LCD driver and any HW required by the display
 
-      @args s[in] The display size, which can be either:
-                  'RA8875_480x272' (4.3" displays) r
+      @param s The display size, which can be either:
+                  'RA8875_480x128' (3.9" displays) or
+                  'RA8875_480x272' (4.3" displays) or
                   'RA8875_800x480' (5" and 7" displays)
+ 
+      @return True if we reached the end
 */
 /**************************************************************************/
 boolean Adafruit_RA8875::begin(enum RA8875sizes s) {
@@ -265,7 +276,7 @@ void Adafruit_RA8875::initialize(void) {
 /*!
       Returns the display width in pixels
 
-      @returns  The 1-based display width in pixels
+      @return  The 1-based display width in pixels
 */
 /**************************************************************************/
 uint16_t Adafruit_RA8875::width(void) { return _width; }
@@ -274,7 +285,7 @@ uint16_t Adafruit_RA8875::width(void) { return _width; }
 /*!
       Returns the display height in pixels
 
-      @returns  The 1-based display height in pixels
+      @return  The 1-based display height in pixels
 */
 /**************************************************************************/
 uint16_t Adafruit_RA8875::height(void) { return _height; }
@@ -284,11 +295,18 @@ uint16_t Adafruit_RA8875::height(void) { return _height; }
 /*!
  Returns the current rotation (0-3)
  
- @returns  The Rotation Setting
+ @return  The Rotation Setting
  */
 /**************************************************************************/
 int8_t  Adafruit_RA8875::getRotation(void) { return _rotation; }
 
+/**************************************************************************/
+/*!
+ Sets the current rotation (0-3)
+ 
+ @param rotation The Rotation Setting
+ */
+/**************************************************************************/
 void Adafruit_RA8875::setRotation(int8_t rotation) {
     switch (rotation) {
         case 2:
@@ -326,8 +344,8 @@ void Adafruit_RA8875::textMode(void)
 /*!
       Sets the display in text mode (as opposed to graphics mode)
 
-      @args x[in] The x position of the cursor (in pixels, 0..1023)
-      @args y[in] The y position of the cursor (in pixels, 0..511)
+      @param x The x position of the cursor (in pixels, 0..1023)
+      @param y The y position of the cursor (in pixels, 0..511)
 */
 /**************************************************************************/
 void Adafruit_RA8875::textSetCursor(uint16_t x, uint16_t y)
@@ -350,8 +368,8 @@ void Adafruit_RA8875::textSetCursor(uint16_t x, uint16_t y)
 /*!
       Sets the fore and background color when rendering text
 
-      @args foreColor[in] The RGB565 color to use when rendering the text
-      @args bgColor[in]   The RGB565 colot to use for the background
+      @param foreColor The RGB565 color to use when rendering the text
+      @param bgColor   The RGB565 colot to use for the background
 */
 /**************************************************************************/
 void Adafruit_RA8875::textColor(uint16_t foreColor, uint16_t bgColor)
@@ -383,7 +401,7 @@ void Adafruit_RA8875::textColor(uint16_t foreColor, uint16_t bgColor)
 /*!
       Sets the fore color when rendering text with a transparent bg
 
-      @args foreColor[in] The RGB565 color to use when rendering the text
+      @param foreColor The RGB565 color to use when rendering the text
 */
 /**************************************************************************/
 void Adafruit_RA8875::textTransparent(uint16_t foreColor)
@@ -412,7 +430,7 @@ void Adafruit_RA8875::textTransparent(uint16_t foreColor)
       2 = 3x zoom
       3 = 4x zoom
 
-      @args scale[in]   The zoom factor (0..3 for 1-4x zoom)
+      @param scale   The zoom factor (0..3 for 1-4x zoom)
 */
 /**************************************************************************/
 void Adafruit_RA8875::textEnlarge(uint8_t scale)
@@ -433,13 +451,15 @@ void Adafruit_RA8875::textEnlarge(uint8_t scale)
 
 /**************************************************************************/
 /*!
- Enable Cursor Visibility and Blink
- Here we set bits 6 and 5 in 40h
- As well as the set the blink rate in 44h
- The rate is 0 through max 255
- the lower the number the faster it blinks (00h is 1 frame time,
- FFh is 256 Frames time.
- Blink Time (sec) = BTCR[44h]x(1/Frame_rate)
+     Enable Cursor Visibility and Blink
+     Here we set bits 6 and 5 in 40h
+     As well as the set the blink rate in 44h
+     The rate is 0 through max 255
+     the lower the number the faster it blinks (00h is 1 frame time,
+     FFh is 256 Frames time.
+     Blink Time (sec) = BTCR[44h]x(1/Frame_rate)
+ 
+     @param rate The frame rate to blink
  */
 /**************************************************************************/
 
@@ -464,8 +484,8 @@ void Adafruit_RA8875::cursorBlink(uint8_t rate){
 /*!
       Renders some text on the screen when in text mode
 
-      @args buffer[in]    The buffer containing the characters to render
-      @args len[in]       The size of the buffer in bytes
+      @param buffer    The buffer containing the characters to render
+      @param len       The size of the buffer in bytes
 */
 /**************************************************************************/
 void Adafruit_RA8875::textWrite(const char* buffer, uint16_t len)
@@ -503,6 +523,11 @@ void Adafruit_RA8875::graphicsMode(void) {
 /**************************************************************************/
 /*!
       Waits for screen to finish by polling the status!
+ 
+      @param regname The register name to check
+      @param waitflag The value to wait for the status register to match
+ 
+      @return True if the expected status has been reached
 */
 /**************************************************************************/
 boolean Adafruit_RA8875::waitPoll(uint8_t regname, uint8_t waitflag) {
@@ -521,8 +546,8 @@ boolean Adafruit_RA8875::waitPoll(uint8_t regname, uint8_t waitflag) {
 /*!
       Sets the current X/Y position on the display before drawing
 
-      @args x[in] The 0-based x location
-      @args y[in] The 0-base y location
+      @param x The 0-based x location
+      @param y The 0-base y location
 */
 /**************************************************************************/
 void Adafruit_RA8875::setXY(uint16_t x, uint16_t y) {
@@ -536,8 +561,8 @@ void Adafruit_RA8875::setXY(uint16_t x, uint16_t y) {
 /*!
       HW accelerated function to push a chunk of raw pixel data
 
-      @args num[in] The number of pixels to push
-      @args p[in]   The pixel color to use
+      @param num The number of pixels to push
+      @param p   The pixel color to use
 */
 /**************************************************************************/
 void Adafruit_RA8875::pushPixels(uint32_t num, uint16_t p) {
@@ -552,7 +577,7 @@ void Adafruit_RA8875::pushPixels(uint32_t num, uint16_t p) {
 
 /**************************************************************************/
 /*!
-
+    Fill the screen with the current color
 */
 /**************************************************************************/
 void Adafruit_RA8875::fillRect(void) {
@@ -564,7 +589,9 @@ void Adafruit_RA8875::fillRect(void) {
 
 /**************************************************************************/
 /*!
+    Apply current rotation in the X direction
  
+    @return the X value with current rotation applied
  */
 /**************************************************************************/
 int16_t Adafruit_RA8875::applyRotationX(int16_t x) {
@@ -579,7 +606,9 @@ int16_t Adafruit_RA8875::applyRotationX(int16_t x) {
 
 /**************************************************************************/
 /*!
+    Apply current rotation in the Y direction
  
+    @return the Y value with current rotation applied
  */
 /**************************************************************************/
 int16_t Adafruit_RA8875::applyRotationY(int16_t y) {
@@ -596,9 +625,9 @@ int16_t Adafruit_RA8875::applyRotationY(int16_t y) {
 /*!
       Draws a single pixel at the specified location
 
-      @args x[in]     The 0-based x location
-      @args y[in]     The 0-base y location
-      @args color[in] The RGB565 color to use when drawing the pixel
+      @param x     The 0-based x location
+      @param y     The 0-base y location
+      @param color The RGB565 color to use when drawing the pixel
 */
 /**************************************************************************/
 void Adafruit_RA8875::drawPixel(int16_t x, int16_t y, uint16_t color)
@@ -622,10 +651,10 @@ void Adafruit_RA8875::drawPixel(int16_t x, int16_t y, uint16_t color)
 /*!
  Draws a series of pixels at the specified location without the overhead
 
- @args p[in]     An array of RGB565 color pixels
- @args num[in]   The number of the pixels to draw
- @args x[in]     The 0-based x location
- @args y[in]     The 0-base y location
+ @param p     An array of RGB565 color pixels
+ @param num   The number of the pixels to draw
+ @param x     The 0-based x location
+ @param y     The 0-base y location
  */
 /**************************************************************************/
 void Adafruit_RA8875::drawPixels(uint16_t * p, uint32_t num, int16_t x, int16_t y)
@@ -659,11 +688,11 @@ void Adafruit_RA8875::drawPixels(uint16_t * p, uint32_t num, int16_t x, int16_t 
 /*!
       Draws a HW accelerated line on the display
 
-      @args x0[in]    The 0-based starting x location
-      @args y0[in]    The 0-base starting y location
-      @args x1[in]    The 0-based ending x location
-      @args y1[in]    The 0-base ending y location
-      @args color[in] The RGB565 color to use when drawing the pixel
+      @param x0    The 0-based starting x location
+      @param y0    The 0-base starting y location
+      @param x1    The 0-based ending x location
+      @param y1    The 0-base ending y location
+      @param color The RGB565 color to use when drawing the pixel
 */
 /**************************************************************************/
 void Adafruit_RA8875::drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color)
@@ -715,7 +744,12 @@ void Adafruit_RA8875::drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, u
 
 /**************************************************************************/
 /*!
-
+    Draw a vertical line
+ 
+    @param x The X position
+    @param y The Y position
+    @param h Height
+    @param color The color
 */
 /**************************************************************************/
 void Adafruit_RA8875::drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color)
@@ -725,7 +759,12 @@ void Adafruit_RA8875::drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t co
 
 /**************************************************************************/
 /*!
-
+     Draw a horizontal line
+ 
+     @param x The X position
+     @param y The Y position
+     @param w Width
+     @param color The color
 */
 /**************************************************************************/
 void Adafruit_RA8875::drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color)
@@ -737,11 +776,11 @@ void Adafruit_RA8875::drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t co
 /*!
       Draws a HW accelerated rectangle on the display
 
-      @args x[in]     The 0-based x location of the top-right corner
-      @args y[in]     The 0-based y location of the top-right corner
-      @args w[in]     The rectangle width
-      @args h[in]     The rectangle height
-      @args color[in] The RGB565 color to use when drawing the pixel
+      @param x     The 0-based x location of the top-right corner
+      @param y     The 0-based y location of the top-right corner
+      @param w     The rectangle width
+      @param h     The rectangle height
+      @param color The RGB565 color to use when drawing the pixel
 */
 /**************************************************************************/
 void Adafruit_RA8875::drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
@@ -753,11 +792,11 @@ void Adafruit_RA8875::drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint1
 /*!
       Draws a HW accelerated filled rectangle on the display
 
-      @args x[in]     The 0-based x location of the top-right corner
-      @args y[in]     The 0-based y location of the top-right corner
-      @args w[in]     The rectangle width
-      @args h[in]     The rectangle height
-      @args color[in] The RGB565 color to use when drawing the pixel
+      @param x     The 0-based x location of the top-right corner
+      @param y     The 0-based y location of the top-right corner
+      @param w     The rectangle width
+      @param h     The rectangle height
+      @param color The RGB565 color to use when drawing the pixel
 */
 /**************************************************************************/
 void Adafruit_RA8875::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
@@ -769,7 +808,7 @@ void Adafruit_RA8875::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint1
 /*!
       Fills the screen with the spefied RGB565 color
 
-      @args color[in] The RGB565 color to use when drawing the pixel
+      @param color The RGB565 color to use when drawing the pixel
 */
 /**************************************************************************/
 void Adafruit_RA8875::fillScreen(uint16_t color)
@@ -781,43 +820,43 @@ void Adafruit_RA8875::fillScreen(uint16_t color)
 /*!
       Draws a HW accelerated circle on the display
 
-      @args x[in]     The 0-based x location of the center of the circle
-      @args y[in]     The 0-based y location of the center of the circle
-      @args w[in]     The circle's radius
-      @args color[in] The RGB565 color to use when drawing the pixel
+      @param x     The 0-based x location of the center of the circle
+      @param y     The 0-based y location of the center of the circle
+      @param r     The circle's radius
+      @param color The RGB565 color to use when drawing the pixel
 */
 /**************************************************************************/
-void Adafruit_RA8875::drawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color)
+void Adafruit_RA8875::drawCircle(int16_t x, int16_t y, int16_t r, uint16_t color)
 {
-  circleHelper(x0, y0, r, color, false);
+  circleHelper(x, y, r, color, false);
 }
 
 /**************************************************************************/
 /*!
       Draws a HW accelerated filled circle on the display
 
-      @args x[in]     The 0-based x location of the center of the circle
-      @args y[in]     The 0-based y location of the center of the circle
-      @args w[in]     The circle's radius
-      @args color[in] The RGB565 color to use when drawing the pixel
+      @param x     The 0-based x location of the center of the circle
+      @param y     The 0-based y location of the center of the circle
+      @param r     The circle's radius
+      @param color The RGB565 color to use when drawing the pixel
 */
 /**************************************************************************/
-void Adafruit_RA8875::fillCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color)
+void Adafruit_RA8875::fillCircle(int16_t x, int16_t y, int16_t r, uint16_t color)
 {
-  circleHelper(x0, y0, r, color, true);
+  circleHelper(x, y, r, color, true);
 }
 
 /**************************************************************************/
 /*!
       Draws a HW accelerated triangle on the display
 
-      @args x0[in]    The 0-based x location of point 0 on the triangle
-      @args y0[in]    The 0-based y location of point 0 on the triangle
-      @args x1[in]    The 0-based x location of point 1 on the triangle
-      @args y1[in]    The 0-based y location of point 1 on the triangle
-      @args x2[in]    The 0-based x location of point 2 on the triangle
-      @args y2[in]    The 0-based y location of point 2 on the triangle
-      @args color[in] The RGB565 color to use when drawing the pixel
+      @param x0    The 0-based x location of point 0 on the triangle
+      @param y0    The 0-based y location of point 0 on the triangle
+      @param x1    The 0-based x location of point 1 on the triangle
+      @param y1    The 0-based y location of point 1 on the triangle
+      @param x2    The 0-based x location of point 2 on the triangle
+      @param y2    The 0-based y location of point 2 on the triangle
+      @param color The RGB565 color to use when drawing the pixel
 */
 /**************************************************************************/
 void Adafruit_RA8875::drawTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color)
@@ -829,13 +868,13 @@ void Adafruit_RA8875::drawTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y
 /*!
       Draws a HW accelerated filled triangle on the display
 
-      @args x0[in]    The 0-based x location of point 0 on the triangle
-      @args y0[in]    The 0-based y location of point 0 on the triangle
-      @args x1[in]    The 0-based x location of point 1 on the triangle
-      @args y1[in]    The 0-based y location of point 1 on the triangle
-      @args x2[in]    The 0-based x location of point 2 on the triangle
-      @args y2[in]    The 0-based y location of point 2 on the triangle
-      @args color[in] The RGB565 color to use when drawing the pixel
+      @param x0    The 0-based x location of point 0 on the triangle
+      @param y0    The 0-based y location of point 0 on the triangle
+      @param x1    The 0-based x location of point 1 on the triangle
+      @param y1    The 0-based y location of point 1 on the triangle
+      @param x2    The 0-based x location of point 2 on the triangle
+      @param y2    The 0-based y location of point 2 on the triangle
+      @param color The RGB565 color to use when drawing the pixel
 */
 /**************************************************************************/
 void Adafruit_RA8875::fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color)
@@ -847,11 +886,11 @@ void Adafruit_RA8875::fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y
 /*!
       Draws a HW accelerated ellipse on the display
 
-      @args xCenter[in]   The 0-based x location of the ellipse's center
-      @args yCenter[in]   The 0-based y location of the ellipse's center
-      @args longAxis[in]  The size in pixels of the ellipse's long axis
-      @args shortAxis[in] The size in pixels of the ellipse's short axis
-      @args color[in]     The RGB565 color to use when drawing the pixel
+      @param xCenter   The 0-based x location of the ellipse's center
+      @param yCenter   The 0-based y location of the ellipse's center
+      @param longAxis  The size in pixels of the ellipse's long axis
+      @param shortAxis The size in pixels of the ellipse's short axis
+      @param color     The RGB565 color to use when drawing the pixel
 */
 /**************************************************************************/
 void Adafruit_RA8875::drawEllipse(int16_t xCenter, int16_t yCenter, int16_t longAxis, int16_t shortAxis, uint16_t color)
@@ -863,11 +902,11 @@ void Adafruit_RA8875::drawEllipse(int16_t xCenter, int16_t yCenter, int16_t long
 /*!
       Draws a HW accelerated filled ellipse on the display
 
-      @args xCenter[in]   The 0-based x location of the ellipse's center
-      @args yCenter[in]   The 0-based y location of the ellipse's center
-      @args longAxis[in]  The size in pixels of the ellipse's long axis
-      @args shortAxis[in] The size in pixels of the ellipse's short axis
-      @args color[in]     The RGB565 color to use when drawing the pixel
+      @param xCenter   The 0-based x location of the ellipse's center
+      @param yCenter   The 0-based y location of the ellipse's center
+      @param longAxis  The size in pixels of the ellipse's long axis
+      @param shortAxis The size in pixels of the ellipse's short axis
+      @param color     The RGB565 color to use when drawing the pixel
 */
 /**************************************************************************/
 void Adafruit_RA8875::fillEllipse(int16_t xCenter, int16_t yCenter, int16_t longAxis, int16_t shortAxis, uint16_t color)
@@ -879,16 +918,16 @@ void Adafruit_RA8875::fillEllipse(int16_t xCenter, int16_t yCenter, int16_t long
 /*!
       Draws a HW accelerated curve on the display
 
-      @args xCenter[in]   The 0-based x location of the ellipse's center
-      @args yCenter[in]   The 0-based y location of the ellipse's center
-      @args longAxis[in]  The size in pixels of the ellipse's long axis
-      @args shortAxis[in] The size in pixels of the ellipse's short axis
-      @args curvePart[in] The corner to draw, where in clock-wise motion:
+      @param xCenter   The 0-based x location of the ellipse's center
+      @param yCenter   The 0-based y location of the ellipse's center
+      @param longAxis  The size in pixels of the ellipse's long axis
+      @param shortAxis The size in pixels of the ellipse's short axis
+      @param curvePart The corner to draw, where in clock-wise motion:
                             0 = 180-270°
                             1 = 270-0°
                             2 = 0-90°
                             3 = 90-180°
-      @args color[in]     The RGB565 color to use when drawing the pixel
+      @param color     The RGB565 color to use when drawing the pixel
 */
 /**************************************************************************/
 void Adafruit_RA8875::drawCurve(int16_t xCenter, int16_t yCenter, int16_t longAxis, int16_t shortAxis, uint8_t curvePart, uint16_t color)
@@ -900,16 +939,16 @@ void Adafruit_RA8875::drawCurve(int16_t xCenter, int16_t yCenter, int16_t longAx
 /*!
       Draws a HW accelerated filled curve on the display
 
-      @args xCenter[in]   The 0-based x location of the ellipse's center
-      @args yCenter[in]   The 0-based y location of the ellipse's center
-      @args longAxis[in]  The size in pixels of the ellipse's long axis
-      @args shortAxis[in] The size in pixels of the ellipse's short axis
-      @args curvePart[in] The corner to draw, where in clock-wise motion:
+      @param xCenter   The 0-based x location of the ellipse's center
+      @param yCenter   The 0-based y location of the ellipse's center
+      @param longAxis  The size in pixels of the ellipse's long axis
+      @param shortAxis The size in pixels of the ellipse's short axis
+      @param curvePart The corner to draw, where in clock-wise motion:
                             0 = 180-270°
                             1 = 270-0°
                             2 = 0-90°
                             3 = 90-180°
-      @args color[in]     The RGB565 color to use when drawing the pixel
+      @param color     The RGB565 color to use when drawing the pixel
 */
 /**************************************************************************/
 void Adafruit_RA8875::fillCurve(int16_t xCenter, int16_t yCenter, int16_t longAxis, int16_t shortAxis, uint8_t curvePart, uint16_t color)
@@ -922,22 +961,22 @@ void Adafruit_RA8875::fillCurve(int16_t xCenter, int16_t yCenter, int16_t longAx
       Helper function for higher level circle drawing code
 */
 /**************************************************************************/
-void Adafruit_RA8875::circleHelper(int16_t x0, int16_t y0, int16_t r, uint16_t color, bool filled)
+void Adafruit_RA8875::circleHelper(int16_t x, int16_t y, int16_t r, uint16_t color, bool filled)
 {
-  x0 = applyRotationX(x0);
-  y0 = applyRotationY(y0);
+  x = applyRotationX(x);
+  y = applyRotationY(y);
 
   /* Set X */
   writeCommand(0x99);
-  writeData(x0);
+  writeData(x);
   writeCommand(0x9a);
-  writeData(x0 >> 8);
+  writeData(x >> 8);
 
   /* Set Y */
   writeCommand(0x9b);
-  writeData(y0);
+  writeData(y);
   writeCommand(0x9c);
-  writeData(y0 >> 8);
+  writeData(y >> 8);
 
   /* Set Radius */
   writeCommand(0x9d);
@@ -1199,6 +1238,18 @@ void Adafruit_RA8875::curveHelper(int16_t xCenter, int16_t yCenter, int16_t long
   waitPoll(RA8875_ELLIPSE, RA8875_ELLIPSE_STATUS);
 }
 
+/**************************************************************************/
+/*!
+      Set the scroll window
+ 
+      @param x  X position of the scroll window
+      @param y  Y position of the scroll window
+      @param w  Width of the Scroll Window
+      @param h  Height of the Scroll window
+      @param mode Layer to Scroll
+
+ */
+/**************************************************************************/
 void Adafruit_RA8875::setScrollWindow(int16_t x, int16_t y, int16_t w, int16_t h, uint8_t mode) {
     // Horizontal Start point of Scroll Window
     writeCommand(0x38);
@@ -1226,9 +1277,17 @@ void Adafruit_RA8875::setScrollWindow(int16_t x, int16_t y, int16_t w, int16_t h
     
     // Scroll function setting
     writeCommand(0x52);
-    writeData(0x00);
+    writeData(mode);
 }
 
+/**************************************************************************/
+/*!
+    Scroll in the X direction
+ 
+    @param dist The distance to scroll
+
+ */
+/**************************************************************************/
 void Adafruit_RA8875::scrollX(int16_t dist) {
     writeCommand(0x24);
     writeData(dist);
@@ -1236,6 +1295,14 @@ void Adafruit_RA8875::scrollX(int16_t dist) {
     writeData(dist>>8);
 }
 
+/**************************************************************************/
+/*!
+     Scroll in the Y direction
+ 
+     @param dist The distance to scroll
+
+ */
+/**************************************************************************/
 void Adafruit_RA8875::scrollY(int16_t dist) {
     writeCommand(0x26);
     writeData(dist);
@@ -1247,8 +1314,11 @@ void Adafruit_RA8875::scrollY(int16_t dist) {
 
 /**************************************************************************/
 /*!
+    Set the Extra General Purpose IO Register
+ 
+    @param on Whether to turn Extra General Purpose IO on or not
 
-*/
+ */
 /**************************************************************************/
 void Adafruit_RA8875::GPIOX(boolean on) {
   if (on)
@@ -1259,7 +1329,9 @@ void Adafruit_RA8875::GPIOX(boolean on) {
 
 /**************************************************************************/
 /*!
-
+    Set the duty cycle of the PWM 1 Clock
+ 
+    @param p The duty Cycle (0-255)
 */
 /**************************************************************************/
 void Adafruit_RA8875::PWM1out(uint8_t p) {
@@ -1268,7 +1340,9 @@ void Adafruit_RA8875::PWM1out(uint8_t p) {
 
 /**************************************************************************/
 /*!
-
+     Set the duty cycle of the PWM 2 Clock
+ 
+     @param p The duty Cycle (0-255)
 */
 /**************************************************************************/
 void Adafruit_RA8875::PWM2out(uint8_t p) {
@@ -1277,7 +1351,10 @@ void Adafruit_RA8875::PWM2out(uint8_t p) {
 
 /**************************************************************************/
 /*!
+    Configure the PWM 1 Clock
 
+    @param on Whether to enable the clock
+    @param clock The Clock Divider
 */
 /**************************************************************************/
 void Adafruit_RA8875::PWM1config(boolean on, uint8_t clock) {
@@ -1290,7 +1367,10 @@ void Adafruit_RA8875::PWM1config(boolean on, uint8_t clock) {
 
 /**************************************************************************/
 /*!
-
+     Configure the PWM 2 Clock
+ 
+     @param on Whether to enable the clock
+     @param clock The Clock Divider
 */
 /**************************************************************************/
 void Adafruit_RA8875::PWM2config(boolean on, uint8_t clock) {
@@ -1304,6 +1384,8 @@ void Adafruit_RA8875::PWM2config(boolean on, uint8_t clock) {
 /**************************************************************************/
 /*!
       Enables or disables the on-chip touch screen controller
+ 
+      @param on Whether to turn touch sensing on or not
 */
 /**************************************************************************/
 void Adafruit_RA8875::touchEnable(boolean on)
@@ -1340,8 +1422,8 @@ void Adafruit_RA8875::touchEnable(boolean on)
 /*!
       Checks if a touch event has occured
 
-      @returns  True is a touch event has occured (reading it via
-                touchRead() will clear the interrupt in memory)
+      @return  True is a touch event has occured (reading it via
+               touchRead() will clear the interrupt in memory)
 */
 /**************************************************************************/
 boolean Adafruit_RA8875::touched(void)
@@ -1354,9 +1436,11 @@ boolean Adafruit_RA8875::touched(void)
 /*!
       Reads the last touch event
 
-      @args x[out]  Pointer to the uint16_t field to assign the raw X value
-      @args y[out]  Pointer to the uint16_t field to assign the raw Y value
+      @param x  Pointer to the uint16_t field to assign the raw X value
+      @param y  Pointer to the uint16_t field to assign the raw Y value
 
+      @return True if successful
+ 
       @note Calling this function will clear the touch panel interrupt on
             the RA8875, resetting the flag used by the 'touched' function
 */
@@ -1386,6 +1470,8 @@ boolean Adafruit_RA8875::touchRead(uint16_t *x, uint16_t *y)
 /**************************************************************************/
 /*!
       Turns the display on or off
+ 
+      @param on Whether to turn the display on or not
 */
 /**************************************************************************/
 void Adafruit_RA8875::displayOn(boolean on)
@@ -1399,6 +1485,8 @@ void Adafruit_RA8875::displayOn(boolean on)
 /**************************************************************************/
 /*!
     Puts the display in sleep mode, or disables sleep mode if enabled
+ 
+    @param sleep Whether to sleep or not
 */
 /**************************************************************************/
 void Adafruit_RA8875::sleep(boolean sleep)
@@ -1413,7 +1501,10 @@ void Adafruit_RA8875::sleep(boolean sleep)
 
 /**************************************************************************/
 /*!
-
+    Write data to the specified register
+ 
+    @param reg Register to write to
+    @param val Value to write
 */
 /**************************************************************************/
 void  Adafruit_RA8875::writeReg(uint8_t reg, uint8_t val)
@@ -1424,7 +1515,11 @@ void  Adafruit_RA8875::writeReg(uint8_t reg, uint8_t val)
 
 /**************************************************************************/
 /*!
-
+    Set the register to read from
+ 
+    @param reg Register to read
+ 
+    @return The value
 */
 /**************************************************************************/
 uint8_t  Adafruit_RA8875::readReg(uint8_t reg)
@@ -1435,7 +1530,9 @@ uint8_t  Adafruit_RA8875::readReg(uint8_t reg)
 
 /**************************************************************************/
 /*!
-
+    Write data to the current register
+ 
+    @param d Data to write
 */
 /**************************************************************************/
 void  Adafruit_RA8875::writeData(uint8_t d)
@@ -1450,7 +1547,9 @@ void  Adafruit_RA8875::writeData(uint8_t d)
 
 /**************************************************************************/
 /*!
-
+    Read the data from the current register
+ 
+    @return The Value
 */
 /**************************************************************************/
 uint8_t  Adafruit_RA8875::readData(void)
@@ -1468,8 +1567,10 @@ uint8_t  Adafruit_RA8875::readData(void)
 
 /**************************************************************************/
 /*!
-
-*/
+    Write a command to the current register
+ 
+    @param d The data to write as a command
+ */
 /**************************************************************************/
 void  Adafruit_RA8875::writeCommand(uint8_t d)
 {
@@ -1485,8 +1586,10 @@ void  Adafruit_RA8875::writeCommand(uint8_t d)
 
 /**************************************************************************/
 /*!
+    Read the status from the current register
 
-*/
+    @return The value
+ */
 /**************************************************************************/
 uint8_t  Adafruit_RA8875::readStatus(void)
 {
@@ -1503,11 +1606,16 @@ uint8_t  Adafruit_RA8875::readStatus(void)
 #if defined(EEPROM_SUPPORTED)
 /**************************************************************************/
 /*!
- Touchscreen Calibration Persistence Functions
- */
+    Read from the EEPROM location
+ 
+    @param location The location of the EEPROM to read
+ 
+    @return The value
+*/
 /**************************************************************************/
 
-uint32_t Adafruit_RA8875::eepromReadS32(int location){
+uint32_t Adafruit_RA8875::eepromReadS32(int location)
+{
     uint32_t value = ((uint32_t)EEPROM.read(location))<<24;
     value = value | ((uint32_t)EEPROM.read(location+1))<<16;
     value = value | ((uint32_t)EEPROM.read(location+2))<<8;
@@ -1517,10 +1625,14 @@ uint32_t Adafruit_RA8875::eepromReadS32(int location){
 
 /**************************************************************************/
 /*!
+    Write to the EEPROM location
  
+    @param location The location of the EEPROM to write to
+    @param value The value to write
  */
 /**************************************************************************/
-void Adafruit_RA8875::eepromWriteS32(int location, int32_t value){
+void Adafruit_RA8875::eepromWriteS32(int location, int32_t value)
+{
     EEPROM.write(location,   (value >> 24)&0xff);
     EEPROM.write(location+1, (value >> 16)&0xff);
     EEPROM.write(location+2, (value >> 8)&0xff);
@@ -1529,10 +1641,16 @@ void Adafruit_RA8875::eepromWriteS32(int location, int32_t value){
 
 /**************************************************************************/
 /*!
+     Read Calibration Data from the EEPROM location
+
+     @param location The location of the EEPROM to read from
+     @param matrixPtr The pointer to the Matrix Variable
  
+     @return success
  */
 /**************************************************************************/
-bool Adafruit_RA8875::readCalibration(int location, tsMatrix_t * matrixPtr){
+bool Adafruit_RA8875::readCalibration(int location, tsMatrix_t * matrixPtr)
+{
     if (location+sizeof(tsMatrix_t) > EEPROMSIZE){
         return false; //readCalibration::Calibration location outside of EEPROM memory bound
     }
@@ -1551,10 +1669,14 @@ bool Adafruit_RA8875::readCalibration(int location, tsMatrix_t * matrixPtr){
 
 /**************************************************************************/
 /*!
+     Write Calibration Data to the EEPROM location
  
+     @param location The location of the EEPROM to write to
+     @param matrixPtr The pointer to the Matrix Variable
  */
 /**************************************************************************/
-void Adafruit_RA8875::writeCalibration(int location, tsMatrix_t * matrixPtr){
+void Adafruit_RA8875::writeCalibration(int location, tsMatrix_t * matrixPtr)
+{
     if (location+sizeof(tsMatrix_t) < EEPROMSIZE){    // Check to see it calibration location outside of EEPROM memory bound
         eepromWriteS32(location+CFG_EEPROM_TOUCHSCREEN_CAL_AN, matrixPtr->An);
         eepromWriteS32(location+CFG_EEPROM_TOUCHSCREEN_CAL_BN, matrixPtr->Bn);
