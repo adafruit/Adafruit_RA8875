@@ -83,8 +83,11 @@ Adafruit_RA8875::Adafruit_RA8875(uint8_t CS, uint8_t RST) : Adafruit_GFX(800, 48
       Initialises the LCD driver and any HW required by the display
 
       @param s The display size, which can be either:
-                  'RA8875_480x272' (4.3" displays) r
+                  'RA8875_480x128' (3.9" displays) or
+                  'RA8875_480x272' (4.3" displays) or
                   'RA8875_800x480' (5" and 7" displays)
+ 
+      @return True if we reached the end
 */
 /**************************************************************************/
 boolean Adafruit_RA8875::begin(enum RA8875sizes s) {
@@ -518,6 +521,8 @@ void Adafruit_RA8875::graphicsMode(void) {
 /**************************************************************************/
 /*!
       Waits for screen to finish by polling the status!
+ 
+      @return True if the expected status has been reached
 */
 /**************************************************************************/
 boolean Adafruit_RA8875::waitPoll(uint8_t regname, uint8_t waitflag) {
@@ -567,7 +572,7 @@ void Adafruit_RA8875::pushPixels(uint32_t num, uint16_t p) {
 
 /**************************************************************************/
 /*!
-
+    Fill the screen with the current color
 */
 /**************************************************************************/
 void Adafruit_RA8875::fillRect(void) {
@@ -579,7 +584,9 @@ void Adafruit_RA8875::fillRect(void) {
 
 /**************************************************************************/
 /*!
+    Apply current rotation in the X direction
  
+    @return the X value with current rotation applied
  */
 /**************************************************************************/
 int16_t Adafruit_RA8875::applyRotationX(int16_t x) {
@@ -594,7 +601,9 @@ int16_t Adafruit_RA8875::applyRotationX(int16_t x) {
 
 /**************************************************************************/
 /*!
+    Apply current rotation in the Y direction
  
+    @return the Y value with current rotation applied
  */
 /**************************************************************************/
 int16_t Adafruit_RA8875::applyRotationY(int16_t y) {
@@ -730,7 +739,12 @@ void Adafruit_RA8875::drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, u
 
 /**************************************************************************/
 /*!
-
+    Draw a vertical line
+ 
+    @param x The X position
+    @param y The Y position
+    @param h Height
+    @param color The color
 */
 /**************************************************************************/
 void Adafruit_RA8875::drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color)
@@ -740,7 +754,12 @@ void Adafruit_RA8875::drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t co
 
 /**************************************************************************/
 /*!
-
+     Draw a horizontal line
+ 
+     @param x The X position
+     @param y The Y position
+     @param w Width
+     @param color The color
 */
 /**************************************************************************/
 void Adafruit_RA8875::drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color)
@@ -1273,10 +1292,10 @@ void Adafruit_RA8875::scrollX(int16_t dist) {
 
 /**************************************************************************/
 /*!
- Scroll in the Y direction
+     Scroll in the Y direction
  
- @param dist The distance to scroll
- 
+     @param dist The distance to scroll
+
  */
 /**************************************************************************/
 void Adafruit_RA8875::scrollY(int16_t dist) {
@@ -1290,8 +1309,11 @@ void Adafruit_RA8875::scrollY(int16_t dist) {
 
 /**************************************************************************/
 /*!
+    Set the Extra General Purpose IO Register
+ 
+    @param on Whether to turn Extra General Purpose IO on or not
 
-*/
+ */
 /**************************************************************************/
 void Adafruit_RA8875::GPIOX(boolean on) {
   if (on)
@@ -1302,7 +1324,9 @@ void Adafruit_RA8875::GPIOX(boolean on) {
 
 /**************************************************************************/
 /*!
-
+    Set the duty cycle of the PWM 1 Clock
+ 
+    @param p The duty Cycle (0-255)
 */
 /**************************************************************************/
 void Adafruit_RA8875::PWM1out(uint8_t p) {
@@ -1311,7 +1335,9 @@ void Adafruit_RA8875::PWM1out(uint8_t p) {
 
 /**************************************************************************/
 /*!
-
+     Set the duty cycle of the PWM 2 Clock
+ 
+     @param p The duty Cycle (0-255)
 */
 /**************************************************************************/
 void Adafruit_RA8875::PWM2out(uint8_t p) {
@@ -1320,7 +1346,10 @@ void Adafruit_RA8875::PWM2out(uint8_t p) {
 
 /**************************************************************************/
 /*!
+    Configure the PWM 1 Clock
 
+    @param on Whether to enable the clock
+    @param clock The Clock Divider
 */
 /**************************************************************************/
 void Adafruit_RA8875::PWM1config(boolean on, uint8_t clock) {
@@ -1333,7 +1362,10 @@ void Adafruit_RA8875::PWM1config(boolean on, uint8_t clock) {
 
 /**************************************************************************/
 /*!
-
+     Configure the PWM 2 Clock
+ 
+     @param on Whether to enable the clock
+     @param clock The Clock Divider
 */
 /**************************************************************************/
 void Adafruit_RA8875::PWM2config(boolean on, uint8_t clock) {
@@ -1385,8 +1417,8 @@ void Adafruit_RA8875::touchEnable(boolean on)
 /*!
       Checks if a touch event has occured
 
-      @returns  True is a touch event has occured (reading it via
-                touchRead() will clear the interrupt in memory)
+      @return  True is a touch event has occured (reading it via
+               touchRead() will clear the interrupt in memory)
 */
 /**************************************************************************/
 boolean Adafruit_RA8875::touched(void)
@@ -1402,6 +1434,8 @@ boolean Adafruit_RA8875::touched(void)
       @param x  Pointer to the uint16_t field to assign the raw X value
       @param y  Pointer to the uint16_t field to assign the raw Y value
 
+      @return True if successful
+ 
       @note Calling this function will clear the touch panel interrupt on
             the RA8875, resetting the flag used by the 'touched' function
 */
@@ -1479,6 +1513,8 @@ void  Adafruit_RA8875::writeReg(uint8_t reg, uint8_t val)
     Set the register to read from
  
     @param reg Register to read
+ 
+    @return The value
 */
 /**************************************************************************/
 uint8_t  Adafruit_RA8875::readReg(uint8_t reg)
@@ -1507,6 +1543,8 @@ void  Adafruit_RA8875::writeData(uint8_t d)
 /**************************************************************************/
 /*!
     Read the data from the current register
+ 
+    @return The Value
 */
 /**************************************************************************/
 uint8_t  Adafruit_RA8875::readData(void)
@@ -1524,6 +1562,8 @@ uint8_t  Adafruit_RA8875::readData(void)
 
 /**************************************************************************/
 /*!
+    Write a command to the current register
+ 
     @param d The data to write as a command
  */
 /**************************************************************************/
@@ -1542,7 +1582,9 @@ void  Adafruit_RA8875::writeCommand(uint8_t d)
 /**************************************************************************/
 /*!
     Read the status from the current register
-*/
+
+    @return The value
+ */
 /**************************************************************************/
 uint8_t  Adafruit_RA8875::readStatus(void)
 {
@@ -1562,7 +1604,9 @@ uint8_t  Adafruit_RA8875::readStatus(void)
     Read from the EEPROM location
  
     @param location The location of the EEPROM to read
- */
+ 
+    @return The value
+*/
 /**************************************************************************/
 
 uint32_t Adafruit_RA8875::eepromReadS32(int location)
@@ -1576,12 +1620,10 @@ uint32_t Adafruit_RA8875::eepromReadS32(int location)
 
 /**************************************************************************/
 /*!
- 
     Write to the EEPROM location
  
     @param location The location of the EEPROM to write to
     @param value The value to write
-
  */
 /**************************************************************************/
 void Adafruit_RA8875::eepromWriteS32(int location, int32_t value)
@@ -1594,7 +1636,12 @@ void Adafruit_RA8875::eepromWriteS32(int location, int32_t value)
 
 /**************************************************************************/
 /*!
+     Read Calibration Data from the EEPROM location
+
+     @param location The location of the EEPROM to read from
+     @param matrixPtr The pointer to the Matrix Variable
  
+     @return success
  */
 /**************************************************************************/
 bool Adafruit_RA8875::readCalibration(int location, tsMatrix_t * matrixPtr)
@@ -1617,7 +1664,10 @@ bool Adafruit_RA8875::readCalibration(int location, tsMatrix_t * matrixPtr)
 
 /**************************************************************************/
 /*!
+     Write Calibration Data to the EEPROM location
  
+     @param location The location of the EEPROM to write to
+     @param matrixPtr The pointer to the Matrix Variable
  */
 /**************************************************************************/
 void Adafruit_RA8875::writeCalibration(int location, tsMatrix_t * matrixPtr)

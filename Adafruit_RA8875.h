@@ -32,7 +32,7 @@
   #include <pgmspace.h>
 #endif
 
-#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) || defined(ESP8266) || defined(ESP32)
+#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) || defined(ESP8266) || defined(ESP32) || defined(DOXYGEN)
     #define EEPROM_SUPPORTED ///< Board supports EEPROM Storage
 #endif
 
@@ -53,11 +53,11 @@
 
 #if defined(EEPROM_SUPPORTED)
   #if defined(__AVR_ATmega328P__)
-    #define EEPROMSIZE 1024
+    #define EEPROMSIZE 1024 ///< 1KB EEPROM
   #elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-    #define EEPROMSIZE 4096
+    #define EEPROMSIZE 4096 ///< 4KB EEPROM
   #else
-    #define EEPROMSIZE 512
+    #define EEPROMSIZE 512 ///< 512 Byte EEPROM
   #endif
 #endif
 // Sizes!
