@@ -525,7 +525,7 @@ void Adafruit_RA8875::graphicsMode(void) {
       Waits for screen to finish by polling the status!
  
       @param regname The register name to check
-      @param waitFlag The value to wait for the status register to match
+      @param waitflag The value to wait for the status register to match
  
       @return True if the expected status has been reached
 */
