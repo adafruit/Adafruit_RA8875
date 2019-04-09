@@ -18,10 +18,6 @@
  Written by Limor Fried/Ladyada for Adafruit Industries.
  BSD license, check license.txt for more information.
  All text above must be included in any redistribution.
-
-    @section  HISTORY
-    
-    v1.0 - First release
 */
 
 #if ARDUINO >= 100
@@ -68,8 +64,18 @@
 // Sizes!
 enum RA8875sizes { RA8875_480x128, RA8875_480x272, RA8875_800x480 };
 
-// Touch screen cal structs
-typedef struct Point 
+/**************************************************************************/
+/*!
+ @struct Point
+ Calibration Point
+
+ @var Point::x
+    x-coordinate
+ @var Point::y
+    y-coordinate
+ */
+/**************************************************************************/
+typedef struct Point
 {
   int32_t x;
   int32_t y;
