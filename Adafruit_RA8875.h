@@ -212,10 +212,11 @@ class Adafruit_RA8875 : public Adafruit_GFX {
   
   /**************************************************************************/
   /*!
-   Alias of textWrite to Play nice with Arduino's Print class
+     Alias of textWrite to Play nice with Arduino's Print class
    
-   @param b The string to write
+     @param b The string to write
    
+     @return The number of bytes written
    */
   /**************************************************************************/
   virtual size_t write(uint8_t b) {
@@ -225,11 +226,12 @@ class Adafruit_RA8875 : public Adafruit_GFX {
 
   /**************************************************************************/
   /*!
-   Alias of textWrite to Play nice with Arduino's Print class
+       Alias of textWrite to Play nice with Arduino's Print class
    
-   @param buffer The buffer to write
-   @param size The size of the buffer
+       @param buffer The buffer to write
+       @param size The size of the buffer
 
+       @return The number of bytes written
    */
   /**************************************************************************/
   virtual size_t write(const uint8_t *buffer, size_t size) {

@@ -451,13 +451,15 @@ void Adafruit_RA8875::textEnlarge(uint8_t scale)
 
 /**************************************************************************/
 /*!
- Enable Cursor Visibility and Blink
- Here we set bits 6 and 5 in 40h
- As well as the set the blink rate in 44h
- The rate is 0 through max 255
- the lower the number the faster it blinks (00h is 1 frame time,
- FFh is 256 Frames time.
- Blink Time (sec) = BTCR[44h]x(1/Frame_rate)
+     Enable Cursor Visibility and Blink
+     Here we set bits 6 and 5 in 40h
+     As well as the set the blink rate in 44h
+     The rate is 0 through max 255
+     the lower the number the faster it blinks (00h is 1 frame time,
+     FFh is 256 Frames time.
+     Blink Time (sec) = BTCR[44h]x(1/Frame_rate)
+ 
+     @param rate The frame rate to blink
  */
 /**************************************************************************/
 
@@ -521,6 +523,9 @@ void Adafruit_RA8875::graphicsMode(void) {
 /**************************************************************************/
 /*!
       Waits for screen to finish by polling the status!
+ 
+      @param regname The register name to check
+      @param waitFlag The value to wait for the status register to match
  
       @return True if the expected status has been reached
 */
