@@ -30,7 +30,7 @@ void setup() {
   tft.PWM1out(255);
 
   tft.fillScreen(RA8875_BLACK);
-  tft.setScrollWindow(0,0,800,480,RA8875_SCROLL_BOTH);
+  tft.setScrollWindow(0, 0, 800, 480, RA8875_SCROLL_BOTH);
   tft.fillCircle(690, 370, 100, RA8875_WHITE);
 }
 

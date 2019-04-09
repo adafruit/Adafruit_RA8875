@@ -41,9 +41,9 @@
 #include <SPI.h>
 
 #if defined (ARDUINO_ARCH_ARC32)
-  uint32_t spi_speed = 12000000;
+  uint32_t spi_speed = 12000000;  /*!< 12MHz */
 #else
-  uint32_t spi_speed = 4000000;
+  uint32_t spi_speed = 4000000;   /*!< 4MHz */
 #endif
 
 // If the SPI library has transaction support, these functions
@@ -60,8 +60,8 @@
         SPI.endTransaction();
     }
 #else
-    #define spi_begin()
-    #define spi_end()
+    #define spi_begin()   ///< Create dummy Macro Function
+    #define spi_end()     ///< Create dummy Macro Function
 #endif
 
 
@@ -297,6 +297,13 @@ uint16_t Adafruit_RA8875::height(void) { return _height; }
 /**************************************************************************/
 int8_t  Adafruit_RA8875::getRotation(void) { return _rotation; }
 
+/**************************************************************************/
+/*!
+ Sets the current rotation (0-3)
+ 
+ @param rotation The Rotation Setting
+ */
+/**************************************************************************/
 void Adafruit_RA8875::setRotation(int8_t rotation) {
     switch (rotation) {
         case 2:
@@ -791,13 +798,13 @@ void Adafruit_RA8875::fillScreen(uint16_t color)
 
       @param x     The 0-based x location of the center of the circle
       @param y     The 0-based y location of the center of the circle
-      @param w     The circle's radius
+      @param r     The circle's radius
       @param color The RGB565 color to use when drawing the pixel
 */
 /**************************************************************************/
-void Adafruit_RA8875::drawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color)
+void Adafruit_RA8875::drawCircle(int16_t x, int16_t y, int16_t r, uint16_t color)
 {
-  circleHelper(x0, y0, r, color, false);
+  circleHelper(x, y, r, color, false);
 }
 
 /**************************************************************************/
@@ -930,22 +937,22 @@ void Adafruit_RA8875::fillCurve(int16_t xCenter, int16_t yCenter, int16_t longAx
       Helper function for higher level circle drawing code
 */
 /**************************************************************************/
-void Adafruit_RA8875::circleHelper(int16_t x0, int16_t y0, int16_t r, uint16_t color, bool filled)
+void Adafruit_RA8875::circleHelper(int16_t x, int16_t y, int16_t r, uint16_t color, bool filled)
 {
-  x0 = applyRotationX(x0);
-  y0 = applyRotationY(y0);
+  x = applyRotationX(x);
+  y = applyRotationY(y);
 
   /* Set X */
   writeCommand(0x99);
-  writeData(x0);
+  writeData(x);
   writeCommand(0x9a);
-  writeData(x0 >> 8);
+  writeData(x >> 8);
 
   /* Set Y */
   writeCommand(0x9b);
-  writeData(y0);
+  writeData(y);
   writeCommand(0x9c);
-  writeData(y0 >> 8);
+  writeData(y >> 8);
 
   /* Set Radius */
   writeCommand(0x9d);
@@ -1207,6 +1214,18 @@ void Adafruit_RA8875::curveHelper(int16_t xCenter, int16_t yCenter, int16_t long
   waitPoll(RA8875_ELLIPSE, RA8875_ELLIPSE_STATUS);
 }
 
+/**************************************************************************/
+/*!
+      Set the scroll window
+ 
+      @param x  X position of the scroll window
+      @param y  Y position of the scroll window
+      @param w  Width of the Scroll Window
+      @param h  Height of the Scroll window
+      @param mode Layer to Scroll
+
+ */
+/**************************************************************************/
 void Adafruit_RA8875::setScrollWindow(int16_t x, int16_t y, int16_t w, int16_t h, uint8_t mode) {
     // Horizontal Start point of Scroll Window
     writeCommand(0x38);
@@ -1234,9 +1253,17 @@ void Adafruit_RA8875::setScrollWindow(int16_t x, int16_t y, int16_t w, int16_t h
     
     // Scroll function setting
     writeCommand(0x52);
-    writeData(0x00);
+    writeData(mode);
 }
 
+/**************************************************************************/
+/*!
+    Scroll in the X direction
+ 
+    @param dist The distance to scroll
+
+ */
+/**************************************************************************/
 void Adafruit_RA8875::scrollX(int16_t dist) {
     writeCommand(0x24);
     writeData(dist);
@@ -1244,6 +1271,14 @@ void Adafruit_RA8875::scrollX(int16_t dist) {
     writeData(dist>>8);
 }
 
+/**************************************************************************/
+/*!
+ Scroll in the Y direction
+ 
+ @param dist The distance to scroll
+ 
+ */
+/**************************************************************************/
 void Adafruit_RA8875::scrollY(int16_t dist) {
     writeCommand(0x26);
     writeData(dist);
@@ -1397,7 +1432,7 @@ boolean Adafruit_RA8875::touchRead(uint16_t *x, uint16_t *y)
 /*!
       Turns the display on or off
  
-      @param sleep Whether to turn the display on or not
+      @param on Whether to turn the display on or not
 */
 /**************************************************************************/
 void Adafruit_RA8875::displayOn(boolean on)
