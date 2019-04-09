@@ -1,24 +1,23 @@
 /**************************************************************************/
 /*!
-    @file     Adafruit_RA8875.cpp
+    @file     Adafruit_RA8875.h
     @author   Limor Friend/Ladyada, K.Townsend/KTOWN for Adafruit Industries
-    @license  BSD license, all text above and below must be included in
-              any redistribution
 
- This is the library for the Adafruit RA8875 Driver board for TFT displays
- ---------------> http://www.adafruit.com/products/1590
- The RA8875 is a TFT driver for up to 800x480 dotclock'd displays
- It is tested to work with displays in the Adafruit shop. Other displays
- may need timing adjustments and are not guanteed to work.
+     This is the library for the Adafruit RA8875 Driver board for TFT displays
+     ---------------> http://www.adafruit.com/products/1590
+     The RA8875 is a TFT driver for up to 800x480 dotclock'd displays
+     It is tested to work with displays in the Adafruit shop. Other displays
+     may need timing adjustments and are not guanteed to work.
  
- Adafruit invests time and resources providing this open
- source code, please support Adafruit and open-source hardware
- by purchasing products from Adafruit!
+     Adafruit invests time and resources providing this open
+     source code, please support Adafruit and open-source hardware
+     by purchasing products from Adafruit!
  
- Written by Limor Fried/Ladyada for Adafruit Industries.
- BSD license, check license.txt for more information.
- All text above must be included in any redistribution.
+     Written by Limor Fried/Ladyada for Adafruit Industries.
+     BSD license, check license.txt for more information.
+     All text above must be included in any redistribution.
 */
+/**************************************************************************/
 
 #if ARDUINO >= 100
  #include "Arduino.h"
@@ -81,6 +80,25 @@ typedef struct Point
   int32_t y;
 } tsPoint_t;
 
+/**************************************************************************/
+/*!
+ @struct tsMatrix_t
+ Calibration Data Structure
+ 
+ @var tsMatrix_t::An
+ A Coefficient with the coarsest granularity
+ @var tsMatrix_t::Bn
+ B Coeffiecient
+ @var tsMatrix_t::Cn
+ C Coefficient
+ @var tsMatrix_t::Dn
+ D Coeffiecient
+ @var tsMatrix_t::En
+ E Coefficient
+ @var tsMatrix_t::Fn
+ F Coeffiecient with the finest granularity
+ */
+/**************************************************************************/
 typedef struct //Matrix
 {
   int32_t An,
@@ -92,6 +110,12 @@ typedef struct //Matrix
           Divider ;
 } tsMatrix_t;
 
+/**************************************************************************/
+/*!
+ @brief  Class that stores state and functions for interacting with
+ the RA8875 display controller.
+ */
+/**************************************************************************/
 class Adafruit_RA8875 : public Adafruit_GFX {
  public:
   Adafruit_RA8875(uint8_t cs, uint8_t rst);
