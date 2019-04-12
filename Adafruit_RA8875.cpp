@@ -184,7 +184,7 @@ void Adafruit_RA8875::PLLinit(void) {
     delay(1);
   }
   else /* (_size == RA8875_800x480) */ {
-    writeReg(RA8875_PLLC1, RA8875_PLLC1_PLLDIV1 + 10);
+    writeReg(RA8875_PLLC1, RA8875_PLLC1_PLLDIV1 + 11);
     delay(1);
     writeReg(RA8875_PLLC2, RA8875_PLLC2_DIV4);
     delay(1);
