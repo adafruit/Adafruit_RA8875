@@ -145,6 +145,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ab5583ae7924948ca6fc53abc28751502"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a37e83a3d738fbb9c7109b2242b3ebee1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___r_a8875.html#a37e83a3d738fbb9c7109b2242b3ebee1">fillCurve</a> (int16_t xCenter, int16_t yCenter, int16_t longAxis, int16_t shortAxis, uint8_t curvePart, uint16_t color)</td></tr>
 <tr class="separator:a37e83a3d738fbb9c7109b2242b3ebee1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6fb2b132cb94540656c0cce2a2b9056c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___r_a8875.html#a6fb2b132cb94540656c0cce2a2b9056c">drawRoundRect</a> (int16_t x, int16_t y, int16_t w, int16_t h, int16_t r, uint16_t color)</td></tr>
+<tr class="separator:a6fb2b132cb94540656c0cce2a2b9056c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0188bf2c61cd0d4d9dcc3dcf0af172f6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___r_a8875.html#a0188bf2c61cd0d4d9dcc3dcf0af172f6">fillRoundRect</a> (int16_t x, int16_t y, int16_t w, int16_t h, int16_t r, uint16_t color)</td></tr>
+<tr class="separator:a0188bf2c61cd0d4d9dcc3dcf0af172f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6a07a16e5b32d1c0feec94b34290e6b1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___r_a8875.html#a6a07a16e5b32d1c0feec94b34290e6b1">setScrollWindow</a> (int16_t x, int16_t y, int16_t w, int16_t h, uint8_t mode)</td></tr>
 <tr class="separator:a6a07a16e5b32d1c0feec94b34290e6b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af4d86322451340de27f59de67ae3a145"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___r_a8875.html#af4d86322451340de27f59de67ae3a145">scrollX</a> (int16_t dist)</td></tr>
@@ -1509,6 +1513,134 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramname">longAxis</td><td>The size in pixels of the ellipse's long axis </td></tr>
     <tr><td class="paramname">shortAxis</td><td>The size in pixels of the ellipse's short axis </td></tr>
     <tr><td class="paramname">curvePart</td><td>The corner to draw, where in clock-wise motion: 0 = 180-270° 1 = 270-0° 2 = 0-90° 3 = 90-180° </td></tr>
+    <tr><td class="paramname">color</td><td>The RGB565 color to use when drawing the pixel </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a6fb2b132cb94540656c0cce2a2b9056c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6fb2b132cb94540656c0cce2a2b9056c">&#9670;&nbsp;</a></span>drawRoundRect()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Adafruit_RA8875::drawRoundRect </td>
+          <td>(</td>
+          <td class="paramtype">int16_t&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int16_t&#160;</td>
+          <td class="paramname"><em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int16_t&#160;</td>
+          <td class="paramname"><em>w</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int16_t&#160;</td>
+          <td class="paramname"><em>h</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int16_t&#160;</td>
+          <td class="paramname"><em>r</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>color</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Draws a HW accelerated rounded rectangle on the display</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">x</td><td>The 0-based x location of the rectangle's upper left corner </td></tr>
+    <tr><td class="paramname">y</td><td>The 0-based y location of the rectangle's upper left corner </td></tr>
+    <tr><td class="paramname">w</td><td>The size in pixels of the rectangle's width </td></tr>
+    <tr><td class="paramname">h</td><td>The size in pixels of the rectangle's height </td></tr>
+    <tr><td class="paramname">r</td><td>The radius of the curves in the corners of the rectangle </td></tr>
+    <tr><td class="paramname">color</td><td>The RGB565 color to use when drawing the pixel </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a0188bf2c61cd0d4d9dcc3dcf0af172f6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0188bf2c61cd0d4d9dcc3dcf0af172f6">&#9670;&nbsp;</a></span>fillRoundRect()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Adafruit_RA8875::fillRoundRect </td>
+          <td>(</td>
+          <td class="paramtype">int16_t&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int16_t&#160;</td>
+          <td class="paramname"><em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int16_t&#160;</td>
+          <td class="paramname"><em>w</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int16_t&#160;</td>
+          <td class="paramname"><em>h</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int16_t&#160;</td>
+          <td class="paramname"><em>r</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>color</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Draws a HW accelerated filled rounded rectangle on the display</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">x</td><td>The 0-based x location of the rectangle's upper left corner </td></tr>
+    <tr><td class="paramname">y</td><td>The 0-based y location of the rectangle's upper left corner </td></tr>
+    <tr><td class="paramname">w</td><td>The size in pixels of the rectangle's width </td></tr>
+    <tr><td class="paramname">h</td><td>The size in pixels of the rectangle's height </td></tr>
+    <tr><td class="paramname">r</td><td>The radius of the curves in the corners of the rectangle </td></tr>
     <tr><td class="paramname">color</td><td>The RGB565 color to use when drawing the pixel </td></tr>
   </table>
   </dd>

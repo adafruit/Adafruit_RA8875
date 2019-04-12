@@ -12,5 +12,6 @@ var searchData=
   ['drawpixel',['drawPixel',['../class_adafruit___r_a8875.html#a0823c85097d1383ceb8b0b11c9c44e8d',1,'Adafruit_RA8875']]],
   ['drawpixels',['drawPixels',['../class_adafruit___r_a8875.html#ac6e86e03d8fe244195d903e32f269d7d',1,'Adafruit_RA8875']]],
   ['drawrect',['drawRect',['../class_adafruit___r_a8875.html#a6e283f1de1daba12df14119497ca3102',1,'Adafruit_RA8875']]],
+  ['drawroundrect',['drawRoundRect',['../class_adafruit___r_a8875.html#a6fb2b132cb94540656c0cce2a2b9056c',1,'Adafruit_RA8875']]],
   ['drawtriangle',['drawTriangle',['../class_adafruit___r_a8875.html#ada0ac44d2948040577edecbc6b638d01',1,'Adafruit_RA8875']]]
 ];
