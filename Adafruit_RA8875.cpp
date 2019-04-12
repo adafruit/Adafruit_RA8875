@@ -958,6 +958,40 @@ void Adafruit_RA8875::fillCurve(int16_t xCenter, int16_t yCenter, int16_t longAx
 
 /**************************************************************************/
 /*!
+      Draws a HW accelerated rounded rectangle on the display
+ 
+      @param x   The 0-based x location of the rectangle's upper left corner
+      @param y   The 0-based y location of the rectangle's upper left corner
+      @param w   The size in pixels of the rectangle's width
+      @param h   The size in pixels of the rectangle's height
+      @param r   The radius of the curves in the corners of the rectangle
+      @param color  The RGB565 color to use when drawing the pixel
+ */
+/**************************************************************************/
+void Adafruit_RA8875::drawRoundRect(int16_t x, int16_t y, int16_t w, int16_t h, int16_t r, uint16_t color)
+{
+  roundRectHelper(x, y, x+w, y+h, r, color, false);
+}
+
+/**************************************************************************/
+/*!
+      Draws a HW accelerated filled rounded rectangle on the display
+
+      @param x   The 0-based x location of the rectangle's upper left corner
+      @param y   The 0-based y location of the rectangle's upper left corner
+      @param w   The size in pixels of the rectangle's width
+      @param h   The size in pixels of the rectangle's height
+      @param r   The radius of the curves in the corners of the rectangle
+      @param color  The RGB565 color to use when drawing the pixel
+ */
+/**************************************************************************/
+void Adafruit_RA8875::fillRoundRect(int16_t x, int16_t y, int16_t w, int16_t h, int16_t r, uint16_t color)
+{
+  roundRectHelper(x, y, x+w, y+h, r, color, true);
+}
+
+/**************************************************************************/
+/*!
       Helper function for higher level circle drawing code
 */
 /**************************************************************************/
@@ -1238,6 +1272,69 @@ void Adafruit_RA8875::curveHelper(int16_t xCenter, int16_t yCenter, int16_t long
   waitPoll(RA8875_ELLIPSE, RA8875_ELLIPSE_STATUS);
 }
 
+/**************************************************************************/
+/*!
+      Helper function for higher level rounded rectangle drawing code
+ */
+/**************************************************************************/
+void Adafruit_RA8875::roundRectHelper(int16_t x, int16_t y, int16_t w, int16_t h, int16_t r, uint16_t color, bool filled)
+{
+  /* Set X */
+  writeCommand(0x91);
+  writeData(x);
+  writeCommand(0x92);
+  writeData(x >> 8);
+  
+  /* Set Y */
+  writeCommand(0x93);
+  writeData(y);
+  writeCommand(0x94);
+  writeData(y >> 8);
+  
+  /* Set X1 */
+  writeCommand(0x95);
+  writeData(w);
+  writeCommand(0x96);
+  writeData((w) >> 8);
+  
+  /* Set Y1 */
+  writeCommand(0x97);
+  writeData(h);
+  writeCommand(0x98);
+  writeData((h) >> 8);
+  
+  writeCommand(0xA1);
+  writeData(r);
+  writeCommand(0xA2);
+  writeData((r) >> 8);
+  
+  writeCommand(0xA3);
+  writeData(r);
+  writeCommand(0xA4);
+  writeData((r) >> 8);
+  
+  /* Set Color */
+  writeCommand(0x63);
+  writeData((color & 0xf800) >> 11);
+  writeCommand(0x64);
+  writeData((color & 0x07e0) >> 5);
+  writeCommand(0x65);
+  writeData((color & 0x001f));
+  
+  /* Draw! */
+  writeCommand(RA8875_ELLIPSE);
+  if (filled)
+  {
+    writeData(0xE0);
+  }
+  else
+  {
+    writeData(0xA0);
+  }
+  
+  /* Wait for the command to finish */
+  waitPoll(RA8875_ELLIPSE, RA8875_DCR_LINESQUTRI_STATUS);
+}
 /**************************************************************************/
 /*!
       Set the scroll window
