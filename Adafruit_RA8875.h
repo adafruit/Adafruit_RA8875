@@ -68,6 +68,7 @@
  */
 /**************************************************************************/
 enum RA8875sizes {
+  RA8875_480x80,  /*!<  480x80 Pixel Display */
   RA8875_480x128, /*!< 480x128 Pixel Display */
   RA8875_480x272, /*!< 480x272 Pixel Display */
   RA8875_800x480  /*!< 800x480 Pixel Display */
@@ -257,10 +258,17 @@ class Adafruit_RA8875 : public Adafruit_GFX {
   int16_t applyRotationX(int16_t x);
   int16_t applyRotationY(int16_t y);
 
+  void swap(int16_t &x, int16_t &y) {
+    int16_t temp = x;
+    x = y;
+    y = temp;
+  }
+
   uint8_t _cs, _rst;
   uint16_t _width, _height;
   uint8_t _textScale;
   uint8_t _rotation;
+  uint8_t _voffset;
   enum RA8875sizes _size;
 };
 

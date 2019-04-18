@@ -83,6 +83,7 @@ Adafruit_RA8875::Adafruit_RA8875(uint8_t CS, uint8_t RST) : Adafruit_GFX(800, 48
       Initialises the LCD driver and any HW required by the display
 
       @param s The display size, which can be either:
+                  'RA8875_480x80'  (3.8" displays) or
                   'RA8875_480x128' (3.9" displays) or
                   'RA8875_480x272' (4.3" displays) or
                   'RA8875_800x480' (5" and 7" displays)
@@ -93,7 +94,11 @@ Adafruit_RA8875::Adafruit_RA8875(uint8_t CS, uint8_t RST) : Adafruit_GFX(800, 48
 boolean Adafruit_RA8875::begin(enum RA8875sizes s) {
   _size = s;
 
-  if (_size == RA8875_480x128) {
+  if (_size == RA8875_480x80) {
+    _width = 480;
+    _height = 80;
+  }
+  else if (_size == RA8875_480x128) {
     _width = 480;
     _height = 128;
   }
@@ -177,7 +182,7 @@ void Adafruit_RA8875::softReset(void) {
 */
 /**************************************************************************/
 void Adafruit_RA8875::PLLinit(void) {
-  if (_size == RA8875_480x128 || _size == RA8875_480x272) {
+  if (_size == RA8875_480x80 || _size == RA8875_480x128 || _size == RA8875_480x272) {
     writeReg(RA8875_PLLC1, RA8875_PLLC1_PLLDIV1 + 10);
     delay(1);
     writeReg(RA8875_PLLC2, RA8875_PLLC2_DIV4);
@@ -211,7 +216,18 @@ void Adafruit_RA8875::initialize(void) {
   uint16_t vsync_start;
 
   /* Set the correct values for the display being used */
-  if (_size == RA8875_480x128 || _size == RA8875_480x272)
+  if (_size == RA8875_480x80) {
+    pixclk          = RA8875_PCSR_PDATL | RA8875_PCSR_4CLK;
+    hsync_nondisp   = 10;
+    hsync_start     = 8;
+    hsync_pw        = 48;
+    hsync_finetune  = 0;
+    vsync_nondisp   = 3;
+    vsync_start     = 8;
+    vsync_pw        = 10;
+    _voffset        = 192; // This uses the bottom 80 pixels of a 272 pixel controller
+  }
+  else if (_size == RA8875_480x128 || _size == RA8875_480x272)
   {
     pixclk          = RA8875_PCSR_PDATL | RA8875_PCSR_4CLK;
     hsync_nondisp   = 10;
@@ -221,6 +237,7 @@ void Adafruit_RA8875::initialize(void) {
     vsync_nondisp   = 3;
     vsync_start     = 8;
     vsync_pw        = 10;
+    _voffset         = 0;
   }
   else // (_size == RA8875_800x480)
   {
@@ -232,6 +249,7 @@ void Adafruit_RA8875::initialize(void) {
     vsync_nondisp   = 32;
     vsync_start     = 23;
     vsync_pw        = 2;
+    _voffset         = 0;
   }
 
   writeReg(RA8875_PCSR, pixclk);
@@ -245,8 +263,8 @@ void Adafruit_RA8875::initialize(void) {
   writeReg(RA8875_HPWR, RA8875_HPWR_LOW + (hsync_pw/8 - 1));        // HSync pulse width = (HPWR+1) * 8
 
   /* Vertical settings registers */
-  writeReg(RA8875_VDHR0, (uint16_t)(_height - 1) & 0xFF);
-  writeReg(RA8875_VDHR1, (uint16_t)(_height - 1) >> 8);
+  writeReg(RA8875_VDHR0, (uint16_t)(_height - 1 + _voffset) & 0xFF);
+  writeReg(RA8875_VDHR1, (uint16_t)(_height - 1 + _voffset) >> 8);
   writeReg(RA8875_VNDR0, vsync_nondisp-1);                          // V non-display period = VNDR + 1
   writeReg(RA8875_VNDR1, vsync_nondisp >> 8);
   writeReg(RA8875_VSTR0, vsync_start-1);                            // Vsync start position = VSTR + 1
@@ -260,10 +278,10 @@ void Adafruit_RA8875::initialize(void) {
   writeReg(RA8875_HEAW1, (uint16_t)(_width - 1) >> 8);
 
   /* Set active window Y */
-  writeReg(RA8875_VSAW0, 0);                                        // vertical start point
-  writeReg(RA8875_VSAW1, 0);
-  writeReg(RA8875_VEAW0, (uint16_t)(_height - 1) & 0xFF);           // horizontal end point
-  writeReg(RA8875_VEAW1, (uint16_t)(_height - 1) >> 8);
+  writeReg(RA8875_VSAW0, 0 + _voffset);                              // vertical start point
+  writeReg(RA8875_VSAW1, 0 + _voffset);
+  writeReg(RA8875_VEAW0, (uint16_t)(_height - 1 + _voffset) & 0xFF); // vertical end point
+  writeReg(RA8875_VEAW1, (uint16_t)(_height - 1 + _voffset) >> 8);
 
   /* ToDo: Setup touch panel? */
 
@@ -597,7 +615,7 @@ void Adafruit_RA8875::fillRect(void) {
 int16_t Adafruit_RA8875::applyRotationX(int16_t x) {
     switch(_rotation) {
         case 2:
-            x = WIDTH - 1 - x;
+            x = _width - 1 - x;
             break;
     }
     
@@ -614,11 +632,11 @@ int16_t Adafruit_RA8875::applyRotationX(int16_t x) {
 int16_t Adafruit_RA8875::applyRotationY(int16_t y) {
     switch(_rotation) {
         case 2:
-            y = HEIGHT - 1 - y;
+            y = _height - 1 - y;
             break;
     }
     
-    return y;
+    return y + _voffset;
 }
 
 /**************************************************************************/
@@ -1279,6 +1297,13 @@ void Adafruit_RA8875::curveHelper(int16_t xCenter, int16_t yCenter, int16_t long
 /**************************************************************************/
 void Adafruit_RA8875::roundRectHelper(int16_t x, int16_t y, int16_t w, int16_t h, int16_t r, uint16_t color, bool filled)
 {
+  x = applyRotationX(x);
+  y = applyRotationY(y);
+  w = applyRotationX(w);
+  h = applyRotationY(h);
+  if (x > w) swap(x, w);
+  if (y > h) swap(y, h);
+
   /* Set X */
   writeCommand(0x91);
   writeData(x);

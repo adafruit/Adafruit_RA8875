@@ -1,6 +1,6 @@
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <SPI.h>
-#include <Wire.h>   
+#include <Wire.h>
 #include <SD.h>
 #include "Adafruit_RA8875.h"
 #include <Adafruit_STMPE610.h>
@@ -19,7 +19,7 @@ Adafruit_RA8875 tft = Adafruit_RA8875(RA8875_CS, RA8875_RESET);
 void setup () {
   Serial.begin(9600);
 
-  if (!SD.begin(sd_cs)) 
+  if (!SD.begin(sd_cs))
   {
     Serial.println("initialization failed!");
     return;
@@ -29,7 +29,7 @@ void setup () {
 
   Serial.println("RA8875 start");
 
-  /* Initialise the display using 'RA8875_480x272' or 'RA8875_800x480' */
+  /* Initialize the display using 'RA8875_480x80', 'RA8875_480x128', 'RA8875_480x272' or 'RA8875_800x480' */
   if (!tft.begin(RA8875_800x480)) {
     Serial.println("RA8875 Not Found!");
     while (1);
@@ -42,20 +42,20 @@ void setup () {
   tft.PWM1config(true, RA8875_PWM_CLK_DIV1024); // PWM output for backlight
   tft.PWM1out(255);
 
-  Serial.print("("); 
+  Serial.print("(");
   Serial.print(tft.width());
-  Serial.print(", "); 
+  Serial.print(", ");
   Serial.print(tft.height());
   Serial.println(")");
   tft.graphicsMode();                 // go back to graphics mode
   tft.fillScreen(RA8875_BLACK);
-  tft.graphicsMode();     
+  tft.graphicsMode();
   bmpDraw("parrot.bmp", 0, 0);
 }
 
 void loop()
 {
-}    
+}
 
 // This function opens a Windows Bitmap (BMP) file and
 // displays it at the given coordinates.  It's sped up
@@ -99,22 +99,22 @@ void bmpDraw(const char *filename, int x, int y) {
 
   // Parse BMP header
   if(read16(bmpFile) == 0x4D42) { // BMP signature
-    Serial.println(F("File size: ")); 
+    Serial.println(F("File size: "));
     Serial.println(read32(bmpFile));
     (void)read32(bmpFile); // Read & ignore creator bytes
     bmpImageoffset = read32(bmpFile); // Start of image data
-    Serial.print(F("Image Offset: ")); 
+    Serial.print(F("Image Offset: "));
     Serial.println(bmpImageoffset, DEC);
 
     // Read DIB header
-    Serial.print(F("Header size: ")); 
+    Serial.print(F("Header size: "));
     Serial.println(read32(bmpFile));
     bmpWidth  = read32(bmpFile);
     bmpHeight = read32(bmpFile);
 
     if(read16(bmpFile) == 1) { // # planes -- must be '1'
       bmpDepth = read16(bmpFile); // bits per pixel
-      Serial.print(F("Bit Depth: ")); 
+      Serial.print(F("Bit Depth: "));
       Serial.println(bmpDepth);
       if((bmpDepth == 24) && (read32(bmpFile) == 0)) { // 0 = uncompressed
         goodBmp = true; // Supported BMP format -- proceed!
@@ -184,7 +184,7 @@ void bmpDraw(const char *filename, int x, int y) {
         // Write any remaining data to LCD
         if(lcdidx > 0) {
           tft.drawPixel(col+x, row+y, lcdbuffer[lcdidx]);
-        } 
+        }
 
         Serial.print(F("Loaded in "));
         Serial.print(millis() - startTime);
@@ -227,4 +227,3 @@ byte decToBcd(byte val){
   // Convert normal decimal numbers to binary coded decimal
   return ( (val/10*16) + (val%10) );
 }
-
