@@ -29,7 +29,7 @@ void setup () {
 
   Serial.println("RA8875 start");
 
-  /* Initialise the display using 'RA8875_480x272' or 'RA8875_800x480' */
+  /* Initialize the display using 'RA8875_480x80', 'RA8875_480x128', 'RA8875_480x272' or 'RA8875_800x480' */
   if (!tft.begin(RA8875_800x480)) {
     Serial.println("RA8875 Not Found!");
     while (1);
