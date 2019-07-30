@@ -213,6 +213,7 @@ class Adafruit_RA8875 : public Adafruit_GFX {
   void    setRotation(int8_t rotation);
   int8_t  getRotation(void);
   
+#ifndef USE_ADAFRUIT_GFX_FONTS
   /**************************************************************************/
   /*!
      Alias of textWrite to Play nice with Arduino's Print class
@@ -241,7 +242,8 @@ class Adafruit_RA8875 : public Adafruit_GFX {
     textWrite((const char *)buffer, size);
     return size;
   }
-
+#endif
+    
  private:
   void PLLinit(void);
   void initialize(void);
