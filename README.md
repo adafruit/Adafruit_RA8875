@@ -1,4 +1,4 @@
-# Adafruit's Arduino driver for the RA8875 TFT driver [![Build Status](https://travis-ci.com/adafruit/Adafruit_RA8875.svg?branch=master)](https://travis-ci.com/adafruit/Adafruit_RA8875)
+# Adafruit RA8875 [![Build Status](https://github.com/adafruit/Adafruit_RA8875/workflows/Arduino%20Library%20CI/badge.svg)](https://github.com/adafruit/Adafruit_RA8875/actions)
 
 This is a library for our driver board 40-pin TFT Touch Displays - 800x480 Max
 
