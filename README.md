@@ -1,4 +1,4 @@
-# Adafruit RA8875 [![Build Status](https://github.com/adafruit/Adafruit_RA8875/workflows/Arduino%20Library%20CI/badge.svg)](https://github.com/adafruit/Adafruit_RA8875/actions)
+# Adafruit RA8875 [![Build Status](https://github.com/adafruit/Adafruit_RA8875/workflows/Arduino%20Library%20CI/badge.svg)](https://github.com/adafruit/Adafruit_RA8875/actions)[![Documentation](https://github.com/adafruit/ci-arduino/blob/master/assets/doxygen_badge.svg)](http://adafruit.github.io/Adafruit_RA8875/html/index.html)
 
 This is a library for our driver board 40-pin TFT Touch Displays - 800x480 Max
 
