@@ -52,16 +52,14 @@ uint32_t spi_speed = 12000000; /*!< 12MHz */
 #else
 /// @endcond
 uint32_t spi_speed = 4000000; /*!< 4MHz */
-                              /// @cond DISABLE
+/// @cond DISABLE
 #endif
 /// @endcond
 
 // If the SPI library has transaction support, these functions
 // establish settings and protect from interference from other
 // libraries.  Otherwise, they simply do nothing.
-/// @cond DISABLE
 #ifdef SPI_HAS_TRANSACTION
-/// @endcond
 static inline void spi_begin(void) __attribute__((always_inline));
 static inline void spi_begin(void) {
   // max speed!
@@ -69,14 +67,10 @@ static inline void spi_begin(void) {
 }
 static inline void spi_end(void) __attribute__((always_inline));
 static inline void spi_end(void) { SPI.endTransaction(); }
-/// @cond DISABLE
 #else
-                              /// @endcond
 #define spi_begin() ///< Create dummy Macro Function
 #define spi_end()   ///< Create dummy Macro Function
-                              /// @cond DISABLE
 #endif
-/// @endcond
 
 /**************************************************************************/
 /*!
@@ -138,11 +132,15 @@ boolean Adafruit_RA8875::begin(enum RA8875sizes s) {
 #ifdef SPI_HAS_TRANSACTION
 /// @cond DISABLE
 #if defined(ARDUINO_ARCH_ARC32)
-  /// @endcond
+/// @endcond
   spi_speed = 2000000;
+/// @cond DISABLE
 #else
+/// @endcond
   spi_speed = 125000;
+/// @cond DISABLE
 #endif
+/// @endcond
 #else
 #ifdef __AVR__
   SPI.setClockDivider(SPI_CLOCK_DIV128);
