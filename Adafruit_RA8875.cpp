@@ -52,7 +52,7 @@ uint32_t spi_speed = 12000000; /*!< 12MHz */
 #else
 /// @endcond
 uint32_t spi_speed = 4000000; /*!< 4MHz */
-/// @cond DISABLE
+                              /// @cond DISABLE
 #endif
 /// @endcond
 
@@ -132,11 +132,11 @@ boolean Adafruit_RA8875::begin(enum RA8875sizes s) {
 #ifdef SPI_HAS_TRANSACTION
 /// @cond DISABLE
 #if defined(ARDUINO_ARCH_ARC32)
-/// @endcond
+  /// @endcond
   spi_speed = 2000000;
 /// @cond DISABLE
 #else
-/// @endcond
+  /// @endcond
   spi_speed = 125000;
 /// @cond DISABLE
 #endif
