@@ -1,6 +1,8 @@
 var searchData=
 [
-  ['readdata',['readData',['../class_adafruit___r_a8875.html#a7771753841f0390793b69421ef86ffb6',1,'Adafruit_RA8875']]],
-  ['readreg',['readReg',['../class_adafruit___r_a8875.html#acff25414ab909c1c2dc7b5bf505fb2cf',1,'Adafruit_RA8875']]],
-  ['readstatus',['readStatus',['../class_adafruit___r_a8875.html#a6bc685b64b6cce6480af2054e7cabc14',1,'Adafruit_RA8875']]]
+  ['pushpixels',['pushPixels',['../class_adafruit___r_a8875.html#a56ee5cb7ee6909234b33d43d6ccad151',1,'Adafruit_RA8875']]],
+  ['pwm1config',['PWM1config',['../class_adafruit___r_a8875.html#ae5ec83867df1220ae6247fc614e3b61f',1,'Adafruit_RA8875']]],
+  ['pwm1out',['PWM1out',['../class_adafruit___r_a8875.html#aa9aff213337d70839995d50e6a88ba5c',1,'Adafruit_RA8875']]],
+  ['pwm2config',['PWM2config',['../class_adafruit___r_a8875.html#a49df93bf32be7e85fbb0370ce9fe2f95',1,'Adafruit_RA8875']]],
+  ['pwm2out',['PWM2out',['../class_adafruit___r_a8875.html#aaabcf8278287f64c28112fb976335c26',1,'Adafruit_RA8875']]]
 ];

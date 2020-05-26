@@ -1,9 +1,12 @@
 var searchData=
 [
-  ['waitpoll',['waitPoll',['../class_adafruit___r_a8875.html#ad926379389b044ab1aca6a3d4e2c5afd',1,'Adafruit_RA8875']]],
-  ['width',['width',['../class_adafruit___r_a8875.html#ad305a724603e1030ec1bfe1a67327ed5',1,'Adafruit_RA8875']]],
-  ['write',['write',['../class_adafruit___r_a8875.html#a66a7c8f7f836c67d3f0952b94a3e420c',1,'Adafruit_RA8875::write(uint8_t b)'],['../class_adafruit___r_a8875.html#a0956b49201ae4618a9a20d828f3815b1',1,'Adafruit_RA8875::write(const uint8_t *buffer, size_t size)']]],
-  ['writecommand',['writeCommand',['../class_adafruit___r_a8875.html#a65c88e13691db0d8cae5b5e32883268e',1,'Adafruit_RA8875']]],
-  ['writedata',['writeData',['../class_adafruit___r_a8875.html#ada2fe2eaba6203691b422c0f561c8a94',1,'Adafruit_RA8875']]],
-  ['writereg',['writeReg',['../class_adafruit___r_a8875.html#a2e6a3f2fd43716ddb5c279e0a456369f',1,'Adafruit_RA8875']]]
+  ['textcolor',['textColor',['../class_adafruit___r_a8875.html#ac1e58c35a5179a7590507c0ac132da74',1,'Adafruit_RA8875']]],
+  ['textenlarge',['textEnlarge',['../class_adafruit___r_a8875.html#a960a7ed5b834a0d058059cbc15412387',1,'Adafruit_RA8875']]],
+  ['textmode',['textMode',['../class_adafruit___r_a8875.html#a4213dbf041641172b7bac40e3b451da5',1,'Adafruit_RA8875']]],
+  ['textsetcursor',['textSetCursor',['../class_adafruit___r_a8875.html#a9bf7b027ee1a23f514d16995171dd027',1,'Adafruit_RA8875']]],
+  ['texttransparent',['textTransparent',['../class_adafruit___r_a8875.html#adcb9cc6b7e2b4d03a32a5fc87e033164',1,'Adafruit_RA8875']]],
+  ['textwrite',['textWrite',['../class_adafruit___r_a8875.html#af2b427d3d6e429aeccbeb956c4159456',1,'Adafruit_RA8875']]],
+  ['touched',['touched',['../class_adafruit___r_a8875.html#ac5d283dee07e8da46e71a1de1394d1c3',1,'Adafruit_RA8875']]],
+  ['touchenable',['touchEnable',['../class_adafruit___r_a8875.html#a16c340772d8f313e1ec937058b6dbdd7',1,'Adafruit_RA8875']]],
+  ['touchread',['touchRead',['../class_adafruit___r_a8875.html#a04a9dc3c75a81429b27630470da8f95d',1,'Adafruit_RA8875']]]
 ];

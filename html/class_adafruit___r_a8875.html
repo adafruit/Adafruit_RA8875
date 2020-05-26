@@ -171,6 +171,14 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ac5d283dee07e8da46e71a1de1394d1c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a04a9dc3c75a81429b27630470da8f95d"><td class="memItemLeft" align="right" valign="top">boolean&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___r_a8875.html#a04a9dc3c75a81429b27630470da8f95d">touchRead</a> (uint16_t *x, uint16_t *y)</td></tr>
 <tr class="separator:a04a9dc3c75a81429b27630470da8f95d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a75d12ce20dd479163c1eb6068c00bcb7"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___r_a8875.html#a75d12ce20dd479163c1eb6068c00bcb7">eepromReadS32</a> (int location)</td></tr>
+<tr class="separator:a75d12ce20dd479163c1eb6068c00bcb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afe5902693cc7d736d3ba75d90a58bbfa"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___r_a8875.html#afe5902693cc7d736d3ba75d90a58bbfa">eepromWriteS32</a> (int location, int32_t value)</td></tr>
+<tr class="separator:afe5902693cc7d736d3ba75d90a58bbfa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a03796e89efb9c7a1bb0236fff55d009c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___r_a8875.html#a03796e89efb9c7a1bb0236fff55d009c">readCalibration</a> (int location, <a class="el" href="structts_matrix__t.html">tsMatrix_t</a> *matrixPtr)</td></tr>
+<tr class="separator:a03796e89efb9c7a1bb0236fff55d009c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c670be0c139067105153156d07df263"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___r_a8875.html#a4c670be0c139067105153156d07df263">writeCalibration</a> (int location, <a class="el" href="structts_matrix__t.html">tsMatrix_t</a> *matrixPtr)</td></tr>
+<tr class="separator:a4c670be0c139067105153156d07df263"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2e6a3f2fd43716ddb5c279e0a456369f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___r_a8875.html#a2e6a3f2fd43716ddb5c279e0a456369f">writeReg</a> (uint8_t reg, uint8_t val)</td></tr>
 <tr class="separator:a2e6a3f2fd43716ddb5c279e0a456369f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acff25414ab909c1c2dc7b5bf505fb2cf"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___r_a8875.html#acff25414ab909c1c2dc7b5bf505fb2cf">readReg</a> (uint8_t reg)</td></tr>
@@ -1983,6 +1991,141 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True if successful</dd></dl>
 <dl class="section note"><dt>Note</dt><dd>Calling this function will clear the touch panel interrupt on the RA8875, resetting the flag used by the 'touched' function </dd></dl>
+
+</div>
+</div>
+<a id="a75d12ce20dd479163c1eb6068c00bcb7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a75d12ce20dd479163c1eb6068c00bcb7">&#9670;&nbsp;</a></span>eepromReadS32()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t Adafruit_RA8875::eepromReadS32 </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>location</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Read from the EEPROM location</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">location</td><td>The location of the EEPROM to read</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The value </dd></dl>
+
+</div>
+</div>
+<a id="afe5902693cc7d736d3ba75d90a58bbfa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afe5902693cc7d736d3ba75d90a58bbfa">&#9670;&nbsp;</a></span>eepromWriteS32()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Adafruit_RA8875::eepromWriteS32 </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>location</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Write to the EEPROM location</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">location</td><td>The location of the EEPROM to write to </td></tr>
+    <tr><td class="paramname">value</td><td>The value to write </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a03796e89efb9c7a1bb0236fff55d009c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a03796e89efb9c7a1bb0236fff55d009c">&#9670;&nbsp;</a></span>readCalibration()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Adafruit_RA8875::readCalibration </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>location</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structts_matrix__t.html">tsMatrix_t</a> *&#160;</td>
+          <td class="paramname"><em>matrixPtr</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Read Calibration Data from the EEPROM location</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">location</td><td>The location of the EEPROM to read from </td></tr>
+    <tr><td class="paramname">matrixPtr</td><td>The pointer to the Matrix Variable</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>success </dd></dl>
+
+</div>
+</div>
+<a id="a4c670be0c139067105153156d07df263"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4c670be0c139067105153156d07df263">&#9670;&nbsp;</a></span>writeCalibration()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Adafruit_RA8875::writeCalibration </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>location</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structts_matrix__t.html">tsMatrix_t</a> *&#160;</td>
+          <td class="paramname"><em>matrixPtr</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Write Calibration Data to the EEPROM location</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">location</td><td>The location of the EEPROM to write to </td></tr>
+    <tr><td class="paramname">matrixPtr</td><td>The pointer to the Matrix Variable </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

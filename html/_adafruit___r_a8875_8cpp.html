@@ -66,6 +66,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="_adafruit___r_a8875_8h_source.html">Adafruit_RA8875.h</a>&quot;</code><br />
+<code>#include &lt;EEPROM.h&gt;</code><br />
 <code>#include &lt;SPI.h&gt;</code><br />
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
@@ -81,25 +82,10 @@ Macros</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
 Variables</h2></td></tr>
-<tr class="memitem:aaf56291fd6677734c778aef6c89548e8"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_adafruit___r_a8875_8cpp.html#aaf56291fd6677734c778aef6c89548e8">spi_speed</a> = 4000000</td></tr>
+<tr class="memitem:aaf56291fd6677734c778aef6c89548e8"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_adafruit___r_a8875_8cpp.html#aaf56291fd6677734c778aef6c89548e8">spi_speed</a> = 12000000</td></tr>
 <tr class="separator:aaf56291fd6677734c778aef6c89548e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><dl class="section author"><dt>Author</dt><dd>Limor Friend/Ladyada, K.Townsend/KTOWN for Adafruit Industries</dd></dl>
-<h1><a class="anchor" id="intro_sec"></a>
-Introduction</h1>
-<p>This is the library for the Adafruit RA8875 Driver board for TFT displays ------------&mdash;&gt; <a href="http://www.adafruit.com/products/1590">http://www.adafruit.com/products/1590</a> The RA8875 is a TFT driver for up to 800x480 dotclock'd displays It is tested to work with displays in the Adafruit shop. Other displays may need timing adjustments and are not guanteed to work.</p>
-<p>Adafruit invests time and resources providing this open source code, please support Adafruit and open-source hardware by purchasing products from Adafruit!</p>
-<h1><a class="anchor" id="author"></a>
-Author</h1>
-<p>Written by Limor Fried/Ladyada for Adafruit Industries.</p>
-<h1><a class="anchor" id="license"></a>
-License</h1>
-<p>BSD license, check license.txt for more information. All text above must be included in any redistribution.</p>
-<h1><a class="anchor" id="HISTORY"></a>
-HISTORY</h1>
-<p>v1.0 - First release </p>
-</div><h2 class="groupheader">Variable Documentation</h2>
+<h2 class="groupheader">Variable Documentation</h2>
 <a id="aaf56291fd6677734c778aef6c89548e8"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aaf56291fd6677734c778aef6c89548e8">&#9670;&nbsp;</a></span>spi_speed</h2>
 
@@ -107,10 +93,11 @@ HISTORY</h1>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">uint32_t spi_speed = 4000000</td>
+          <td class="memname">uint32_t spi_speed = 12000000</td>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>12MHz</p>
 <p>4MHz </p>
 
 </div>

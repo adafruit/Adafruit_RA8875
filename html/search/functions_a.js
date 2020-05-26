@@ -1,12 +1,10 @@
 var searchData=
 [
-  ['textcolor',['textColor',['../class_adafruit___r_a8875.html#ac1e58c35a5179a7590507c0ac132da74',1,'Adafruit_RA8875']]],
-  ['textenlarge',['textEnlarge',['../class_adafruit___r_a8875.html#a960a7ed5b834a0d058059cbc15412387',1,'Adafruit_RA8875']]],
-  ['textmode',['textMode',['../class_adafruit___r_a8875.html#a4213dbf041641172b7bac40e3b451da5',1,'Adafruit_RA8875']]],
-  ['textsetcursor',['textSetCursor',['../class_adafruit___r_a8875.html#a9bf7b027ee1a23f514d16995171dd027',1,'Adafruit_RA8875']]],
-  ['texttransparent',['textTransparent',['../class_adafruit___r_a8875.html#adcb9cc6b7e2b4d03a32a5fc87e033164',1,'Adafruit_RA8875']]],
-  ['textwrite',['textWrite',['../class_adafruit___r_a8875.html#af2b427d3d6e429aeccbeb956c4159456',1,'Adafruit_RA8875']]],
-  ['touched',['touched',['../class_adafruit___r_a8875.html#ac5d283dee07e8da46e71a1de1394d1c3',1,'Adafruit_RA8875']]],
-  ['touchenable',['touchEnable',['../class_adafruit___r_a8875.html#a16c340772d8f313e1ec937058b6dbdd7',1,'Adafruit_RA8875']]],
-  ['touchread',['touchRead',['../class_adafruit___r_a8875.html#a04a9dc3c75a81429b27630470da8f95d',1,'Adafruit_RA8875']]]
+  ['scrollx',['scrollX',['../class_adafruit___r_a8875.html#af4d86322451340de27f59de67ae3a145',1,'Adafruit_RA8875']]],
+  ['scrolly',['scrollY',['../class_adafruit___r_a8875.html#ab5c46f0b877fadea657548e2f7755a03',1,'Adafruit_RA8875']]],
+  ['setrotation',['setRotation',['../class_adafruit___r_a8875.html#ae63649355c69e89318a1fbaf201bcdf5',1,'Adafruit_RA8875']]],
+  ['setscrollwindow',['setScrollWindow',['../class_adafruit___r_a8875.html#a6a07a16e5b32d1c0feec94b34290e6b1',1,'Adafruit_RA8875']]],
+  ['setxy',['setXY',['../class_adafruit___r_a8875.html#a807ac7af98da8800090badbc7ef8c333',1,'Adafruit_RA8875']]],
+  ['sleep',['sleep',['../class_adafruit___r_a8875.html#a20b6b7c127c9247918ac745c002adaba',1,'Adafruit_RA8875']]],
+  ['softreset',['softReset',['../class_adafruit___r_a8875.html#ab80403cb248d78d78aae92ad5e40166c',1,'Adafruit_RA8875']]]
 ];

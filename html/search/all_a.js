@@ -187,6 +187,7 @@ var searchData=
   ['ra8875_5fwhite',['RA8875_WHITE',['../_adafruit___r_a8875_8h.html#a9af696102c07fd5028b28e67439c46f3',1,'Adafruit_RA8875.h']]],
   ['ra8875_5fyellow',['RA8875_YELLOW',['../_adafruit___r_a8875_8h.html#a28675b330b35528004804fd2c2562df4',1,'Adafruit_RA8875.h']]],
   ['ra8875sizes',['RA8875sizes',['../_adafruit___r_a8875_8h.html#aadfa25dab72d848e1d3c1562fec77a0c',1,'Adafruit_RA8875.h']]],
+  ['readcalibration',['readCalibration',['../class_adafruit___r_a8875.html#a03796e89efb9c7a1bb0236fff55d009c',1,'Adafruit_RA8875']]],
   ['readdata',['readData',['../class_adafruit___r_a8875.html#a7771753841f0390793b69421ef86ffb6',1,'Adafruit_RA8875']]],
   ['readreg',['readReg',['../class_adafruit___r_a8875.html#acff25414ab909c1c2dc7b5bf505fb2cf',1,'Adafruit_RA8875']]],
   ['readstatus',['readStatus',['../class_adafruit___r_a8875.html#a6bc685b64b6cce6480af2054e7cabc14',1,'Adafruit_RA8875']]]
