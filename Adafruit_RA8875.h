@@ -210,7 +210,7 @@ public:
 
 /// @cond DISABLE
 #if defined(EEPROM_SUPPORTED)
-/// @endcond
+  /// @endcond
   /* Touch screen calibration persistence*/
   uint32_t eepromReadS32(int location);
   void eepromWriteS32(int location, int32_t value);
@@ -218,7 +218,7 @@ public:
   void writeCalibration(int location, tsMatrix_t *matrixPtr);
 /// @cond DISABLE
 #endif
-/// @endcond
+  /// @endcond
 
   /* Low level access */
   void writeReg(uint8_t reg, uint8_t val);

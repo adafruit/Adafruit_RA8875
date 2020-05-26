@@ -52,7 +52,7 @@ uint32_t spi_speed = 12000000; /*!< 12MHz */
 #else
 /// @endcond
 uint32_t spi_speed = 4000000; /*!< 4MHz */
-/// @cond DISABLE
+                              /// @cond DISABLE
 #endif
 /// @endcond
 
@@ -71,10 +71,10 @@ static inline void spi_end(void) __attribute__((always_inline));
 static inline void spi_end(void) { SPI.endTransaction(); }
 /// @cond DISABLE
 #else
-/// @endcond
+                              /// @endcond
 #define spi_begin() ///< Create dummy Macro Function
 #define spi_end()   ///< Create dummy Macro Function
-/// @cond DISABLE
+                              /// @cond DISABLE
 #endif
 /// @endcond
 
@@ -138,7 +138,7 @@ boolean Adafruit_RA8875::begin(enum RA8875sizes s) {
 #ifdef SPI_HAS_TRANSACTION
 /// @cond DISABLE
 #if defined(ARDUINO_ARCH_ARC32)
-/// @endcond
+  /// @endcond
   spi_speed = 2000000;
 #else
   spi_speed = 125000;
@@ -162,7 +162,7 @@ boolean Adafruit_RA8875::begin(enum RA8875sizes s) {
 #ifdef SPI_HAS_TRANSACTION
 /// @cond DISABLE
 #if defined(ARDUINO_ARCH_ARC32)
-/// @endcond
+  /// @endcond
   spi_speed = 12000000L;
 #else
   spi_speed = 4000000L;
@@ -526,20 +526,20 @@ void Adafruit_RA8875::textWrite(const char *buffer, uint16_t len) {
     writeData(buffer[i]);
 /// @cond DISABLE
 #if defined(__arm__)
-/// @endcond
+    /// @endcond
     // This delay is needed with textEnlarge(1) because
     // Teensy 3.X is much faster than Arduino Uno
     if (_textScale > 0)
       delay(1);
 /// @cond DISABLE
 #else
-/// @endcond
+    /// @endcond
     // For others, delay starting with textEnlarge(2)
     if (_textScale > 1)
       delay(1);
 /// @cond DISABLE
 #endif
-/// @endcond
+    /// @endcond
   }
 }
 
