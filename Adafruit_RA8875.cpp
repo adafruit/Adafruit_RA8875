@@ -1,50 +1,60 @@
-/**************************************************************************/
 /*!
- @file     Adafruit_RA8875.cpp
- @author   Limor Friend/Ladyada, K.Townsend/KTOWN for Adafruit Industries
-
-
- @section intro_sec Introduction
-
- This is the library for the Adafruit RA8875 Driver board for TFT displays
- ---------------> http://www.adafruit.com/products/1590
- The RA8875 is a TFT driver for up to 800x480 dotclock'd displays
- It is tested to work with displays in the Adafruit shop. Other displays
- may need timing adjustments and are not guanteed to work.
-
- Adafruit invests time and resources providing this open
- source code, please support Adafruit and open-source hardware
- by purchasing products from Adafruit!
-
- @section author Author
-
- Written by Limor Fried/Ladyada for Adafruit Industries.
-
- @section license License
-
- BSD license, check license.txt for more information.
- All text above must be included in any redistribution.
-
- @section  HISTORY
-
- v1.0 - First release
-
+ * @file     Adafruit_RA8875.cpp
+ *
+ * @mainpage Adafruit RA8875 TFT Driver
+ *
+ * @author   Limor Friend/Ladyada, K.Townsend/KTOWN for Adafruit Industries
+ *
+ * @section intro_sec Introduction
+ *
+ * This is the library for the Adafruit RA8875 Driver board for TFT displays
+ * ---------------> http://www.adafruit.com/products/1590
+ * The RA8875 is a TFT driver for up to 800x480 dotclock'd displays
+ * It is tested to work with displays in the Adafruit shop. Other displays
+ * may need timing adjustments and are not guanteed to work.
+ *
+ * Adafruit invests time and resources providing this open
+ * source code, please support Adafruit and open-source hardware
+ * by purchasing products from Adafruit!
+ *
+ * @section author Author
+ *
+ * Written by Limor Fried/Ladyada for Adafruit Industries.
+ *
+ * @section license License
+ *
+ * BSD license, check license.txt for more information.
+ * All text above must be included in any redistribution.
+ *
+ * @section  HISTORY
+ *
+ * v1.0 - First release
+ *
  */
-/**************************************************************************/
 
 #include "Adafruit_RA8875.h"
 
+/// @cond DISABLE
 #if defined(EEPROM_SUPPORTED)
+/// @endcond
 #include <EEPROM.h>
+/// @cond DISABLE
 #endif
+/// @endcond
 
 #include <SPI.h>
 
+/// @cond DISABLE
 #if defined(ARDUINO_ARCH_ARC32)
+/// @endcond
 uint32_t spi_speed = 12000000; /*!< 12MHz */
+/// @cond DISABLE
 #else
+/// @endcond
 uint32_t spi_speed = 4000000; /*!< 4MHz */
+                              /// @cond DISABLE
 #endif
+/// @endcond
 
 // If the SPI library has transaction support, these functions
 // establish settings and protect from interference from other
@@ -120,11 +130,17 @@ boolean Adafruit_RA8875::begin(enum RA8875sizes s) {
   SPI.begin();
 
 #ifdef SPI_HAS_TRANSACTION
+/// @cond DISABLE
 #if defined(ARDUINO_ARCH_ARC32)
+  /// @endcond
   spi_speed = 2000000;
+/// @cond DISABLE
 #else
+  /// @endcond
   spi_speed = 125000;
+/// @cond DISABLE
 #endif
+/// @endcond
 #else
 #ifdef __AVR__
   SPI.setClockDivider(SPI_CLOCK_DIV128);
@@ -142,7 +158,9 @@ boolean Adafruit_RA8875::begin(enum RA8875sizes s) {
   initialize();
 
 #ifdef SPI_HAS_TRANSACTION
+/// @cond DISABLE
 #if defined(ARDUINO_ARCH_ARC32)
+  /// @endcond
   spi_speed = 12000000L;
 #else
   spi_speed = 4000000L;
@@ -504,16 +522,22 @@ void Adafruit_RA8875::textWrite(const char *buffer, uint16_t len) {
   writeCommand(RA8875_MRWC);
   for (uint16_t i = 0; i < len; i++) {
     writeData(buffer[i]);
+/// @cond DISABLE
 #if defined(__arm__)
+    /// @endcond
     // This delay is needed with textEnlarge(1) because
     // Teensy 3.X is much faster than Arduino Uno
     if (_textScale > 0)
       delay(1);
+/// @cond DISABLE
 #else
+    /// @endcond
     // For others, delay starting with textEnlarge(2)
     if (_textScale > 1)
       delay(1);
+/// @cond DISABLE
 #endif
+    /// @endcond
   }
 }
 
@@ -1689,7 +1713,9 @@ uint8_t Adafruit_RA8875::readStatus(void) {
   return x;
 }
 
+/// @cond DISABLE
 #if defined(EEPROM_SUPPORTED)
+/// @endcond
 /**************************************************************************/
 /*!
     Read from the EEPROM location
@@ -1775,4 +1801,6 @@ void Adafruit_RA8875::writeCalibration(int location, tsMatrix_t *matrixPtr) {
     EEPROM.write(location + CFG_EEPROM_TOUCHSCREEN_CALIBRATED, 1);
   }
 }
+/// @cond DISABLE
 #endif
+/// @endcond

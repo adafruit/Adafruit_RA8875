@@ -32,11 +32,15 @@
 #include <pgmspace.h>
 #endif
 
+/// @cond DISABLE
 #if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega1280__) ||              \
     defined(__AVR_ATmega2560__) || defined(ESP8266) || defined(ESP32) ||       \
     defined(DOXYGEN)
+/// @endcond
 #define EEPROM_SUPPORTED ///< Board supports EEPROM Storage
+/// @cond DISABLE
 #endif
+/// @endcond
 
 #include <Adafruit_GFX.h>
 
@@ -53,15 +57,23 @@
 #define CFG_EEPROM_TOUCHSCREEN_CAL_DIVIDER 24 ///< EEPROM Storage Location
 #define CFG_EEPROM_TOUCHSCREEN_CALIBRATED 28  ///< EEPROM Storage Location
 
+/// @cond DISABLE
 #if defined(EEPROM_SUPPORTED)
 #if defined(__AVR_ATmega328P__)
+/// @endcond
 #define EEPROMSIZE 1024 ///< 1KB EEPROM
+/// @cond DISABLE
 #elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+/// @endcond
 #define EEPROMSIZE 4096 ///< 4KB EEPROM
+/// @cond DISABLE
 #else
+/// @endcond
 #define EEPROMSIZE 512 ///< 512 Byte EEPROM
+/// @cond DISABLE
 #endif
 #endif
+/// @endcond
 // Sizes!
 
 /**************************************************************************/
@@ -196,13 +208,17 @@ public:
   boolean touched(void);
   boolean touchRead(uint16_t *x, uint16_t *y);
 
+/// @cond DISABLE
 #if defined(EEPROM_SUPPORTED)
+  /// @endcond
   /* Touch screen calibration persistence*/
   uint32_t eepromReadS32(int location);
   void eepromWriteS32(int location, int32_t value);
   bool readCalibration(int location, tsMatrix_t *matrixPtr);
   void writeCalibration(int location, tsMatrix_t *matrixPtr);
+/// @cond DISABLE
 #endif
+  /// @endcond
 
   /* Low level access */
   void writeReg(uint8_t reg, uint8_t val);
