@@ -31,7 +31,27 @@
 
 #include <cstdint>
 #include <cstddef>
-#include "Arduino.h"
+#include <Arduino.h>
+#include <SPI.h>
+
+/**
+ * Determine the default SPI configuration.
+ */
+#if defined(ARDUINO_ARCH_APOLLO3)\
+  || (defined(__AVR__) && defined(SPDR) && defined(SPSR) && defined(SPIF))\
+  || (defined(__AVR__) && defined(SPI0) && defined(SPI_RXCIF_bm))\
+  || defined(ESP8266) || defined(ESP32)\
+  || defined(PLATFORM_ID)\
+  || defined(ARDUINO_SAM_DUE)\
+  || defined(__STM32F1__) || defined(__STM32F4__)\
+  || (defined(CORE_TEENSY) && defined(__arm__))
+#define HAS_CUSTOM_SPI 1
+#else  // HAS_CUSTOM_SPI
+// Use standard SPI library.
+#define HAS_CUSTOM_SPI 0
+#endif  // HAS_CUSTOM_SPI
+
+#define USE_CUSTOM_SPI 0
 
 
 #endif // _ADAFRUIT_RA8875_SPICONFIG_H

@@ -44,33 +44,22 @@
 
 #include <SPI.h>
 
+void set_base_spi_speed(SpiDriver &driver);
+void set_base_spi_speed(SpiDriver &driver) {
 /// @cond DISABLE
 #if defined(ARDUINO_ARCH_ARC32)
+  /// @endcond
+    driver.setClockSpeed(12000000L); /*!< 12MHz */
+  /// @cond DISABLE
+#elif defined(ARDUINO_SAM_DUE)
 /// @endcond
-uint32_t spi_speed = 12000000; /*!< 12MHz */
+  driver.setClockSpeed(22000000L); /*!< For non-DMA uses, the highest recorded / usable SPI speed reached was 22MHz */
 /// @cond DISABLE
 #else
-/// @endcond
-uint32_t spi_speed = 4000000; /*!< 4MHz */
-                              /// @cond DISABLE
+  /// @endcond
+  driver.setClockSpeed(4000000L); /*!< 4MHz */
 #endif
-/// @endcond
-
-// If the SPI library has transaction support, these functions
-// establish settings and protect from interference from other
-// libraries.  Otherwise, they simply do nothing.
-#ifdef SPI_HAS_TRANSACTION
-static inline void spi_begin(void) __attribute__((always_inline));
-static inline void spi_begin(void) {
-  // max speed!
-  SPI.beginTransaction(SPISettings(spi_speed, MSBFIRST, SPI_MODE0));
 }
-static inline void spi_end(void) __attribute__((always_inline));
-static inline void spi_end(void) { SPI.endTransaction(); }
-#else
-#define spi_begin() ///< Create dummy Macro Function
-#define spi_end()   ///< Create dummy Macro Function
-#endif
 
 /**************************************************************************/
 /*!
@@ -81,9 +70,12 @@ static inline void spi_end(void) { SPI.endTransaction(); }
 */
 /**************************************************************************/
 Adafruit_RA8875::Adafruit_RA8875(uint8_t CS, uint8_t RST)
-    : Adafruit_GFX(800, 480) {
+  : Adafruit_GFX(800, 480) {
   _cs = CS;
   _rst = RST;
+  _spiDriver = SpiDriver();
+
+  set_base_spi_speed(_spiDriver);
 }
 
 /**************************************************************************/
@@ -127,26 +119,20 @@ boolean Adafruit_RA8875::begin(enum RA8875sizes s) {
   digitalWrite(_rst, HIGH);
   delay(100);
 
-  SPI.begin();
+  _spiDriver.begin();
 
 #ifdef SPI_HAS_TRANSACTION
-/// @cond DISABLE
 #if defined(ARDUINO_ARCH_ARC32)
-  /// @endcond
-  spi_speed = 2000000;
-/// @cond DISABLE
-#else
-  /// @endcond
-  spi_speed = 125000;
-/// @cond DISABLE
-#endif
-/// @endcond
-#else
+  _spiDriver.setClockSpeed(2000000);
+#else // defined(ARDUINO_ARCH_ARC32)
+  _spiDriver.setClockSpeed(125000);
+#endif // defined(ARDUINO_ARCH_ARC32)
+#else // SPI_HAS_TRANSACTION
 #ifdef __AVR__
   SPI.setClockDivider(SPI_CLOCK_DIV128);
   SPI.setDataMode(SPI_MODE0);
-#endif
-#endif
+#endif // __AVR__
+#endif // SPI_HAS_TRANSACTION
 
   uint8_t x = readReg(0);
   //    Serial.print("x = 0x"); Serial.println(x,HEX);
@@ -158,20 +144,18 @@ boolean Adafruit_RA8875::begin(enum RA8875sizes s) {
   initialize();
 
 #ifdef SPI_HAS_TRANSACTION
-/// @cond DISABLE
-#if defined(ARDUINO_ARCH_ARC32)
-  /// @endcond
-  spi_speed = 12000000L;
-#else
-  spi_speed = 4000000L;
-#endif
-#else
+  set_base_spi_speed(_spiDriver);
+#else // SPI_HAS_TRANSACTION
 #ifdef __AVR__
   SPI.setClockDivider(SPI_CLOCK_DIV4);
-#endif
-#endif
+#endif // __AVR__
+#endif // SPI_HAS_TRANSACTION
 
   return true;
+}
+
+void Adafruit_RA8875::setClockSpeed(uint32_t speed) {
+  _spiDriver.setClockSpeed(speed);
 }
 
 /************************* Initialization *********************************/
@@ -268,11 +252,11 @@ void Adafruit_RA8875::initialize(void) {
   writeReg(RA8875_HDWR, (_width / 8) - 1); // H width: (HDWR + 1) * 8 = 480
   writeReg(RA8875_HNDFTR, RA8875_HNDFTR_DE_HIGH + hsync_finetune);
   writeReg(RA8875_HNDR, (hsync_nondisp - hsync_finetune - 2) /
-                            8); // H non-display: HNDR * 8 + HNDFTR + 2 = 10
+                        8); // H non-display: HNDR * 8 + HNDFTR + 2 = 10
   writeReg(RA8875_HSTR, hsync_start / 8 - 1); // Hsync start: (HSTR + 1)*8
   writeReg(RA8875_HPWR,
            RA8875_HPWR_LOW +
-               (hsync_pw / 8 - 1)); // HSync pulse width = (HPWR+1) * 8
+           (hsync_pw / 8 - 1)); // HSync pulse width = (HPWR+1) * 8
 
   /* Vertical settings registers */
   writeReg(RA8875_VDHR0, (uint16_t)(_height - 1 + _voffset) & 0xFF);
@@ -600,10 +584,10 @@ void Adafruit_RA8875::setXY(uint16_t x, uint16_t y) {
 /**************************************************************************/
 void Adafruit_RA8875::pushPixels(uint32_t num, uint16_t p) {
   digitalWrite(_cs, LOW);
-  SPI.transfer(RA8875_DATAWRITE);
+  _spiDriver.send(RA8875_DATAWRITE);
   while (num--) {
-    SPI.transfer(p >> 8);
-    SPI.transfer(p);
+    _spiDriver.send(p >> 8);
+    _spiDriver.send(p);
   }
   digitalWrite(_cs, HIGH);
 }
@@ -673,9 +657,9 @@ void Adafruit_RA8875::drawPixel(int16_t x, int16_t y, uint16_t color) {
   writeReg(RA8875_CURV1, y >> 8);
   writeCommand(RA8875_MRWC);
   digitalWrite(_cs, LOW);
-  SPI.transfer(RA8875_DATAWRITE);
-  SPI.transfer(color >> 8);
-  SPI.transfer(color);
+  _spiDriver.send(RA8875_DATAWRITE);
+  _spiDriver.send(color >> 8);
+  _spiDriver.send(color);
   digitalWrite(_cs, HIGH);
 }
 
@@ -707,10 +691,60 @@ void Adafruit_RA8875::drawPixels(uint16_t *p, uint32_t num, int16_t x,
 
   writeCommand(RA8875_MRWC);
   digitalWrite(_cs, LOW);
-  SPI.transfer(RA8875_DATAWRITE);
+  _spiDriver.send(RA8875_DATAWRITE);
   while (num--) {
-    SPI.transfer16(*p++);
+    _spiDriver.send16(*p++);
   }
+  digitalWrite(_cs, HIGH);
+}
+
+/**************************************************************************/
+/*!
+ Draws a series of pixels at the specified location without the overhead.
+ Allows programming of specified width, instead of full line width.
+
+ @param p     An array of RGB565 color pixels
+ @param num   The number of the pixels to draw
+ @param x     The 0-based x location
+ @param y     The 0-base y location
+ @param width The width of the rectangle to draw in
+ */
+/**************************************************************************/
+void Adafruit_RA8875::drawPixelsArea(uint16_t *p, uint32_t num, int16_t x, int16_t y, int16_t width) {
+  x = applyRotationX(x);
+  y = applyRotationY(y);
+
+  setXY(x, y);
+
+  uint16_t pixels = 0;
+  uint16_t rows = 0;
+  uint8_t dir = RA8875_MWCR0_LRTD;
+  if (_rotation == 2) {
+    dir = RA8875_MWCR0_RLTD;
+  }
+  writeReg(RA8875_MWCR0, (readReg(RA8875_MWCR0) & ~RA8875_MWCR0_DIRMASK) | dir);
+  writeCommand(RA8875_MRWC);
+  digitalWrite(_cs, LOW);
+  _spiDriver.send(RA8875_DATAWRITE);
+  while (num > 0) {
+    if (pixels == width) {
+      digitalWrite(_cs, HIGH);
+
+      rows++;
+      setXY(x, y + rows);
+      pixels = 0;
+
+      writeCommand(RA8875_MRWC);
+      digitalWrite(_cs, LOW);
+      _spiDriver.send(RA8875_DATAWRITE);
+    }
+    uint16_t to_transfer = min(num, width);
+    auto start = (uint8_t *)(p + (rows * width));
+    _spiDriver.send(start, sizeof(uint16_t) * to_transfer);
+    pixels += to_transfer;
+    num -= to_transfer;
+  }
+
   digitalWrite(_cs, HIGH);
 }
 
@@ -1521,14 +1555,16 @@ void Adafruit_RA8875::touchEnable(boolean on) {
 
   if (on) {
     /* Enable Touch Panel (Reg 0x70) */
+    _spiDriver.setClockSpeed(10000000L);
     writeReg(RA8875_TPCR0, RA8875_TPCR0_ENABLE | RA8875_TPCR0_WAIT_4096CLK |
-                               RA8875_TPCR0_WAKEENABLE | adcClk); // 10mhz max!
+                           RA8875_TPCR0_WAKEENABLE | adcClk); // 10mhz max!
     /* Set Auto Mode      (Reg 0x71) */
     writeReg(RA8875_TPCR1, RA8875_TPCR1_AUTO |
-                               // RA8875_TPCR1_VREFEXT |
-                               RA8875_TPCR1_DEBOUNCE);
+                           // RA8875_TPCR1_VREFEXT |
+                           RA8875_TPCR1_DEBOUNCE);
     /* Enable TP INT */
     writeReg(RA8875_INTC1, readReg(RA8875_INTC1) | RA8875_INTC1_TP);
+    set_base_spi_speed(_spiDriver);
   } else {
     /* Disable TP INT */
     writeReg(RA8875_INTC1, readReg(RA8875_INTC1) & ~RA8875_INTC1_TP);
@@ -1651,10 +1687,10 @@ uint8_t Adafruit_RA8875::readReg(uint8_t reg) {
 /**************************************************************************/
 void Adafruit_RA8875::writeData(uint8_t d) {
   digitalWrite(_cs, LOW);
-  spi_begin();
-  SPI.transfer(RA8875_DATAWRITE);
-  SPI.transfer(d);
-  spi_end();
+  _spiDriver.activate();
+  _spiDriver.send(RA8875_DATAWRITE);
+  _spiDriver.send(d);
+  _spiDriver.deactivate();
   digitalWrite(_cs, HIGH);
 }
 
@@ -1667,11 +1703,11 @@ void Adafruit_RA8875::writeData(uint8_t d) {
 /**************************************************************************/
 uint8_t Adafruit_RA8875::readData(void) {
   digitalWrite(_cs, LOW);
-  spi_begin();
+  _spiDriver.activate();
 
-  SPI.transfer(RA8875_DATAREAD);
-  uint8_t x = SPI.transfer(0x0);
-  spi_end();
+  _spiDriver.send(RA8875_DATAREAD);
+  uint8_t x = _spiDriver.receive();
+  _spiDriver.deactivate();
 
   digitalWrite(_cs, HIGH);
   return x;
@@ -1686,11 +1722,11 @@ uint8_t Adafruit_RA8875::readData(void) {
 /**************************************************************************/
 void Adafruit_RA8875::writeCommand(uint8_t d) {
   digitalWrite(_cs, LOW);
-  spi_begin();
+  _spiDriver.activate();
 
-  SPI.transfer(RA8875_CMDWRITE);
-  SPI.transfer(d);
-  spi_end();
+  _spiDriver.send(RA8875_CMDWRITE);
+  _spiDriver.send(d);
+  _spiDriver.deactivate();
 
   digitalWrite(_cs, HIGH);
 }
@@ -1704,10 +1740,10 @@ void Adafruit_RA8875::writeCommand(uint8_t d) {
 /**************************************************************************/
 uint8_t Adafruit_RA8875::readStatus(void) {
   digitalWrite(_cs, LOW);
-  spi_begin();
-  SPI.transfer(RA8875_CMDREAD);
-  uint8_t x = SPI.transfer(0x0);
-  spi_end();
+  _spiDriver.activate();
+  _spiDriver.send(RA8875_CMDREAD);
+  uint8_t x = _spiDriver.receive();
+  _spiDriver.deactivate();
 
   digitalWrite(_cs, HIGH);
   return x;
