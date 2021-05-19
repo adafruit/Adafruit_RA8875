@@ -24,24 +24,14 @@
  */
 /**
  * \file
- * \brief SpiDriver classes for Arduino compatible systems. Adapted from SdFat-beta by Bill Greiman
+ * \brief configuration definitions. Adapted from SdFat-beta by Bill Greiman
  */
-#ifndef _ADAFRUIT_RA8875_SPI_DRIVER_H
-#define _ADAFRUIT_RA8875_SPI_DRIVER_H
+#ifndef _ADAFRUIT_RA8875_SPICONFIG_H
+#define _ADAFRUIT_RA8875_SPICONFIG_H
 
-#include "SpiConfig.h"
+#include <cstdint>
+#include <cstddef>
+#include "Arduino.h"
 
-class SpiDriver {
-public:
-    static uint32_t spi_speed;
-    void select();
-    void deselect();
-    void activate();
-    void deactivate();
-    void begin();
-    void end();
-    uint8_t receive();
-    uint8_t receive(uint8_t* buf, size_t count);
 
-};
-#endif // _ADAFRUIT_RA8875_SPI_DRIVER_H
+#endif // _ADAFRUIT_RA8875_SPICONFIG_H

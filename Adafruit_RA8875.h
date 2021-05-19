@@ -42,6 +42,7 @@
 #endif
 /// @endcond
 
+#include "SpiDriver.h"
 #include <Adafruit_GFX.h>
 
 #ifndef _ADAFRUIT_RA8875_H
