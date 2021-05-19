@@ -34,6 +34,8 @@
 #include <Arduino.h>
 #include <SPI.h>
 
+#define SPI_DRIVER 0
+
 /**
  * Determine the default SPI configuration.
  */
@@ -51,7 +53,9 @@
 #define HAS_CUSTOM_SPI 0
 #endif  // HAS_CUSTOM_SPI
 
-#define USE_CUSTOM_SPI 0
+#if HAS_CUSTOM_SPI && SPI_DRIVER == 0
+#define USE_CUSTOM_SPI
+#endif
 
 
 #endif // _ADAFRUIT_RA8875_SPICONFIG_H

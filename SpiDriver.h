@@ -43,7 +43,7 @@ public:
     void end();
     uint8_t receive();
     uint16_t receive16();
-    void receive(uint8_t* buf, size_t count);
+    uint8_t receive(uint8_t* buf, size_t count);
     void send(uint8_t data);
     void send16(uint16_t data);
     void send(uint8_t* buf, size_t count);
@@ -59,8 +59,12 @@ private:
     SPISettings _spiSettings;
 };
 
-#if USE_CUSTOM_SPI == 0
+typedef SpiDriver SpiDriver;
+
+#ifndef USE_CUSTOM_SPI
 #include "SpiDefaultDriver.h"
+#elif defined(__AVR__)
+// Include AVR Definitions
 #endif
 
 #endif // _ADAFRUIT_RA8875_SPI_DRIVER_H
