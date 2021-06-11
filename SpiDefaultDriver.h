@@ -30,6 +30,11 @@
 #ifndef _ADAFRUIT_RA8875_SPIDEFAULTDRIVER_H
 #define _ADAFRUIT_RA8875_SPIDEFAULTDRIVER_H
 
+inline SpiDriver::SpiDriver(uint8_t csPin, bool interrupts) {
+  _spiClass = getSpiClass();
+  setClockSpeed(4000000L);
+}
+
 inline SPIClass* SpiDriver::getSpiClass() {
     return &SPI;
 }

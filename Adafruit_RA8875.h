@@ -139,7 +139,7 @@ typedef struct // Matrix
 /**************************************************************************/
 class Adafruit_RA8875 : public Adafruit_GFX {
 public:
-  Adafruit_RA8875(uint8_t cs, uint8_t rst);
+  Adafruit_RA8875(uint8_t cs, uint8_t rst, bool use_interrupts=false);
 
   boolean begin(enum RA8875sizes s);
   void softReset(void);
@@ -165,6 +165,7 @@ public:
   void drawPixel(int16_t x, int16_t y, uint16_t color);
   void drawPixels(uint16_t *p, uint32_t count, int16_t x, int16_t y);
   void drawPixelsArea(uint16_t *p, uint32_t count, int16_t x, int16_t y, int16_t width);
+  void drawPixelsAreaDMA(uint16_t *p, uint32_t count, int16_t x, int16_t y, int16_t width);
   void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color);
   void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color);
 
@@ -273,7 +274,7 @@ public:
    */
   /**************************************************************************/
   void setClockSpeed(uint32_t speed);
-
+  SpiDriver spiDriver;
 private:
   void PLLinit(void);
   void initialize(void);
@@ -303,7 +304,10 @@ private:
     y = temp;
   }
 
-  SpiDriver _spiDriver;
+  DMAManager * getManager(){
+    return spiDriver.getDMAManager();
+  }
+
   uint8_t _cs, _rst;
   uint16_t _width, _height;
   uint8_t _textScale;

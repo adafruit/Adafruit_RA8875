@@ -36,6 +36,8 @@
 
 #define SPI_DRIVER 0
 
+#define USE_DMA_INTERRUPT 0
+
 /**
  * Determine the default SPI configuration.
  */

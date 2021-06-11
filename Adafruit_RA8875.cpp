@@ -69,13 +69,12 @@ void set_base_spi_speed(SpiDriver &driver) {
       @param RST Location of the reset pin
 */
 /**************************************************************************/
-Adafruit_RA8875::Adafruit_RA8875(uint8_t CS, uint8_t RST)
-  : Adafruit_GFX(800, 480) {
+Adafruit_RA8875::Adafruit_RA8875(uint8_t CS, uint8_t RST, bool use_interrupts)
+  : Adafruit_GFX(800, 480), spiDriver(CS, use_interrupts) {
   _cs = CS;
   _rst = RST;
-  _spiDriver = SpiDriver();
 
-  set_base_spi_speed(_spiDriver);
+  set_base_spi_speed(spiDriver);
 }
 
 /**************************************************************************/
@@ -119,13 +118,13 @@ boolean Adafruit_RA8875::begin(enum RA8875sizes s) {
   digitalWrite(_rst, HIGH);
   delay(100);
 
-  _spiDriver.begin();
+  spiDriver.begin();
 
 #ifdef SPI_HAS_TRANSACTION
 #if defined(ARDUINO_ARCH_ARC32)
-  _spiDriver.setClockSpeed(2000000);
+  spiDriver.setClockSpeed(2000000);
 #else // defined(ARDUINO_ARCH_ARC32)
-  _spiDriver.setClockSpeed(125000);
+  spiDriver.setClockSpeed(125000);
 #endif // defined(ARDUINO_ARCH_ARC32)
 #else // SPI_HAS_TRANSACTION
 #ifdef __AVR__
@@ -144,7 +143,7 @@ boolean Adafruit_RA8875::begin(enum RA8875sizes s) {
   initialize();
 
 #ifdef SPI_HAS_TRANSACTION
-  set_base_spi_speed(_spiDriver);
+  set_base_spi_speed(spiDriver);
 #else // SPI_HAS_TRANSACTION
 #ifdef __AVR__
   SPI.setClockDivider(SPI_CLOCK_DIV4);
@@ -155,7 +154,7 @@ boolean Adafruit_RA8875::begin(enum RA8875sizes s) {
 }
 
 void Adafruit_RA8875::setClockSpeed(uint32_t speed) {
-  _spiDriver.setClockSpeed(speed);
+  spiDriver.setClockSpeed(speed);
 }
 
 /************************* Initialization *********************************/
@@ -568,10 +567,36 @@ boolean Adafruit_RA8875::waitPoll(uint8_t regname, uint8_t waitflag) {
 */
 /**************************************************************************/
 void Adafruit_RA8875::setXY(uint16_t x, uint16_t y) {
-  writeReg(RA8875_CURH0, x);
-  writeReg(RA8875_CURH1, x >> 8);
-  writeReg(RA8875_CURV0, y);
-  writeReg(RA8875_CURV1, y >> 8);
+
+  digitalWrite(_cs, LOW);
+  spiDriver.activate();
+  spiDriver.send(RA8875_CMDWRITE);
+  spiDriver.send(RA8875_CURH0);
+  spiDriver.send(RA8875_DATAWRITE);
+  spiDriver.send(x);
+  digitalWrite(_cs, HIGH);
+
+  digitalWrite(_cs, LOW);
+  spiDriver.send(RA8875_CMDWRITE);
+  spiDriver.send(RA8875_CURH1);
+  spiDriver.send(RA8875_DATAWRITE);
+  spiDriver.send(x >> 8);
+  digitalWrite(_cs, HIGH);
+
+  digitalWrite(_cs, LOW);
+  spiDriver.send(RA8875_CMDWRITE);
+  spiDriver.send(RA8875_CURV0);
+  spiDriver.send(RA8875_DATAWRITE);
+  spiDriver.send(y);
+  digitalWrite(_cs, HIGH);
+
+  digitalWrite(_cs, LOW);
+  spiDriver.send(RA8875_CMDWRITE);
+  spiDriver.send(RA8875_CURV1);
+  spiDriver.send(RA8875_DATAWRITE);
+  spiDriver.send(y >> 8);
+  spiDriver.deactivate();
+  digitalWrite(_cs, HIGH);
 }
 
 /**************************************************************************/
@@ -584,10 +609,10 @@ void Adafruit_RA8875::setXY(uint16_t x, uint16_t y) {
 /**************************************************************************/
 void Adafruit_RA8875::pushPixels(uint32_t num, uint16_t p) {
   digitalWrite(_cs, LOW);
-  _spiDriver.send(RA8875_DATAWRITE);
+  spiDriver.send(RA8875_DATAWRITE);
   while (num--) {
-    _spiDriver.send(p >> 8);
-    _spiDriver.send(p);
+    spiDriver.send(p >> 8);
+    spiDriver.send(p);
   }
   digitalWrite(_cs, HIGH);
 }
@@ -657,9 +682,9 @@ void Adafruit_RA8875::drawPixel(int16_t x, int16_t y, uint16_t color) {
   writeReg(RA8875_CURV1, y >> 8);
   writeCommand(RA8875_MRWC);
   digitalWrite(_cs, LOW);
-  _spiDriver.send(RA8875_DATAWRITE);
-  _spiDriver.send(color >> 8);
-  _spiDriver.send(color);
+  spiDriver.send(RA8875_DATAWRITE);
+  spiDriver.send(color >> 8);
+  spiDriver.send(color);
   digitalWrite(_cs, HIGH);
 }
 
@@ -691,9 +716,9 @@ void Adafruit_RA8875::drawPixels(uint16_t *p, uint32_t num, int16_t x,
 
   writeCommand(RA8875_MRWC);
   digitalWrite(_cs, LOW);
-  _spiDriver.send(RA8875_DATAWRITE);
+  spiDriver.send(RA8875_DATAWRITE);
   while (num--) {
-    _spiDriver.send16(*p++);
+    spiDriver.send16(*p++);
   }
   digitalWrite(_cs, HIGH);
 }
@@ -725,7 +750,7 @@ void Adafruit_RA8875::drawPixelsArea(uint16_t *p, uint32_t num, int16_t x, int16
   writeReg(RA8875_MWCR0, (readReg(RA8875_MWCR0) & ~RA8875_MWCR0_DIRMASK) | dir);
   writeCommand(RA8875_MRWC);
   digitalWrite(_cs, LOW);
-  _spiDriver.send(RA8875_DATAWRITE);
+  spiDriver.send(RA8875_DATAWRITE);
   while (num > 0) {
     if (pixels == width) {
       digitalWrite(_cs, HIGH);
@@ -736,16 +761,120 @@ void Adafruit_RA8875::drawPixelsArea(uint16_t *p, uint32_t num, int16_t x, int16
 
       writeCommand(RA8875_MRWC);
       digitalWrite(_cs, LOW);
-      _spiDriver.send(RA8875_DATAWRITE);
+      spiDriver.send(RA8875_DATAWRITE);
     }
     uint16_t to_transfer = min(num, width);
     auto start = (uint8_t *)(p + (rows * width));
-    _spiDriver.send(start, sizeof(uint16_t) * to_transfer);
+    spiDriver.send(start, sizeof(uint16_t) * to_transfer);
     pixels += to_transfer;
     num -= to_transfer;
   }
 
   digitalWrite(_cs, HIGH);
+}
+
+static void drawPixelsDMADelegate(DMAManager* manager, DMA_Data* data) {
+  const uint8_t frames_per_line = 16;
+  DrawAreaData *functionData = &data->functionData.drawAreaData;
+  // Pointers for stuff that will be updated
+  uint16_t *pixel_arr_start = functionData->colors;
+  volatile uint32_t *pixels_left = &(functionData->num);
+  volatile uint16_t *rows_completed = &(functionData->rows_completed);
+
+  // Values that we need saved
+  uint16_t area_width = functionData->width;
+
+  // Reset frames
+  manager->clear_frames();
+
+  // Add frames for each line until full or out of pixels
+  while(*pixels_left > 0 && manager->can_add_entries(frames_per_line)) {
+
+    uint16_t y_row = functionData->y + (*rows_completed);
+
+    // Write XY Coordinates
+
+    manager->add_entry_cs_pin_toggle(LOW);
+    manager->add_entry_coord_bits(functionData->x, RA8875_CURH0);
+    // If RA Clock is 60MHz and the due runs at 84MHz, and we need CS to be high for 5 RA clock cycles
+    // Keep high for 7 cycles
+    manager->add_entry_cs_pin_toggle(HIGH, DMA_CS_HIGH_TRANSFERS);
+
+    manager->add_entry_cs_pin_toggle(LOW);
+    manager->add_entry_coord_bits(functionData->x, RA8875_CURH1);
+    manager->add_entry_cs_pin_toggle(HIGH, DMA_CS_HIGH_TRANSFERS);
+
+    manager->add_entry_cs_pin_toggle(LOW);
+    manager->add_entry_coord_bits(y_row, RA8875_CURV0);
+    manager->add_entry_cs_pin_toggle(HIGH, DMA_CS_HIGH_TRANSFERS);
+
+    manager->add_entry_cs_pin_toggle(LOW);
+    manager->add_entry_coord_bits(y_row, RA8875_CURV1);
+    manager->add_entry_cs_pin_toggle(HIGH, DMA_CS_HIGH_TRANSFERS);
+
+    // Draw Pixels out
+
+    uint16_t to_transfer = min(*pixels_left, area_width);
+    auto start = (uint8_t *)(pixel_arr_start + ((*rows_completed) * area_width));
+
+    manager->add_entry_cs_pin_toggle(LOW);
+    manager->add_entry_spi_draw_pixels(start, sizeof(uint16_t) * to_transfer);
+    manager->add_entry_cs_pin_toggle(HIGH, DMA_CS_HIGH_TRANSFERS);
+
+    *pixels_left -= to_transfer;
+    *rows_completed += 1;
+  }
+}
+
+/**************************************************************************/
+/*!
+ Draws a series of pixels at the specified location without the overhead.
+ Allows programming of specified width, instead of full line width.
+ Uses DMA
+
+ @param p     An array of RGB565 color pixels
+ @param num   The number of the pixels to draw
+ @param x     The 0-based x location
+ @param y     The 0-base y location
+ @param width The width of the rectangle to draw in
+ */
+/**************************************************************************/
+void Adafruit_RA8875::drawPixelsAreaDMA(uint16_t *p, uint32_t num, int16_t x, int16_t y, int16_t width) {
+
+  DMAManager* manager = getManager();
+  DMA_Data* curData = manager->get_cur_data();
+  DMAFunctionData* functionData = &curData->functionData;
+
+  curData->is_complete = [](const DMAFunctionData &function_data) -> bool {
+    return function_data.drawAreaData.num <= 0;
+  };
+
+  curData->fetch_next_batch = [](DMAManager* manager, DMA_Data* data) -> void {
+    data->clear_working_data();
+    drawPixelsDMADelegate(manager, data);
+  };
+
+  curData->on_complete = [](SpiDriver* driver) -> void {
+    driver->deactivate();
+  };
+
+  functionData->drawAreaData.colors = p;
+  functionData->drawAreaData.num = num;
+  functionData->drawAreaData.x = applyRotationX(x);
+  functionData->drawAreaData.y = applyRotationY(y);
+  functionData->drawAreaData.width = width;
+  functionData->drawAreaData.rows_completed = 0;
+
+  uint8_t dir = RA8875_MWCR0_LRTD;
+  if (_rotation == 2) {
+    dir = RA8875_MWCR0_RLTD;
+  }
+  writeReg(RA8875_MWCR0, (readReg(RA8875_MWCR0) & ~RA8875_MWCR0_DIRMASK) | dir);
+
+  curData->fetch_next_batch(manager, curData);
+  spiDriver.activate();
+  spiDriver.sendChain(manager->finalize());
+
 }
 
 /**************************************************************************/
@@ -1555,7 +1684,7 @@ void Adafruit_RA8875::touchEnable(boolean on) {
 
   if (on) {
     /* Enable Touch Panel (Reg 0x70) */
-    _spiDriver.setClockSpeed(10000000L);
+    spiDriver.setClockSpeed(10000000L);
     writeReg(RA8875_TPCR0, RA8875_TPCR0_ENABLE | RA8875_TPCR0_WAIT_4096CLK |
                            RA8875_TPCR0_WAKEENABLE | adcClk); // 10mhz max!
     /* Set Auto Mode      (Reg 0x71) */
@@ -1564,7 +1693,7 @@ void Adafruit_RA8875::touchEnable(boolean on) {
                            RA8875_TPCR1_DEBOUNCE);
     /* Enable TP INT */
     writeReg(RA8875_INTC1, readReg(RA8875_INTC1) | RA8875_INTC1_TP);
-    set_base_spi_speed(_spiDriver);
+    set_base_spi_speed(spiDriver);
   } else {
     /* Disable TP INT */
     writeReg(RA8875_INTC1, readReg(RA8875_INTC1) & ~RA8875_INTC1_TP);
@@ -1687,10 +1816,10 @@ uint8_t Adafruit_RA8875::readReg(uint8_t reg) {
 /**************************************************************************/
 void Adafruit_RA8875::writeData(uint8_t d) {
   digitalWrite(_cs, LOW);
-  _spiDriver.activate();
-  _spiDriver.send(RA8875_DATAWRITE);
-  _spiDriver.send(d);
-  _spiDriver.deactivate();
+  spiDriver.activate();
+  spiDriver.send(RA8875_DATAWRITE);
+  spiDriver.send(d);
+  spiDriver.deactivate();
   digitalWrite(_cs, HIGH);
 }
 
@@ -1703,11 +1832,11 @@ void Adafruit_RA8875::writeData(uint8_t d) {
 /**************************************************************************/
 uint8_t Adafruit_RA8875::readData(void) {
   digitalWrite(_cs, LOW);
-  _spiDriver.activate();
+  spiDriver.activate();
 
-  _spiDriver.send(RA8875_DATAREAD);
-  uint8_t x = _spiDriver.receive();
-  _spiDriver.deactivate();
+  spiDriver.send(RA8875_DATAREAD);
+  uint8_t x = spiDriver.receive();
+  spiDriver.deactivate();
 
   digitalWrite(_cs, HIGH);
   return x;
@@ -1722,11 +1851,11 @@ uint8_t Adafruit_RA8875::readData(void) {
 /**************************************************************************/
 void Adafruit_RA8875::writeCommand(uint8_t d) {
   digitalWrite(_cs, LOW);
-  _spiDriver.activate();
+  spiDriver.activate();
 
-  _spiDriver.send(RA8875_CMDWRITE);
-  _spiDriver.send(d);
-  _spiDriver.deactivate();
+  spiDriver.send(RA8875_CMDWRITE);
+  spiDriver.send(d);
+  spiDriver.deactivate();
 
   digitalWrite(_cs, HIGH);
 }
@@ -1740,10 +1869,10 @@ void Adafruit_RA8875::writeCommand(uint8_t d) {
 /**************************************************************************/
 uint8_t Adafruit_RA8875::readStatus(void) {
   digitalWrite(_cs, LOW);
-  _spiDriver.activate();
-  _spiDriver.send(RA8875_CMDREAD);
-  uint8_t x = _spiDriver.receive();
-  _spiDriver.deactivate();
+  spiDriver.activate();
+  spiDriver.send(RA8875_CMDREAD);
+  uint8_t x = spiDriver.receive();
+  spiDriver.deactivate();
 
   digitalWrite(_cs, HIGH);
   return x;

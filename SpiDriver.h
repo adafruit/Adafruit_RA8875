@@ -30,33 +30,54 @@
 #define _ADAFRUIT_RA8875_SPI_DRIVER_H
 
 #include "SpiConfig.h"
+#include "DMAManager.h"
 
 class SpiDriver {
 public:
-    inline SpiDriver(){
-        _spiClass = getSpiClass();
-        setClockSpeed(4000000L);
-    }
-    void activate();
-    void deactivate();
-    void begin();
-    void end();
-    uint8_t receive();
-    uint16_t receive16();
-    uint8_t receive(uint8_t* buf, size_t count);
-    void send(uint8_t data);
-    void send16(uint16_t data);
-    void send(uint8_t* buf, size_t count);
-    inline void setClockSpeed(uint32_t speed) {
-#if SPI_HAS_TRANSACTION
-        _spiSettings = SPISettings(speed, MSBFIRST, SPI_MODE0);
-#endif
-    }
-private:
-    SPIClass* getSpiClass();
+  explicit SpiDriver(uint8_t csPin, bool interrupts = false);
 
-    SPIClass* _spiClass;
-    SPISettings _spiSettings;
+  void activate();
+
+  void deactivate();
+
+  void begin();
+
+  void end();
+
+  uint8_t receive();
+
+  uint16_t receive16();
+
+  uint8_t receive(uint8_t *buf, size_t count);
+
+  void send(uint8_t data);
+
+  void send16(uint16_t data);
+
+  void send(uint8_t *buf, size_t count);
+
+  inline void setClockSpeed(uint32_t speed) {
+#if SPI_HAS_TRANSACTION
+    _spiSettings = SPISettings(speed, MSBFIRST, SPI_MODE0);
+#endif
+  }
+
+#ifdef USE_CUSTOM_SPI
+  DMAManager* getDMAManager() {
+    return &dmaManager;
+  }
+  void sendChain(volatile LLI* head);
+  void nextDMA();
+#endif
+private:
+  SPIClass *getSpiClass();
+
+  SPIClass *_spiClass;
+  SPISettings _spiSettings;
+#ifdef USE_CUSTOM_SPI
+  bool use_dma_interrupts = false;
+  DMAManager dmaManager;
+#endif
 };
 
 typedef SpiDriver SpiDriver;
