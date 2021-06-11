@@ -20,8 +20,10 @@
 /**************************************************************************/
 
 #if ARDUINO >= 100
+
 #include "Arduino.h"
 #include "Print.h"
+
 #else
 #include "WProgram.h"
 #endif
@@ -33,8 +35,8 @@
 #endif
 
 /// @cond DISABLE
-#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega1280__) ||              \
-    defined(__AVR_ATmega2560__) || defined(ESP8266) || defined(ESP32) ||       \
+#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega1280__) || \
+    defined(__AVR_ATmega2560__) || defined(ESP8266) || defined(ESP32) || \
     defined(DOXYGEN)
 /// @endcond
 #define EEPROM_SUPPORTED ///< Board supports EEPROM Storage
@@ -139,7 +141,7 @@ typedef struct // Matrix
 /**************************************************************************/
 class Adafruit_RA8875 : public Adafruit_GFX {
 public:
-  Adafruit_RA8875(uint8_t cs, uint8_t rst, bool use_interrupts=false);
+  Adafruit_RA8875(uint8_t cs, uint8_t rst, bool use_interrupts = false);
 
   boolean begin(enum RA8875sizes s);
   void softReset(void);
@@ -166,8 +168,8 @@ public:
   void drawPixels(uint16_t *p, uint32_t count, int16_t x, int16_t y);
   void drawPixelsArea(uint16_t *p, uint32_t count, int16_t x, int16_t y, int16_t width);
 
-  void
-  drawPixelsAreaDMA(uint16_t *p, uint32_t count, int16_t x, int16_t y, int16_t width, void (*complete_cb)() = nullptr);
+  void drawPixelsAreaDMA(uint16_t *p, uint32_t num, int16_t x, int16_t y, int16_t width, void *cbData,
+                         void (*complete_cb)(void *));
 
   void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color);
   void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color);
@@ -268,6 +270,7 @@ public:
     textWrite((const char *)buffer, size);
     return size;
   }
+
 #endif
 
   /**************************************************************************/
@@ -278,6 +281,8 @@ public:
   /**************************************************************************/
   void setClockSpeed(uint32_t speed);
   SpiDriver spiDriver;
+  void onDMAInterrupt();
+
 private:
   void PLLinit(void);
   void initialize(void);

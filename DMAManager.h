@@ -69,7 +69,13 @@ typedef union DMAFunctionData {
   DrawAreaData drawAreaData;
 } DMAFunctionData;
 
-void memset_volatile(volatile void *s, char c, size_t n) {
+typedef struct DMACallbackData {
+  void *dataPtr;
+
+  void (*complete_cb)(void *);
+} DMACallbackData;
+
+static void memset_volatile(volatile void *s, char c, size_t n) {
   char *p = (char *)s;
   while (n-- > 0) {
     *p++ = c;
@@ -84,6 +90,7 @@ void memset_volatile(volatile void *s, char c, size_t n) {
 typedef struct DMA_Data {
   DMAOperation operation;
   DMAFunctionData functionData;
+  DMACallbackData callbackData;
   volatile uint16_t storage_idx;
   volatile uint8_t working_storage[WORKING_DATA_SIZE];
 
@@ -93,7 +100,6 @@ typedef struct DMA_Data {
 
   void (*on_complete)(SpiDriver *spiDriver);
 
-  void (*complete_cb)();
 
   inline void clear_working_data() {
     storage_idx = 0;
@@ -110,7 +116,6 @@ typedef struct DMA_Data {
 
   inline volatile uint8_t *add_working_data(const uint8_t *buf, size_t size) {
     if (!can_add_working_data(size)) {
-      Serial.println("HELP");
       return nullptr;
     }
     uint16_t cursorStart = storage_idx;
