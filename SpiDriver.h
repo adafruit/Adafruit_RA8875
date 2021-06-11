@@ -63,11 +63,15 @@ public:
   }
 
 #ifdef USE_CUSTOM_SPI
-  DMAManager* getDMAManager() {
+
+  DMAManager *getDMAManager() {
     return &dmaManager;
   }
-  void sendChain(volatile LLI* head);
+
+  void sendChain(volatile LLI *head);
+
   void nextDMA();
+
 #endif
 private:
   SPIClass *getSpiClass();

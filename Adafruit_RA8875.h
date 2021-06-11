@@ -304,7 +304,7 @@ private:
     y = temp;
   }
 
-  DMAManager * getManager(){
+  DMAManager *getManager() {
     return spiDriver.getDMAManager();
   }
 

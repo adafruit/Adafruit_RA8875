@@ -83,19 +83,19 @@ static void dmac_channel_enable(uint32_t ul_num) {
 
 /* Disable DMA Interrupt Channel. */
 static void dmac_interrupt_disable(uint32_t ul_num, bool chain = false) {
-  if(chain) {
-    DMAC->DMAC_EBCIER = DMAC_EBCIER_CBTC0 << ul_num;
+  if (chain) {
+    DMAC->DMAC_EBCIDR = DMAC_EBCIDR_CBTC0 << ul_num;
   } else {
-    DMAC->DMAC_EBCIER = DMAC_EBCIER_BTC0 << ul_num;
+    DMAC->DMAC_EBCIDR = DMAC_EBCIDR_BTC0 << ul_num;
   }
 }
 
 /* Enable DMA Interrupt Channel. */
 static void dmac_interrupt_enable(uint32_t ul_num, bool chain = false) {
-  if(chain) {
-    DMAC->DMAC_EBCIDR = DMAC_EBCIER_CBTC0 << ul_num;
+  if (chain) {
+    DMAC->DMAC_EBCIER = DMAC_EBCIER_CBTC0 << ul_num;
   } else {
-    DMAC->DMAC_EBCIDR = DMAC_EBCIER_BTC0 << ul_num;
+    DMAC->DMAC_EBCIER = DMAC_EBCIER_BTC0 << ul_num;
   }
 }
 
@@ -106,7 +106,7 @@ static bool dmac_channel_transfer_done(uint32_t ul_num) {
 
 SpiDriver::SpiDriver(uint8_t csPin, bool interrupts) : use_dma_interrupts(interrupts), dmaManager(csPin) {
   _spiClass = getSpiClass();
-  setClockSpeed(4000000L);
+  setClockSpeed(2000000L);
 }
 
 //------------------------------------------------------------------------------
@@ -196,7 +196,7 @@ void SpiDriver::activate() {
   // enable SPI
   pSpi->SPI_CR |= SPI_CR_SPIEN;
 
-  Serial.println("Activating SPI");
+  //Serial.println("Activating SPI");
 }
 
 //------------------------------------------------------------------------------
@@ -204,7 +204,6 @@ void SpiDriver::deactivate() {
 #if SPI_HAS_TRANSACTION
   SPI.endTransaction();
 #endif
-  Serial.println("Deactivating SPI");
 }
 
 //------------------------------------------------------------------------------
@@ -293,26 +292,27 @@ void SpiDriver::send(uint8_t *buf, size_t count) {
   }
 }
 
-void SpiDriver::sendChain(volatile LLI* head) {
+void SpiDriver::sendChain(volatile LLI *head) {
+
   dmac_channel_disable(SPI_DMAC_TX_CH);
   // Clear interrupts
   Word interrupt_state = DMAC->DMAC_EBCIER;
   (void)interrupt_state;
 
-  if(!use_dma_interrupts) {
+  if (!use_dma_interrupts) {
     dmac_interrupt_disable(SPI_DMAC_TX_CH, true);
     dmac_interrupt_disable(SPI_DMAC_TX_CH);
   }
 
-  DMAC->DMAC_CH_NUM[SPI_DMAC_TX_CH].DMAC_DSCR = (uint32_t) head;
+  DMAC->DMAC_CH_NUM[SPI_DMAC_TX_CH].DMAC_DSCR = (uint32_t)head;
 
-  DMAC->DMAC_CH_NUM[SPI_DMAC_TX_CH].DMAC_CTRLB = DMAC_CTRLB_SRC_INCR_INCREMENTING | DMAC_CTRLB_DST_INCR_FIXED;
+  DMAC->DMAC_CH_NUM[SPI_DMAC_TX_CH].DMAC_CTRLB = DMAC_CTRLB_SRC_INCR_FIXED | DMAC_CTRLB_DST_INCR_FIXED;
 
   DMAC->DMAC_CH_NUM[SPI_DMAC_TX_CH].DMAC_CFG = DMAC_CFG_DST_PER(SPI_TX_IDX) |
-                                            DMAC_CFG_DST_H2SEL | DMAC_CFG_SOD | DMAC_CFG_FIFOCFG_ALAP_CFG;
+                                               DMAC_CFG_DST_H2SEL | DMAC_CFG_SOD | DMAC_CFG_FIFOCFG_ALAP_CFG;
 
-  if(use_dma_interrupts) {
-    //dmac_interrupt_enable(SPI_DMAC_TX_CH);
+  if (use_dma_interrupts) {
+    // dmac_interrupt_enable(SPI_DMAC_TX_CH);
     dmac_interrupt_enable(SPI_DMAC_TX_CH, true);
   }
 
@@ -321,9 +321,12 @@ void SpiDriver::sendChain(volatile LLI* head) {
 
 void SpiDriver::nextDMA() {
   DMA_Data *data = dmaManager.get_cur_data();
-  if(data->is_complete(data->functionData)) {
+  if (data->is_complete(data->functionData)) {
     data->on_complete(this);
+    return;
   }
+  data->fetch_next_batch(&dmaManager, data);
+  sendChain(dmaManager.finalize());
 }
 
 #endif

@@ -60,7 +60,8 @@ volatile LLI *DMAManager::get_entry(uint16_t idx) {
 }
 
 void DMAManager::remove_entry(uint16_t idx) {
-  if (idx >= size) return;
+  if (idx >= size)
+    return;
 
   if (idx < size - 1) { // Move every entry down
     uint16_t elements_moved = size - idx - 1;
@@ -122,7 +123,7 @@ bool DMAManager::add_entry_pin_toggle(bool state, uint8_t pin, uint32_t *pin_mas
   return add_entry(SADDR, DADDR, CTRLA, CTRLB);
 }
 
-bool DMAManager::add_entry_spi_transfer(const volatile uint8_t *buf, size_t qty) {
+bool DMAManager::add_entry_spi_transfer(volatile uint8_t *buf, size_t qty) {
   if (qty <= 0) return false;
 
   static uint8_t ff = 0XFF;
@@ -135,7 +136,8 @@ bool DMAManager::add_entry_spi_transfer(const volatile uint8_t *buf, size_t qty)
   auto SADDR = (Word)buf;
   Word DADDR = (uint32_t)&SPI0->SPI_TDR;
   Word CTRLA = qty | DMAC_CTRLA_SRC_WIDTH_BYTE | DMAC_CTRLA_DST_WIDTH_BYTE;
-  Word CTRLB = DMAC_CTRLB_FC_MEM2PER_DMA_FC | src_incr | DMAC_CTRLB_DST_INCR_FIXED;
+  Word CTRLB = DMAC_CTRLB_FC_MEM2PER_DMA_FC |
+               src_incr | DMAC_CTRLB_DST_INCR_FIXED;
 
   return add_entry(SADDR, DADDR, CTRLA, CTRLB);
 }
@@ -154,19 +156,20 @@ bool DMAManager::add_entry_coord_bits(uint16_t coord, uint8_t coord_register) {
 
   uint8_t coord_commands[COORD_BUF_SPACE];
 
+  coord_commands[0] = RA8875_CMDWRITE;
+  coord_commands[1] = coord_register;
+  coord_commands[2] = RA8875_DATAWRITE;
   if (coord_register == RA8875_CURH1 || coord_register == RA8875_CURV1) {
-    fill_command(&coord_commands[0], RA8875_CMDWRITE, coord_register);
-    fill_command(&coord_commands[2], RA8875_DATAWRITE, coord >> 8);
+    coord_commands[3] = coord >> 8;
   } else {
-    fill_command(&coord_commands[0], RA8875_CMDWRITE, coord_register);
-    fill_command(&coord_commands[2], RA8875_DATAWRITE, coord);
+    coord_commands[3] = coord & 0xFF;
   }
 
-  volatile uint8_t* data_ptr = transaction_data.add_working_data(coord_commands, COORD_BUF_SPACE);
+  volatile uint8_t *data_ptr = transaction_data.add_working_data(coord_commands, COORD_BUF_SPACE);
   return add_entry_spi_transfer(data_ptr, COORD_BUF_SPACE);
 }
 
-bool DMAManager::add_entry_spi_draw_pixels(const volatile uint8_t *buf, size_t qty) {
+bool DMAManager::add_entry_spi_draw_pixels(volatile uint8_t *buf, size_t qty) {
   if (!transaction_data.can_add_working_data(3)) { // High & Low bits
     return false;
   }

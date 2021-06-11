@@ -4,11 +4,13 @@
 #include <cstdint>
 #include <Arduino.h>
 
-
-#define LLI_MAX_FRAMES 400
-#define WORKING_DATA_SIZE 300
+#define FRAMES_PER_LINE 16
+#define LINES_PER_DMA 25
+#define LLI_MAX_FRAMES (FRAMES_PER_LINE * LINES_PER_DMA)
+#define WORKING_DATA_PER_LINE 19
+#define WORKING_DATA_SIZE (WORKING_DATA_PER_LINE * LINES_PER_DMA)
 #define COORD_BUF_SPACE 4
-#define DMA_CS_HIGH_TRANSFERS 10
+#define DMA_CS_HIGH_TRANSFERS 8
 
 #ifdef ARDUINO_SAM_DUE
 typedef uint32_t Word;
@@ -106,6 +108,7 @@ typedef struct DMA_Data {
 
   inline volatile uint8_t *add_working_data(const uint8_t *buf, size_t size) {
     if (!can_add_working_data(size)) {
+      Serial.println("HELP");
       return nullptr;
     }
     uint16_t cursorStart = storage_idx;
@@ -120,7 +123,7 @@ typedef struct DMA_Data {
 
 class DMAManager {
 public:
-  explicit DMAManager(uint8_t csPin) : size(0) {
+  explicit DMAManager(uint8_t csPin) : size(0), dma_frames() {
     _csPin = csPin;
     _csPinMask = digitalPinToBitMask(csPin);
     reset();
@@ -170,13 +173,13 @@ public:
   /************************
    * General purpose methods for adding SPI Frames, PIO Frames, etc.
    ************************/
-  bool add_entry_pin_toggle(bool state, uint8_t pin, uint32_t *pin_mask_ptr, uint8_t num_transfers = 1);
+  bool add_entry_pin_toggle(bool state, uint8_t pin, uint32_t *pin_mask_ptr, uint8_t num_transfers = 2);
 
-  bool add_entry_cs_pin_toggle(bool state, uint8_t num_transfers = 1);
+  bool add_entry_cs_pin_toggle(bool state, uint8_t num_transfers = 2);
 
-  bool add_entry_spi_transfer(const volatile uint8_t *buf, size_t qty);
+  bool add_entry_spi_transfer(volatile uint8_t *buf, size_t qty);
 
-  bool add_entry_spi_draw_pixels(const volatile uint8_t *buf, size_t qty);
+  bool add_entry_spi_draw_pixels(volatile uint8_t *buf, size_t qty);
 
   /**
    * Adds an entry to set the bits in an X/Y position register
@@ -191,7 +194,7 @@ private:
   volatile uint32_t size;                     /**< Cur Number of frames in buffer*/
   uint8_t _csPin;                             /**< ChipSelect Pin*/
   uint32_t _csPinMask;                        /**< Persistent mask for CS Pin, since it can't be obtained by DMA*/
-  volatile LLI dma_frames[LLI_MAX_FRAMES]{};  /**< Constructed frames*/
+  LLI volatile dma_frames[LLI_MAX_FRAMES]{};  /**< Constructed frames*/
 };
 
 

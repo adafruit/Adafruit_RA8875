@@ -32,7 +32,7 @@
 
 inline SpiDriver::SpiDriver(uint8_t csPin, bool interrupts) {
   _spiClass = getSpiClass();
-  setClockSpeed(4000000L);
+  setClockSpeed(2000000L);
 }
 
 inline SPIClass* SpiDriver::getSpiClass() {

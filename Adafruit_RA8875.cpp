@@ -788,7 +788,7 @@ static void drawPixelsDMADelegate(DMAManager* manager, DMA_Data* data) {
   manager->clear_frames();
 
   // Add frames for each line until full or out of pixels
-  while(*pixels_left > 0 && manager->can_add_entries(frames_per_line)) {
+  while (*pixels_left > 0 && manager->can_add_entries(frames_per_line)) {
 
     uint16_t y_row = functionData->y + (*rows_completed);
 
@@ -815,6 +815,7 @@ static void drawPixelsDMADelegate(DMAManager* manager, DMA_Data* data) {
     // Draw Pixels out
 
     uint16_t to_transfer = min(*pixels_left, area_width);
+    //Serial.println(to_transfer);Serial.println("");
     auto start = (uint8_t *)(pixel_arr_start + ((*rows_completed) * area_width));
 
     manager->add_entry_cs_pin_toggle(LOW);
@@ -841,8 +842,8 @@ static void drawPixelsDMADelegate(DMAManager* manager, DMA_Data* data) {
 /**************************************************************************/
 void Adafruit_RA8875::drawPixelsAreaDMA(uint16_t *p, uint32_t num, int16_t x, int16_t y, int16_t width) {
 
-  DMAManager* manager = getManager();
-  DMA_Data* curData = manager->get_cur_data();
+  DMAManager *manager = getManager();
+  DMA_Data *curData = manager->get_cur_data();
   DMAFunctionData* functionData = &curData->functionData;
 
   curData->is_complete = [](const DMAFunctionData &function_data) -> bool {
@@ -854,7 +855,7 @@ void Adafruit_RA8875::drawPixelsAreaDMA(uint16_t *p, uint32_t num, int16_t x, in
     drawPixelsDMADelegate(manager, data);
   };
 
-  curData->on_complete = [](SpiDriver* driver) -> void {
+  curData->on_complete = [](SpiDriver *driver) -> void {
     driver->deactivate();
   };
 
@@ -874,7 +875,6 @@ void Adafruit_RA8875::drawPixelsAreaDMA(uint16_t *p, uint32_t num, int16_t x, in
   curData->fetch_next_batch(manager, curData);
   spiDriver.activate();
   spiDriver.sendChain(manager->finalize());
-
 }
 
 /**************************************************************************/
