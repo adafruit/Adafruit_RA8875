@@ -5,7 +5,7 @@
 #include <Arduino.h>
 
 #define FRAMES_PER_LINE 16
-#define LINES_PER_DMA 25
+#define LINES_PER_DMA 20
 #define LLI_MAX_FRAMES (FRAMES_PER_LINE * LINES_PER_DMA)
 #define WORKING_DATA_PER_LINE 19
 #define WORKING_DATA_SIZE (WORKING_DATA_PER_LINE * LINES_PER_DMA)
@@ -92,6 +92,8 @@ typedef struct DMA_Data {
   void (*fetch_next_batch)(DMAManager *manager, DMA_Data *data);
 
   void (*on_complete)(SpiDriver *spiDriver);
+
+  void (*complete_cb)();
 
   inline void clear_working_data() {
     storage_idx = 0;

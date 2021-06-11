@@ -840,17 +840,20 @@ static void drawPixelsDMADelegate(DMAManager* manager, DMA_Data* data) {
  @param width The width of the rectangle to draw in
  */
 /**************************************************************************/
-void Adafruit_RA8875::drawPixelsAreaDMA(uint16_t *p, uint32_t num, int16_t x, int16_t y, int16_t width) {
+void Adafruit_RA8875::drawPixelsAreaDMA(uint16_t *p, uint32_t num, int16_t x, int16_t y, int16_t width,
+                                        void (*complete_cb)()) {
 
   DMAManager *manager = getManager();
   DMA_Data *curData = manager->get_cur_data();
-  DMAFunctionData* functionData = &curData->functionData;
+  DMAFunctionData *functionData = &curData->functionData;
+
+  curData->operation = DRAW_PIXELS_AREA;
 
   curData->is_complete = [](const DMAFunctionData &function_data) -> bool {
     return function_data.drawAreaData.num <= 0;
   };
 
-  curData->fetch_next_batch = [](DMAManager* manager, DMA_Data* data) -> void {
+  curData->fetch_next_batch = [](DMAManager *manager, DMA_Data *data) -> void {
     data->clear_working_data();
     drawPixelsDMADelegate(manager, data);
   };
@@ -858,6 +861,8 @@ void Adafruit_RA8875::drawPixelsAreaDMA(uint16_t *p, uint32_t num, int16_t x, in
   curData->on_complete = [](SpiDriver *driver) -> void {
     driver->deactivate();
   };
+
+  curData->complete_cb = complete_cb;
 
   functionData->drawAreaData.colors = p;
   functionData->drawAreaData.num = num;

@@ -323,6 +323,9 @@ void SpiDriver::nextDMA() {
   DMA_Data *data = dmaManager.get_cur_data();
   if (data->is_complete(data->functionData)) {
     data->on_complete(this);
+    if (data->complete_cb != nullptr) {
+      data->complete_cb();
+    }
     return;
   }
   data->fetch_next_batch(&dmaManager, data);
