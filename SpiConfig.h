@@ -34,9 +34,12 @@
 #include <Arduino.h>
 #include <SPI.h>
 
+/**
+ * Which SPI Driver to use. Combines with HAS_CUSTOM_SPI to enable full custom SPI mode
+ * 0: Use optimized SPI Driver if available
+ * 1: Use default Arduino SPI regardless of other availabilities.
+ */
 #define SPI_DRIVER 0
-
-#define USE_DMA_INTERRUPT 0
 
 /**
  * Determine the default SPI configuration.
@@ -45,19 +48,40 @@
   || (defined(__AVR__) && defined(SPDR) && defined(SPSR) && defined(SPIF))\
   || (defined(__AVR__) && defined(SPI0) && defined(SPI_RXCIF_bm))\
   || defined(ESP8266) || defined(ESP32)\
-  || defined(PLATFORM_ID)\
-  || defined(ARDUINO_SAM_DUE)\
-  || defined(__STM32F1__) || defined(__STM32F4__)\
-  || (defined(CORE_TEENSY) && defined(__arm__))
+ || defined(PLATFORM_ID)\
+ || defined(ARDUINO_SAM_DUE)\
+ || defined(__STM32F1__) || defined(__STM32F4__)\
+ || (defined(CORE_TEENSY) && defined(__arm__))
 #define HAS_CUSTOM_SPI 1
 #else  // HAS_CUSTOM_SPI
 // Use standard SPI library.
 #define HAS_CUSTOM_SPI 0
 #endif  // HAS_CUSTOM_SPI
 
+
+/**
+ * If Custom SPI is available, and we've selected to use it, enable it.
+ */
 #if HAS_CUSTOM_SPI && SPI_DRIVER == 0
 #define USE_CUSTOM_SPI
 #endif
 
+#ifdef USE_CUSTOM_SPI
+
+/**
+ * Time DMA Operations. Currently DUE Specific
+ */
+#define PRINT_DMA_DEBUG 1
+
+/**
+ * Offer to use interrupt services.
+ */
+#define USE_DMA_INTERRUPT 1
+/**
+ * Try to reuse DMA Frames based on the previous operation
+ */
+#define REUSE_DMA_FRAMES_IF_AVAILABLE 1
+
+#endif
 
 #endif // _ADAFRUIT_RA8875_SPICONFIG_H

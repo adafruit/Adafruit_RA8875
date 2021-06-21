@@ -45,6 +45,7 @@
 #include <SPI.h>
 
 void set_base_spi_speed(SpiDriver &driver);
+
 void set_base_spi_speed(SpiDriver &driver) {
 /// @cond DISABLE
 #if defined(ARDUINO_ARCH_ARC32)
@@ -155,17 +156,6 @@ boolean Adafruit_RA8875::begin(enum RA8875sizes s) {
 
 void Adafruit_RA8875::setClockSpeed(uint32_t speed) {
   spiDriver.setClockSpeed(speed);
-}
-
-void Adafruit_RA8875::onDMAInterrupt() {
-  uint32_t interrupt = DMAC->DMAC_EBCISR;
-  (void)interrupt;
-  while ((SPI0->SPI_SR & SPI_SR_TXEMPTY) == 0) {}
-  // leave RDR empty
-  while (SPI0->SPI_SR & (SPI_SR_OVRES | SPI_SR_RDRF)) {
-    SPI0->SPI_RDR;
-  }
-  spiDriver.nextDMA();
 }
 
 /************************* Initialization *********************************/
@@ -782,115 +772,6 @@ void Adafruit_RA8875::drawPixelsArea(uint16_t *p, uint32_t num, int16_t x, int16
   }
 
   digitalWrite(_cs, HIGH);
-}
-
-static void drawPixelsDMADelegate(DMAManager* manager, DMA_Data* data) {
-  const uint8_t frames_per_line = 16;
-  DrawAreaData *functionData = &data->functionData.drawAreaData;
-  // Pointers for stuff that will be updated
-  uint16_t *pixel_arr_start = functionData->colors;
-  volatile uint32_t *pixels_left = &(functionData->num);
-  volatile uint16_t *rows_completed = &(functionData->rows_completed);
-
-  // Values that we need saved
-  uint16_t area_width = functionData->width;
-
-  // Reset frames
-  manager->clear_frames();
-
-  // Add frames for each line until full or out of pixels
-  while (*pixels_left > 0 && manager->can_add_entries(frames_per_line)) {
-
-    uint16_t y_row = functionData->y + (*rows_completed);
-
-    // Write XY Coordinates
-
-    manager->add_entry_cs_pin_toggle(LOW);
-    manager->add_entry_coord_bits(functionData->x, RA8875_CURH0);
-    // If RA Clock is 60MHz and the due runs at 84MHz, and we need CS to be high for 5 RA clock cycles
-    // Keep high for 7 cycles
-    manager->add_entry_cs_pin_toggle(HIGH, DMA_CS_HIGH_TRANSFERS);
-
-    manager->add_entry_cs_pin_toggle(LOW);
-    manager->add_entry_coord_bits(functionData->x, RA8875_CURH1);
-    manager->add_entry_cs_pin_toggle(HIGH, DMA_CS_HIGH_TRANSFERS);
-
-    manager->add_entry_cs_pin_toggle(LOW);
-    manager->add_entry_coord_bits(y_row, RA8875_CURV0);
-    manager->add_entry_cs_pin_toggle(HIGH, DMA_CS_HIGH_TRANSFERS);
-
-    manager->add_entry_cs_pin_toggle(LOW);
-    manager->add_entry_coord_bits(y_row, RA8875_CURV1);
-    manager->add_entry_cs_pin_toggle(HIGH, DMA_CS_HIGH_TRANSFERS);
-
-    // Draw Pixels out
-
-    uint16_t to_transfer = min(*pixels_left, area_width);
-    auto start = (uint8_t *)(pixel_arr_start + ((*rows_completed) * area_width));
-
-    manager->add_entry_cs_pin_toggle(LOW);
-    manager->add_entry_spi_draw_pixels(start, sizeof(uint16_t) * to_transfer);
-    manager->add_entry_cs_pin_toggle(HIGH, DMA_CS_HIGH_TRANSFERS);
-
-    *pixels_left -= to_transfer;
-    *rows_completed += 1;
-  }
-}
-
-/**************************************************************************/
-/*!
- Draws a series of pixels at the specified location without the overhead.
- Allows programming of specified width, instead of full line width.
- Uses DMA
-
- @param p     An array of RGB565 color pixels
- @param num   The number of the pixels to draw
- @param x     The 0-based x location
- @param y     The 0-base y location
- @param width The width of the rectangle to draw in
- */
-/**************************************************************************/
-void Adafruit_RA8875::drawPixelsAreaDMA(uint16_t *p, uint32_t num, int16_t x, int16_t y, int16_t width, void *cbData,
-                                        void (*complete_cb)(void *)) {
-
-  DMAManager *manager = getManager();
-  DMA_Data *curData = manager->get_cur_data();
-  DMAFunctionData *functionData = &curData->functionData;
-
-  curData->operation = DRAW_PIXELS_AREA;
-
-  curData->is_complete = [](const DMAFunctionData &function_data) -> bool {
-    return function_data.drawAreaData.num <= 0;
-  };
-
-  curData->fetch_next_batch = [](DMAManager *manager, DMA_Data *data) -> void {
-    data->clear_working_data();
-    drawPixelsDMADelegate(manager, data);
-  };
-
-  curData->on_complete = [](SpiDriver *driver) -> void {
-    driver->deactivate();
-  };
-
-  curData->callbackData.complete_cb = complete_cb;
-  curData->callbackData.dataPtr = cbData;
-
-  functionData->drawAreaData.colors = p;
-  functionData->drawAreaData.num = num;
-  functionData->drawAreaData.x = applyRotationX(x);
-  functionData->drawAreaData.y = applyRotationY(y);
-  functionData->drawAreaData.width = width;
-  functionData->drawAreaData.rows_completed = 0;
-
-  uint8_t dir = RA8875_MWCR0_LRTD;
-  if (_rotation == 2) {
-    dir = RA8875_MWCR0_RLTD;
-  }
-  writeReg(RA8875_MWCR0, (readReg(RA8875_MWCR0) & ~RA8875_MWCR0_DIRMASK) | dir);
-
-  curData->fetch_next_batch(manager, curData);
-  spiDriver.activate();
-  spiDriver.sendChain(manager->finalize());
 }
 
 /**************************************************************************/

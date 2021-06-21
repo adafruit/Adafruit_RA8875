@@ -35,66 +35,66 @@ inline SpiDriver::SpiDriver(uint8_t csPin, bool interrupts) {
   setClockSpeed(2000000L);
 }
 
-inline SPIClass* SpiDriver::getSpiClass() {
-    return &SPI;
+inline SPIClass *SpiDriver::getSpiClass() {
+  return &SPI;
 }
 
 inline void SpiDriver::activate() {
 #if SPI_HAS_TRANSACTION
-    _spiClass->beginTransaction(_spiSettings);
+  _spiClass->beginTransaction(_spiSettings);
 #endif // SPI_HAS_TRANSACTION
 }
 
 inline void SpiDriver::deactivate() {
 #if SPI_HAS_TRANSACTION
-    _spiClass->endTransaction();
+  _spiClass->endTransaction();
 #endif // SPI_HAS_TRANSACTION
 }
 
 inline void SpiDriver::begin() {
-    _spiClass->begin();
+  _spiClass->begin();
 }
 
 inline void SpiDriver::end() {
-    _spiClass->end();
+  _spiClass->end();
 }
 
 inline uint8_t SpiDriver::receive() {
-    return _spiClass->transfer(0xff);
+  return _spiClass->transfer(0xff);
 }
 
 inline uint16_t SpiDriver::receive16() {
-    return _spiClass->transfer16(0xff);
+  return _spiClass->transfer16(0xff);
 }
 
-inline uint8_t SpiDriver::receive(uint8_t* buf, size_t count) {
+inline uint8_t SpiDriver::receive(uint8_t *buf, size_t count) {
 #ifdef __AVR__
-    for (size_t i = 0; i < count; i++) {
-        buf[i] = _spiClass->transfer(0xff);
-    }
-    return 0;
+  for (size_t i = 0; i < count; i++) {
+      buf[i] = _spiClass->transfer(0xff);
+  }
+  return 0;
 #endif
-    memset(buf, 0xFF, count);
-    _spiClass->transfer(buf, count);
-    return 0;
+  memset(buf, 0xFF, count);
+  _spiClass->transfer(buf, count);
+  return 0;
 }
 
 inline void SpiDriver::send(uint8_t data) {
-    _spiClass->transfer(data);
+  _spiClass->transfer(data);
 }
 
 inline void SpiDriver::send16(uint16_t data) {
-    _spiClass->transfer16(data);
+  _spiClass->transfer16(data);
 }
 
-inline void SpiDriver::send(uint8_t* buf, size_t count) {
+inline void SpiDriver::send(uint8_t *buf, size_t count) {
 #ifdef __AVR__
-    for (size_t i = 0; i < count; i++) {
-        buf[i] = _spiClass->transfer(0xff);
-    }
-    return;
+  for (size_t i = 0; i < count; i++) {
+      buf[i] = _spiClass->transfer(0xff);
+  }
+  return;
 #endif
-    _spiClass->transfer(buf, count);
+  _spiClass->transfer(buf, count);
 }
 
 #endif // _ADAFRUIT_RA8875_SPIDEFAULTDRIVER_H

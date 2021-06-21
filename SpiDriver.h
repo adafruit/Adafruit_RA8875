@@ -62,7 +62,7 @@ public:
 #endif
   }
 
-#ifdef USE_CUSTOM_SPI
+#if USE_DMA_INTERRUPT
 
   DMAManager *getDMAManager() {
     return &dmaManager;
@@ -78,7 +78,8 @@ private:
 
   SPIClass *_spiClass;
   SPISettings _spiSettings;
-#ifdef USE_CUSTOM_SPI
+
+#if USE_DMA_INTERRUPT
   bool use_dma_interrupts = false;
   DMAManager dmaManager;
 #endif

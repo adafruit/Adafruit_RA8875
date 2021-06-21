@@ -168,9 +168,6 @@ public:
   void drawPixels(uint16_t *p, uint32_t count, int16_t x, int16_t y);
   void drawPixelsArea(uint16_t *p, uint32_t count, int16_t x, int16_t y, int16_t width);
 
-  void drawPixelsAreaDMA(uint16_t *p, uint32_t num, int16_t x, int16_t y, int16_t width, void *cbData,
-                         void (*complete_cb)(void *));
-
   void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color);
   void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color);
 
@@ -281,7 +278,44 @@ public:
   /**************************************************************************/
   void setClockSpeed(uint32_t speed);
   SpiDriver spiDriver;
+  /****
+   * DMA Stuff
+   ***/
+#ifdef USE_CUSTOM_SPI
+  /**
+   * Method called in between DMA operations. Flushes buffers and sets up the next operation.
+   * Should be called from ISR
+   */
   void onDMAInterrupt();
+
+  /**
+   * Deprecated version of drawPixelsAreaDMA. Used for testing/timing only
+   * @deprecated Only exists for testing and timing
+   * @param p The buffer of colors to use
+   * @param num The number of pixels in the buffer
+   * @param x The x position (upper left)
+   * @param y The y position (upper left)
+   * @param width The width of the area being drawn
+   * @param cbData Pointer to custom data used in complete_cb (nullable)
+   * @param complete_cb The function to be called when all operations are complete (nullable)
+   */
+  void drawPixelsAreaDMASlow(uint16_t *p, uint32_t num, int16_t x, int16_t y, int16_t width, void *cbData,
+                             void (*complete_cb)(void *));
+
+  /**
+   * Fast-Draws a dirty rect to the screen. Uses DMA interrupts, reuses frames if possible.
+   *
+   * @param p The buffer of colors to use
+   * @param num The number of pixels in the buffer
+   * @param x The x position (upper left)
+   * @param y The y position (upper left)
+   * @param width The width of the area being drawn
+   * @param cbData Pointer to custom data used in complete_cb (nullable)
+   * @param complete_cb The function to be called when all operations are complete (nullable)
+   */
+  void drawPixelsAreaDMA(uint16_t *p, uint32_t num, int16_t x, int16_t y, int16_t width, void *cbData,
+                         void (*complete_cb)(void *));
+#endif
 
 private:
   void PLLinit(void);
@@ -312,9 +346,12 @@ private:
     y = temp;
   }
 
+#if USE_DMA_INTERRUPT
   DMAManager *getManager() {
     return spiDriver.getDMAManager();
   }
+
+#endif
 
   uint8_t _cs, _rst;
   uint16_t _width, _height;

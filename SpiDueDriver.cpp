@@ -27,6 +27,7 @@
  * This file contains adapted code from the SdFat-beta library by Bill Greiman
  */
 #include "SpiDriver.h"
+#include "function_timings.h"
 
 #if defined(USE_CUSTOM_SPI) && defined(ARDUINO_SAM_DUE)
 
@@ -104,10 +105,19 @@ static bool dmac_channel_transfer_done(uint32_t ul_num) {
   return (DMAC->DMAC_CHSR & (DMAC_CHSR_ENA0 << ul_num)) ? false : true;
 }
 
+#if USE_DMA_INTERRUPT
+
 SpiDriver::SpiDriver(uint8_t csPin, bool interrupts) : use_dma_interrupts(interrupts), dmaManager(csPin) {
   _spiClass = getSpiClass();
   setClockSpeed(2000000L);
 }
+
+#else
+SpiDriver::SpiDriver(uint8_t csPin, bool interrupts) {
+  _spiClass = getSpiClass();
+  setClockSpeed(2000000L);
+}
+#endif
 
 //------------------------------------------------------------------------------
 SPIClass *SpiDriver::getSpiClass() {
@@ -292,6 +302,7 @@ void SpiDriver::send(uint8_t *buf, size_t count) {
   }
 }
 
+#if USE_DMA_INTERRUPT
 void SpiDriver::sendChain(volatile LLI *head) {
 
   dmac_channel_disable(SPI_DMAC_TX_CH);
@@ -316,20 +327,32 @@ void SpiDriver::sendChain(volatile LLI *head) {
     dmac_interrupt_enable(SPI_DMAC_TX_CH, true);
   }
 
+  RA_DEBUG_START(SPI_TIMING);
   dmac_channel_enable(SPI_DMAC_TX_CH);
 }
 
 void SpiDriver::nextDMA() {
+  RA_DEBUG_INTERRUPT_INC();
   DMA_Data *data = dmaManager.get_cur_data();
   if (data->is_complete(data->functionData)) {
     data->on_complete(this);
-    if (data->callbackData.dataPtr != nullptr && data->callbackData.complete_cb != nullptr) {
+
+    // The size of this debug actually takes up more than the size of the default due Serial Buffer.
+    // Needs SERIAL_BUFFER_SIZE in RingBuffer.h set to >=256 to use
+    RA_DEBUG_PRINT_TIMINGS();
+    if (data->callbackData.complete_cb != nullptr) {
       data->callbackData.complete_cb(data->callbackData.dataPtr);
     }
+    data->reset();
     return;
   }
-  data->fetch_next_batch(&dmaManager, data);
-  sendChain(dmaManager.finalize());
+  if (data->fetch_next_batch) {
+    RA_DEBUG_PAUSE(INTERRUPT);
+    data->fetch_next_batch(&dmaManager, data);
+    sendChain(dmaManager.finalize());
+    RA_DEBUG_START(INTERRUPT);
+  }
 }
 
-#endif
+#endif // USE_DMA_INTERRUPT
+#endif // defined(USE_CUSTOM_SPI) && defined(ARDUINO_SAM_DUE)

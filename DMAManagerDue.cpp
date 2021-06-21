@@ -1,50 +1,52 @@
+#include "SpiConfig.h"
+
+#if USE_DMA_INTERRUPT
+
 #include <Arduino.h>
 #include "DMAManager.h"
 #include "Adafruit_RA8875.h"
 
-/**
- * Makes no size checks, ensure space before using
- */
-static void fill_command(uint8_t *buf, uint8_t keyword, uint8_t data) {
-  *buf = keyword;
-  *(buf + 1) = data;
+static void volatile_memcpy(volatile void *dst, volatile void *src, size_t size) {
+  volatile auto *start = (volatile uint8_t *)src;
+  volatile auto *end = (volatile uint8_t *)dst;
+  for (size_t i = 0; i < size; i++) {
+    *(end + i) = *(start + i);
+  }
 }
 
-_LLI::_LLI() {
+_LLI::_LLI() : CTRLA(0), CTRLB(0) {
   SADDR = 0;
   DADDR = 0;
-  CTRLA = 0;
-  CTRLB = 0;
   DSCR = 0;
 }
 
-_LLI::_LLI(volatile _LLI &other) {
+_LLI::_LLI(volatile _LLI &other) : CTRLA(other.CTRLA.raw), CTRLB(other.CTRLB.raw) {
   SADDR = other.SADDR;
   DADDR = other.DADDR;
-  CTRLA = other.CTRLA;
-  CTRLB = other.CTRLB;
   DSCR = other.DSCR;
 }
 
-_LLI::_LLI(_LLI const volatile &&other) {
+_LLI::_LLI(_LLI const volatile &&other) noexcept: CTRLA(other.CTRLA.raw), CTRLB(other.CTRLB.raw) {
   SADDR = other.SADDR;
   DADDR = other.DADDR;
-  CTRLA = other.CTRLA;
-  CTRLB = other.CTRLB;
   DSCR = other.DSCR;
 }
 
-bool DMAManager::add_entry(LLI *item) {
-  return add_entry(item->SADDR, item->DADDR, item->CTRLA, item->CTRLB);
+_LLI::_LLI(Word SADDR, Word DADDR, Word CTRLA, Word CTRLB) : SADDR(SADDR), DADDR(DADDR), CTRLA(CTRLA), CTRLB(CTRLB) {
+  DSCR = 0;
 }
 
-bool DMAManager::add_entry(Word SADDR, Word DADDR, Word CTRLA, Word CTRLB) {
+bool DMAManager::add_entry(volatile LLI *item) {
+  return add_entry(*item);
+}
+
+bool DMAManager::add_entry(const volatile LLI &item) {
   if (size >= LLI_MAX_FRAMES) return false;
   volatile LLI *tail = get_next_blank_entry();
-  tail->SADDR = SADDR;
-  tail->DADDR = DADDR;
-  tail->CTRLA = CTRLA;
-  tail->CTRLB = CTRLB;
+  tail->SADDR = item.SADDR;
+  tail->DADDR = item.DADDR;
+  tail->CTRLA.raw = item.CTRLA.raw;
+  tail->CTRLB.raw = item.CTRLB.raw;
   size++;
   return true;
 }
@@ -54,8 +56,13 @@ volatile LLI *DMAManager::get_next_blank_entry() {
   return &dma_frames[size];
 }
 
-volatile LLI *DMAManager::get_entry(uint16_t idx) {
-  if (idx >= size) return nullptr;
+volatile LLI *DMAManager::get_entry(size_t idx, bool force) {
+  if (idx >= size && !force) {
+    return nullptr;
+  }
+  if (force && idx >= LLI_MAX_FRAMES) {
+    return nullptr;
+  }
   return &dma_frames[idx];
 }
 
@@ -65,18 +72,18 @@ void DMAManager::remove_entry(uint16_t idx) {
 
   if (idx < size - 1) { // Move every entry down
     uint16_t elements_moved = size - idx - 1;
-    for (uint i = 0; i < elements_moved; i++) {
-      dma_frames[idx + i] = dma_frames[idx + i + 1];
-    }
+    volatile_memcpy(&dma_frames[idx], &dma_frames[idx + 1], sizeof(LLI) * elements_moved);
   }
 
   size--;
 }
 
 volatile LLI *DMAManager::finalize() {
-  for (int i = 0; i < size - 1; i++) {
+  for (uint i = 0; i < size - 1; i++) {
+    dma_frames[i].CTRLA.DONE = 0;
     dma_frames[i].DSCR = (uint32_t)&dma_frames[i + 1];
   }
+  dma_frames[size - 1].CTRLA.DONE = 0;
   dma_frames[size - 1].DSCR = 0;
   return dma_frames;
 }
@@ -85,64 +92,69 @@ void DMAManager::clear_frames() {
   size = 0;
 }
 
-void DMAManager::reset() {
+void DMAManager::reset(bool full) {
   clear_frames();
-  transaction_data.reset();
+  transaction_data.reset(full);
 }
 
-uint32_t DMAManager::get_size() const {
+size_t DMAManager::get_size() const {
   return size;
 }
 
 bool DMAManager::can_add_entries(uint32_t entries) const {
-  return size + entries < LLI_MAX_FRAMES;
+  bool result = size + entries <= LLI_MAX_FRAMES;
+  return result;
 }
 
 /*****************************
  * Frame Add Functions
  *****************************/
 
-bool DMAManager::add_entry_cs_pin_toggle(bool state, uint8_t num_transfers) {
+WoReg *DMAManager::get_pio_reg(bool state, uint8_t pin) {
+  Pio *pin_descriptor = digitalPinToPort(pin);
+  if (state) {
+    return &pin_descriptor->PIO_SODR;
+  }
+  return &pin_descriptor->PIO_CODR;
+}
+
+bool DMAManager::add_entry_cs_pin_toggle(bool state, size_t num_transfers) {
   return add_entry_pin_toggle(state, _csPin, &_csPinMask, num_transfers);
 }
 
-bool DMAManager::add_entry_pin_toggle(bool state, uint8_t pin, uint32_t *pin_mask_ptr, uint8_t num_transfers) {
-  Pio *pin_descriptor = digitalPinToPort(pin);
+bool DMAManager::add_entry_pin_toggle(bool state, uint8_t pin, const uint32_t *pin_mask_ptr, size_t num_transfers) {
 
-  auto SADDR = (Word)pin_mask_ptr;
-  Word DADDR;
-  Word CTRLA = num_transfers | DMAC_CTRLA_SRC_WIDTH_WORD | DMAC_CTRLA_DST_WIDTH_WORD;
-  Word CTRLB = DMAC_CTRLB_SRC_INCR_FIXED | DMAC_CTRLB_DST_INCR_FIXED;
+  volatile LLI entry = {
+    (Word)pin_mask_ptr,
+    (Word)get_pio_reg(state, pin),
+    (Word)(num_transfers | DMAC_CTRLA_SRC_WIDTH_WORD | DMAC_CTRLA_DST_WIDTH_WORD),
+    (Word)(DMAC_CTRLB_SRC_INCR_FIXED | DMAC_CTRLB_DST_INCR_FIXED),
+  };
 
-  if (state) {
-    DADDR = (Word)&pin_descriptor->PIO_SODR;
-  } else {
-    DADDR = (Word)&pin_descriptor->PIO_CODR;
-  }
-
-  return add_entry(SADDR, DADDR, CTRLA, CTRLB);
+  return add_entry(entry);
 }
 
 bool DMAManager::add_entry_spi_transfer(volatile uint8_t *buf, size_t qty) {
   if (qty <= 0) return false;
 
-  static uint8_t ff = 0XFF;
+  static volatile uint8_t ff = 0XFF;
   uint32_t src_incr = DMAC_CTRLB_SRC_INCR_INCREMENTING;
   if (!buf) {
     buf = &ff;
     src_incr = DMAC_CTRLB_SRC_INCR_FIXED;
   }
 
-  auto SADDR = (Word)buf;
-  Word DADDR = (uint32_t)&SPI0->SPI_TDR;
-  Word CTRLA = qty | DMAC_CTRLA_SRC_WIDTH_BYTE | DMAC_CTRLA_DST_WIDTH_BYTE;
-  Word CTRLB = DMAC_CTRLB_FC_MEM2PER_DMA_FC |
-               src_incr | DMAC_CTRLB_DST_INCR_FIXED;
+  volatile LLI entry = {
+    (Word)buf,
+    (Word)&SPI0->SPI_TDR,
+    qty | DMAC_CTRLA_SRC_WIDTH_BYTE | DMAC_CTRLA_DST_WIDTH_BYTE,
+    DMAC_CTRLB_FC_MEM2PER_DMA_FC | src_incr | DMAC_CTRLB_DST_INCR_FIXED
+  };
 
-  return add_entry(SADDR, DADDR, CTRLA, CTRLB);
+  return add_entry(entry);
 }
 
-bool DMAManager::add_entry_coord_bits(uint16_t coord, uint8_t coord_register) {
+volatile CoordEntryCommand *DMAManager::add_entry_coord_bits(uint16_t coord, uint8_t coord_register) {
   if (!transaction_data.can_add_working_data(COORD_BUF_SPACE)) { // High & Low bits
     return false;
   }
@@ -166,10 +178,13 @@ bool DMAManager::add_entry_coord_bits(uint16_t coord, uint8_t coord_register) {
   }
 
   volatile uint8_t *data_ptr = transaction_data.add_working_data(coord_commands, COORD_BUF_SPACE);
-  return add_entry_spi_transfer(data_ptr, COORD_BUF_SPACE);
+  if (!add_entry_spi_transfer(data_ptr, COORD_BUF_SPACE)) {
+    return nullptr;
+  }
+  return (CoordEntryCommand *)data_ptr;
 }
 
-bool DMAManager::add_entry_spi_draw_pixels(volatile uint8_t *buf, size_t qty) {
+volatile uint8_t *DMAManager::add_entry_spi_draw_pixels(volatile uint8_t *buf, size_t qty) {
   if (!transaction_data.can_add_working_data(3)) { // High & Low bits
     return false;
   }
@@ -187,5 +202,10 @@ bool DMAManager::add_entry_spi_draw_pixels(volatile uint8_t *buf, size_t qty) {
   volatile uint8_t *data_ptr = transaction_data.add_working_data(draw_commands, 3);
   auto ret1 = add_entry_spi_transfer(data_ptr, 3);
   auto ret2 = add_entry_spi_transfer(buf, qty);
-  return ret1 && ret2;
+  if (!(ret1 && ret2)) {
+    return nullptr;
+  }
+  return data_ptr;
 }
+
+#endif
