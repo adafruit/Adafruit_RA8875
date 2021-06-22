@@ -71,7 +71,7 @@
 /**
  * Time DMA Operations. Currently DUE Specific
  */
-#define PRINT_DMA_DEBUG 1
+#define PRINT_DMA_DEBUG 0
 
 /**
  * Offer to use interrupt services.
