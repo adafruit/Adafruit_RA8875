@@ -5,6 +5,9 @@
 
 typedef uint32_t Word;
 
+/**
+ * Bitfield for CTRLA register.
+ */
 typedef volatile union _CTRLA_Field {
   _CTRLA_Field() : raw(0) {};
 
@@ -25,6 +28,9 @@ typedef volatile union _CTRLA_Field {
   Word raw;
 } CTRLA_Field;
 
+/**
+ * Bitfield for CTRLB Register
+ */
 typedef volatile union _CTRLB_Field {
   _CTRLB_Field() : _CTRLB_Field(0) {};
 

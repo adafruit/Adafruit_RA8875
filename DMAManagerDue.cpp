@@ -101,7 +101,7 @@ size_t DMAManager::get_size() const {
   return size;
 }
 
-bool DMAManager::can_add_entries(uint32_t entries) const {
+bool DMAManager::can_add_entries(size_t entries) const {
   bool result = size + entries <= LLI_MAX_FRAMES;
   return result;
 }

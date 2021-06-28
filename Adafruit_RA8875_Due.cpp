@@ -11,6 +11,10 @@ typedef volatile union _SADDR_Type {
   Word raw;
 } SADDR_Type;
 
+/**
+ * Redef of the LLI as an entry in a row.
+ * Uses SADDR_Type union for easier debugging of what's in the SADDR field
+ */
 typedef volatile struct _RowFrame {
   SADDR_Type SADDR;
   Word DADDR;
@@ -30,6 +34,12 @@ typedef volatile struct _Row {
   }
 } Row;
 
+/**
+ * Gets a chunk of LLIs and treats them like an entire row of pixels. Good for bulk operations
+ * @param manager The DMA Manager
+ * @param row Which row to get
+ * @return The collection of frames as a row pointer, if within range. Nullptr otherwise
+ */
 static Row *get_row(DMAManager *manager, size_t row) {
   if (row * FRAMES_PER_LINE >= LLI_MAX_FRAMES) {
     return nullptr;

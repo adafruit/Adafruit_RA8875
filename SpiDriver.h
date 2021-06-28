@@ -36,26 +36,69 @@ class SpiDriver {
 public:
   explicit SpiDriver(uint8_t csPin, bool interrupts = false);
 
+  /**
+   * Activates the driver. Similar to SPI.beginTransaction or setting clock div, etc.
+   */
   void activate();
 
+  /**
+   * Deactivates the driver after activate(). Similar to SPI.endTransaction
+   */
   void deactivate();
 
+  /**
+   * Starts SPI. Usually wraps SPI.begin()
+   */
   void begin();
 
+  /**
+   * Ends SPI. Usually wraps SPI.end()
+   */
   void end();
 
+  /**
+   * Reads 1 byte from SPI
+   * @return Read data
+   */
   uint8_t receive();
 
+  /**
+   * Reads 2 bytes
+   * @return Bytes read
+   */
   uint16_t receive16();
 
+  /**
+   * Read n bytes
+   * @param buf buffer to read into
+   * @param count number of bytes to read
+   * @return A status code
+   */
   uint8_t receive(uint8_t *buf, size_t count);
 
+  /**
+   * Sends 1 byte
+   * @param data Data to send
+   */
   void send(uint8_t data);
 
+  /**
+   * Sends 2 bytes of data
+   * @param data The data to send
+   */
   void send16(uint16_t data);
 
+  /**
+   * Send n bytes
+   * @param buf The start of the buffer to send
+   * @param count Number of bytes
+   */
   void send(uint8_t *buf, size_t count);
 
+  /**
+   * Sets the clock speed for the SPI controller
+   * @param speed Speed in Hz
+   */
   inline void setClockSpeed(uint32_t speed) {
 #if SPI_HAS_TRANSACTION
     _spiSettings = SPISettings(speed, MSBFIRST, SPI_MODE0);
@@ -64,12 +107,23 @@ public:
 
 #if USE_DMA_INTERRUPT
 
+  /**
+   * Get the underlying DMA manager, if available.
+   * @return The Manager
+   */
   DMAManager *getDMAManager() {
     return &dmaManager;
   }
 
+  /**
+   * Sends a chain of DMA frames, if available
+   * @param head The start of the chain.
+   */
   void sendChain(volatile LLI *head);
 
+  /**
+   * Starts the next chain of DMA operations
+   */
   void nextDMA();
 
 #endif
