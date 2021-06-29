@@ -39,7 +39,9 @@
  * 0: Use optimized SPI Driver if available
  * 1: Use default Arduino SPI regardless of other availabilities.
  */
-#define SPI_DRIVER 0
+#ifndef SPI_DRIVER
+#  define SPI_DRIVER 0
+#endif
 
 /**
  * Determine the default SPI configuration.
@@ -71,16 +73,23 @@
 /**
  * Time DMA Operations. Currently DUE Specific
  */
-#define PRINT_DMA_DEBUG 0
+#ifndef PRINT_DMA_DEBUG
+#  define PRINT_DMA_DEBUG 0
+#endif
 
 /**
  * Offer to use interrupt services.
  */
-#define USE_DMA_INTERRUPT 1
+#ifndef USE_DMA_INTERRUPT
+#  define USE_DMA_INTERRUPT 1
+#endif
+
 /**
  * Try to reuse DMA Frames based on the previous operation
  */
-#define REUSE_DMA_FRAMES_IF_AVAILABLE 1
+#ifndef REUSE_DMA_FRAMES_IF_AVAILABLE
+#  define REUSE_DMA_FRAMES_IF_AVAILABLE 1
+#endif
 
 #endif
 
