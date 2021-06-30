@@ -63,20 +63,24 @@ void Adafruit_RA8875::onDMAInterrupt() {
 
 /**
  * Delegate function to draw a batch of pixels from the larger buffer.
- * This operation takes 16 LLI Frames per line of pixels drawn, regardless of the length of the line.
- * setX (CurH0)                                (+ CS Toggle) (3 frames)
- * setX (CurH1)                                (+ CS Toggle) (3 frames)
- * setY (CurV0)                                (+ CS Toggle) (3 frames)
- * setY (curV1)                                (+ CS Toggle) (3 frames)
- * set command MWRC, datawrite, send pixels    (+ CS Toggle) (3 frames)
- * CS High                                                   (1 frame)
+ * This operation takes 21 LLI Frames per line of pixels drawn, regardless of the length of the line.
+ * CS Low                                                                   (1 frame)
+ * setX (CurH0)                                (+ Dummy Transfers, CS High) (3 frames)
+ * CS Low                                                                   (1 frame)
+ * setX (CurH1)                                (+ Dummy Transfers, CS High) (3 frames)
+ * CS Low                                                                   (1 frame)
+ * setY (CurV0)                                (+ Dummy Transfers, CS High) (3 frames)
+ * CS Low                                                                   (1 frame)
+ * setY (curV1)                                (+ Dummy Transfers, CS High) (3 frames)
+ * CS Low                                                                   (1 frame)
+ * set command MWRC, datawrite, send pixels    (+ Dummy Transfers)          (3 frames)
+ * CS High                                                                  (1 frame)
  * @param manager   The DMA Manager responsible for frames
  * @param data      Data with callbacks & function-specific data
  */
 static void drawPixelsDMADelegateSlow(DMAManager *manager, DMA_Data *data) {
   RA_DEBUG_DELEGATE_INC();
   RA_DEBUG_START(DELEGATE);
-  const uint8_t frames_per_line = 16;
   DrawAreaData *functionData = &data->functionData.drawAreaData;
   // Pointers for stuff that will be updated
   uint16_t *pixel_arr_start = functionData->colors;
@@ -90,7 +94,7 @@ static void drawPixelsDMADelegateSlow(DMAManager *manager, DMA_Data *data) {
   manager->clear_frames();
 
   // Add frames for each line until full or out of pixels
-  while (*pixels_left > 0 && manager->can_add_entries(frames_per_line)) {
+  while (*pixels_left > 0 && manager->can_add_entries(FRAMES_PER_LINE)) {
 
     uint16_t y_row = functionData->y + (*rows_completed);
 
@@ -98,20 +102,23 @@ static void drawPixelsDMADelegateSlow(DMAManager *manager, DMA_Data *data) {
 
     manager->add_entry_cs_pin_toggle(LOW);
     manager->add_entry_coord_bits(functionData->x, RA8875_CURH0);
-    // If RA Clock is 60MHz and the due runs at 84MHz, and we need CS to be high for 5 RA clock cycles
-    // Keep high for 8 cycles just to be safe
+    // Keep CS Pin low until we're sure the data has transferred
+    manager->add_entry_dummy_transfer(DMA_DUMMY_TRANSFERS);
     manager->add_entry_cs_pin_toggle(HIGH, DMA_CS_HIGH_TRANSFERS);
 
     manager->add_entry_cs_pin_toggle(LOW);
     manager->add_entry_coord_bits(functionData->x, RA8875_CURH1);
+    manager->add_entry_dummy_transfer(DMA_DUMMY_TRANSFERS);
     manager->add_entry_cs_pin_toggle(HIGH, DMA_CS_HIGH_TRANSFERS);
 
     manager->add_entry_cs_pin_toggle(LOW);
     manager->add_entry_coord_bits(y_row, RA8875_CURV0);
+    manager->add_entry_dummy_transfer(DMA_DUMMY_TRANSFERS);
     manager->add_entry_cs_pin_toggle(HIGH, DMA_CS_HIGH_TRANSFERS);
 
     manager->add_entry_cs_pin_toggle(LOW);
     manager->add_entry_coord_bits(y_row, RA8875_CURV1);
+    manager->add_entry_dummy_transfer(DMA_DUMMY_TRANSFERS);
     manager->add_entry_cs_pin_toggle(HIGH, DMA_CS_HIGH_TRANSFERS);
 
     // Draw Pixels out
@@ -121,6 +128,7 @@ static void drawPixelsDMADelegateSlow(DMAManager *manager, DMA_Data *data) {
 
     manager->add_entry_cs_pin_toggle(LOW);
     manager->add_entry_spi_draw_pixels(start, sizeof(uint16_t) * to_transfer);
+    manager->add_entry_dummy_transfer(DMA_DUMMY_TRANSFERS);
     manager->add_entry_cs_pin_toggle(HIGH, DMA_CS_HIGH_TRANSFERS);
 
     // Subtract pixels from total and increment the lines done
@@ -134,20 +142,24 @@ static void drawPixelsDMADelegateSlow(DMAManager *manager, DMA_Data *data) {
 /**
  * Delegate function to draw a batch of pixels from the larger buffer.
  * Uses quick row transforms instead of rewriting the entire buffer like the slow version.
- * This operation takes 16 LLI Frames per line of pixels drawn, regardless of the length of the line.
- * setX (CurH0)                                (+ CS Toggle) (3 frames)
- * setX (CurH1)                                (+ CS Toggle) (3 frames)
- * setY (CurV0)                                (+ CS Toggle) (3 frames)
- * setY (curV1)                                (+ CS Toggle) (3 frames)
- * set command MWRC, datawrite, send pixels    (+ CS Toggle) (3 frames)
- * CS High                                                   (1 frame)
+ * This operation takes 21 LLI Frames per line of pixels drawn, regardless of the length of the line.
+ * CS Low                                                                   (1 frame)
+ * setX (CurH0)                                (+ Dummy Transfers, CS High) (3 frames)
+ * CS Low                                                                   (1 frame)
+ * setX (CurH1)                                (+ Dummy Transfers, CS High) (3 frames)
+ * CS Low                                                                   (1 frame)
+ * setY (CurV0)                                (+ Dummy Transfers, CS High) (3 frames)
+ * CS Low                                                                   (1 frame)
+ * setY (curV1)                                (+ Dummy Transfers, CS High) (3 frames)
+ * CS Low                                                                   (1 frame)
+ * set command MWRC, datawrite, send pixels    (+ Dummy Transfers)          (3 frames)
+ * CS High                                                                  (1 frame)
  * @param manager   The DMA Manager responsible for frames
  * @param data      Data with callbacks & function-specific data
  */
 static void drawPixelsDMADelegateRows(DMAManager *manager, DMA_Data *data) {
   RA_DEBUG_DELEGATE_INC();
   RA_DEBUG_START(DELEGATE);
-  const uint8_t frames_per_line = 16;
   size_t cur_row = 0;
   DrawAreaData *functionData = &data->functionData.drawAreaData;
   // Pointers for stuff that will be updated
@@ -162,7 +174,7 @@ static void drawPixelsDMADelegateRows(DMAManager *manager, DMA_Data *data) {
   manager->clear_frames();
 
   // Add frames for each line until full or out of pixels
-  while (*pixels_left > 0 && manager->can_add_entries(frames_per_line)) {
+  while (*pixels_left > 0 && manager->can_add_entries(FRAMES_PER_LINE)) {
 
     uint16_t y_row = functionData->y + (*rows_completed);
     volatile Row *row = get_row(manager, cur_row++);
@@ -170,16 +182,16 @@ static void drawPixelsDMADelegateRows(DMAManager *manager, DMA_Data *data) {
     // Write XY Coordinates
 
     row->get_frame(1)->SADDR.coord_entry->coord = functionData->x;
-    row->get_frame(4)->SADDR.coord_entry->coord = (functionData->x >> 8);
-    row->get_frame(7)->SADDR.coord_entry->coord = (y_row);
-    row->get_frame(10)->SADDR.coord_entry->coord = (y_row >> 8);
+    row->get_frame(5)->SADDR.coord_entry->coord = (functionData->x >> 8);
+    row->get_frame(9)->SADDR.coord_entry->coord = (y_row);
+    row->get_frame(13)->SADDR.coord_entry->coord = (y_row >> 8);
 
     // Draw Pixels out
 
     uint16_t to_transfer = min(*pixels_left, area_width);
     auto start = (uint8_t *)(pixel_arr_start + ((*rows_completed) * area_width));
 
-    volatile RowFrame *frame = row->get_frame(14);
+    volatile RowFrame *frame = row->get_frame(18);
     frame->SADDR.raw = (Word)start;
     frame->CTRLA.BTSIZE = (sizeof(uint16_t) * to_transfer);
 
@@ -303,26 +315,30 @@ void Adafruit_RA8875::drawPixelsAreaDMA(uint16_t *p, uint32_t num, int16_t x, in
       // Write XY Coordinates
       manager->add_entry_cs_pin_toggle(LOW);
       manager->add_entry_coord_bits(0, RA8875_CURH0);
-      // If RA Clock is 60MHz and the due runs at 84MHz, and we need CS to be high for 5 RA clock cycles
-      // Keep high for 8 cycles just to be safe
+      // Keep CS Pin low until we're sure the data has transferred
+      manager->add_entry_dummy_transfer(DMA_DUMMY_TRANSFERS);
       manager->add_entry_cs_pin_toggle(HIGH, DMA_CS_HIGH_TRANSFERS);
 
       manager->add_entry_cs_pin_toggle(LOW);
       manager->add_entry_coord_bits(0, RA8875_CURH1);
+      manager->add_entry_dummy_transfer(DMA_DUMMY_TRANSFERS);
       manager->add_entry_cs_pin_toggle(HIGH, DMA_CS_HIGH_TRANSFERS);
 
       manager->add_entry_cs_pin_toggle(LOW);
       manager->add_entry_coord_bits(0, RA8875_CURV0);
+      manager->add_entry_dummy_transfer(DMA_DUMMY_TRANSFERS);
       manager->add_entry_cs_pin_toggle(HIGH, DMA_CS_HIGH_TRANSFERS);
 
       manager->add_entry_cs_pin_toggle(LOW);
       manager->add_entry_coord_bits(0, RA8875_CURV1);
+      manager->add_entry_dummy_transfer(DMA_DUMMY_TRANSFERS);
       manager->add_entry_cs_pin_toggle(HIGH, DMA_CS_HIGH_TRANSFERS);
 
       // Draw Pixels out
 
       manager->add_entry_cs_pin_toggle(LOW);
       manager->add_entry_spi_draw_pixels((uint8_t *)p, sizeof(uint16_t) * width);
+      manager->add_entry_dummy_transfer(DMA_DUMMY_TRANSFERS);
       manager->add_entry_cs_pin_toggle(HIGH, DMA_CS_HIGH_TRANSFERS);
     }
   }

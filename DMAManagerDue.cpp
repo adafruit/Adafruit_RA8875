@@ -6,6 +6,9 @@
 #include "DMAManager.h"
 #include "Adafruit_RA8875.h"
 
+uint8_t dummy_from = 0xFF;
+uint8_t dummy_to = 0xFF;
+
 static void volatile_memcpy(volatile void *dst, volatile void *src, size_t size) {
   volatile auto *start = (volatile uint8_t *)src;
   volatile auto *end = (volatile uint8_t *)dst;
@@ -128,6 +131,18 @@ bool DMAManager::add_entry_pin_toggle(bool state, uint8_t pin, const uint32_t *p
     (Word)pin_mask_ptr,
     (Word)get_pio_reg(state, pin),
     (Word)(num_transfers | DMAC_CTRLA_SRC_WIDTH_WORD | DMAC_CTRLA_DST_WIDTH_WORD),
+    (Word)(DMAC_CTRLB_SRC_INCR_FIXED | DMAC_CTRLB_DST_INCR_FIXED),
+  };
+
+  return add_entry(entry);
+}
+
+bool DMAManager::add_entry_dummy_transfer(size_t num_transfers) {
+
+  volatile LLI entry = {
+    (Word)&dummy_from,
+    (Word)&dummy_to,
+    (Word)num_transfers | DMAC_CTRLA_SRC_WIDTH_BYTE | DMAC_CTRLA_DST_WIDTH_BYTE,
     (Word)(DMAC_CTRLB_SRC_INCR_FIXED | DMAC_CTRLB_DST_INCR_FIXED),
   };
 

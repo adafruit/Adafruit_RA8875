@@ -305,6 +305,19 @@ public:
   /**
    * Fast-Draws a dirty rect to the screen. Uses DMA interrupts, reuses frames if possible.
    *
+   * Builds Frames prior to starting the delegate function
+   * CS Low                                                                   (1 frame)
+   * setX (CurH0)                                (+ Dummy Transfers, CS High) (3 frames)
+   * CS Low                                                                   (1 frame)
+   * setX (CurH1)                                (+ Dummy Transfers, CS High) (3 frames)
+   * CS Low                                                                   (1 frame)
+   * setY (CurV0)                                (+ Dummy Transfers, CS High) (3 frames)
+   * CS Low                                                                   (1 frame)
+   * setY (curV1)                                (+ Dummy Transfers, CS High) (3 frames)
+   * CS Low                                                                   (1 frame)
+   * set command MWRC, datawrite, send pixels    (+ Dummy Transfers)          (3 frames)
+   * CS High                                                                  (1 frame)
+   *
    * @param p The buffer of colors to use
    * @param num The number of pixels in the buffer
    * @param x The x position (upper left)

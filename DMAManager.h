@@ -14,7 +14,7 @@
 /**
  * The number of frames required to draw one line to the screen.
  */
-#define FRAMES_PER_LINE 16
+#define FRAMES_PER_LINE 21
 #endif
 #ifndef LINES_PER_DMA
 /**
@@ -38,7 +38,8 @@
 /**
  * How long to wait / buffer the CS pin low or high
  */
-#define DMA_CS_HIGH_TRANSFERS 8
+#define DMA_CS_HIGH_TRANSFERS 120
+#define DMA_DUMMY_TRANSFERS 100
 
 // Forward Declaration for class
 class DMAManager;
@@ -288,6 +289,8 @@ public:
    * @return Whether or not the entry was added to the buffer.
    */
   bool add_entry_cs_pin_toggle(bool state, size_t num_transfers = 2);
+
+  bool add_entry_dummy_transfer(size_t num_transfers = 2);
 
   /**
    * Adds a generic SPI transfer to the list
