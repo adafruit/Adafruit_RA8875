@@ -20,8 +20,10 @@
 /**************************************************************************/
 
 #if ARDUINO >= 100
+
 #include "Arduino.h"
 #include "Print.h"
+
 #else
 #include "WProgram.h"
 #endif
@@ -33,8 +35,8 @@
 #endif
 
 /// @cond DISABLE
-#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega1280__) ||              \
-    defined(__AVR_ATmega2560__) || defined(ESP8266) || defined(ESP32) ||       \
+#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega1280__) || \
+    defined(__AVR_ATmega2560__) || defined(ESP8266) || defined(ESP32) || \
     defined(DOXYGEN)
 /// @endcond
 #define EEPROM_SUPPORTED ///< Board supports EEPROM Storage
@@ -42,6 +44,7 @@
 #endif
 /// @endcond
 
+#include "SpiDriver.h"
 #include <Adafruit_GFX.h>
 
 #ifndef _ADAFRUIT_RA8875_H
@@ -138,7 +141,7 @@ typedef struct // Matrix
 /**************************************************************************/
 class Adafruit_RA8875 : public Adafruit_GFX {
 public:
-  Adafruit_RA8875(uint8_t cs, uint8_t rst);
+  Adafruit_RA8875(uint8_t cs, uint8_t rst, bool use_interrupts = false);
 
   boolean begin(enum RA8875sizes s);
   void softReset(void);
@@ -163,6 +166,8 @@ public:
   /* Adafruit_GFX functions */
   void drawPixel(int16_t x, int16_t y, uint16_t color);
   void drawPixels(uint16_t *p, uint32_t count, int16_t x, int16_t y);
+  void drawPixelsArea(uint16_t *p, uint32_t count, int16_t x, int16_t y, int16_t width);
+
   void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color);
   void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color);
 
@@ -262,6 +267,67 @@ public:
     textWrite((const char *)buffer, size);
     return size;
   }
+
+#endif
+
+  /**************************************************************************/
+  /*!
+       Wrapper function to manually set the SPI Clock speed
+       @param speed The new speed, in Hz
+   */
+  /**************************************************************************/
+  void setClockSpeed(uint32_t speed);
+  SpiDriver spiDriver;
+  /****
+   * DMA Stuff
+   ***/
+#ifdef USE_CUSTOM_SPI
+  /**
+   * Method called in between DMA operations. Flushes buffers and sets up the next operation.
+   * Should be called from ISR
+   */
+  void onDMAInterrupt();
+
+  /**
+   * Deprecated version of drawPixelsAreaDMA. Used for testing/timing only
+   * @deprecated Only exists for testing and timing
+   * @param p The buffer of colors to use
+   * @param num The number of pixels in the buffer
+   * @param x The x position (upper left)
+   * @param y The y position (upper left)
+   * @param width The width of the area being drawn
+   * @param cbData Pointer to custom data used in complete_cb (nullable)
+   * @param complete_cb The function to be called when all operations are complete (nullable)
+   */
+  void drawPixelsAreaDMASlow(uint16_t *p, uint32_t num, int16_t x, int16_t y, int16_t width, void *cbData,
+                             void (*complete_cb)(void *));
+
+  /**
+   * Fast-Draws a dirty rect to the screen. Uses DMA interrupts, reuses frames if possible.
+   *
+   * Builds Frames prior to starting the delegate function
+   * CS Low                                                                   (1 frame)
+   * setX (CurH0)                                (+ Dummy Transfers, CS High) (3 frames)
+   * CS Low                                                                   (1 frame)
+   * setX (CurH1)                                (+ Dummy Transfers, CS High) (3 frames)
+   * CS Low                                                                   (1 frame)
+   * setY (CurV0)                                (+ Dummy Transfers, CS High) (3 frames)
+   * CS Low                                                                   (1 frame)
+   * setY (curV1)                                (+ Dummy Transfers, CS High) (3 frames)
+   * CS Low                                                                   (1 frame)
+   * set command MWRC, datawrite, send pixels    (+ Dummy Transfers)          (3 frames)
+   * CS High                                                                  (1 frame)
+   *
+   * @param p The buffer of colors to use
+   * @param num The number of pixels in the buffer
+   * @param x The x position (upper left)
+   * @param y The y position (upper left)
+   * @param width The width of the area being drawn
+   * @param cbData Pointer to custom data used in complete_cb (nullable)
+   * @param complete_cb The function to be called when all operations are complete (nullable)
+   */
+  void drawPixelsAreaDMA(uint16_t *p, uint32_t num, int16_t x, int16_t y, int16_t width, void *cbData,
+                         void (*complete_cb)(void *));
 #endif
 
 private:
@@ -292,6 +358,13 @@ private:
     x = y;
     y = temp;
   }
+
+#if USE_DMA_INTERRUPT
+  DMAManager *getManager() {
+    return spiDriver.getDMAManager();
+  }
+
+#endif
 
   uint8_t _cs, _rst;
   uint16_t _width, _height;
