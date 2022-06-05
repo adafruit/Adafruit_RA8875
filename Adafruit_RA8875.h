@@ -43,6 +43,7 @@
 /// @endcond
 
 #include <Adafruit_GFX.h>
+#include <Adafruit_SPIDevice.h>
 
 #ifndef _ADAFRUIT_RA8875_H
 #define _ADAFRUIT_RA8875_H ///< File has been included
@@ -140,7 +141,7 @@ class Adafruit_RA8875 : public Adafruit_GFX {
 public:
   Adafruit_RA8875(uint8_t cs, uint8_t rst);
 
-  boolean begin(enum RA8875sizes s);
+  boolean begin(enum RA8875sizes s, SPIClass *theSPI = &SPI);
   void softReset(void);
   void displayOn(boolean on);
   void sleep(boolean sleep);
@@ -292,6 +293,8 @@ private:
     x = y;
     y = temp;
   }
+
+  Adafruit_SPIDevice *spi_dev = nullptr;
 
   uint8_t _cs, _rst;
   uint16_t _width, _height;
