@@ -245,8 +245,9 @@ void Adafruit_RA8875::initialize(void) {
   /* Horizontal settings registers */
   writeReg(RA8875_HDWR, (_width / 8) - 1); // H width: (HDWR + 1) * 8 = 480
   writeReg(RA8875_HNDFTR, RA8875_HNDFTR_DE_HIGH + hsync_finetune);
-  writeReg(RA8875_HNDR, (hsync_nondisp - hsync_finetune - 2) /
-                            8); // H non-display: HNDR * 8 + HNDFTR + 2 = 10
+  writeReg(RA8875_HNDR,
+           (hsync_nondisp - hsync_finetune - 2) /
+               8); // H non-display: HNDR * 8 + HNDFTR + 2 = 10
   writeReg(RA8875_HSTR, hsync_start / 8 - 1); // Hsync start: (HSTR + 1)*8
   writeReg(RA8875_HPWR,
            RA8875_HPWR_LOW +
@@ -1493,8 +1494,9 @@ void Adafruit_RA8875::touchEnable(boolean on) {
 
   if (on) {
     /* Enable Touch Panel (Reg 0x70) */
-    writeReg(RA8875_TPCR0, RA8875_TPCR0_ENABLE | RA8875_TPCR0_WAIT_4096CLK |
-                               RA8875_TPCR0_WAKEENABLE | adcClk); // 10mhz max!
+    writeReg(RA8875_TPCR0,
+             RA8875_TPCR0_ENABLE | RA8875_TPCR0_WAIT_4096CLK |
+                 RA8875_TPCR0_WAKEENABLE | adcClk); // 10mhz max!
     /* Set Auto Mode      (Reg 0x71) */
     writeReg(RA8875_TPCR1, RA8875_TPCR1_AUTO |
                                // RA8875_TPCR1_VREFEXT |
