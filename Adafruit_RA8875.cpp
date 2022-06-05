@@ -570,6 +570,28 @@ void Adafruit_RA8875::setXY(uint16_t x, uint16_t y) {
 
 /**************************************************************************/
 /*!
+ Sets the current window for pushing pixels
+
+ @param xStart The 0-based x location to start the window
+ @param xEnd The 0-base x location to end the window
+ @param yStart The 0-based y location to start the window
+ @param yEnd The 0-base y location to end the window
+ */
+/**************************************************************************/
+void Adafruit_RA8875::setWindow(uint16_t xStart, uint16_t xEnd, uint16_t yStart,
+                                uint16_t yEnd) {
+  writeReg(RA8875_HSAW0, (uint8_t)(xStart & 0x0FF));
+  writeReg(RA8875_HSAW1, (uint8_t)(xStart >> 8));
+  writeReg(RA8875_VSAW0, (uint8_t)(yStart & 0x0FF));
+  writeReg(RA8875_VSAW1, (uint8_t)(yStart >> 8));
+  writeReg(RA8875_HEAW0, (uint8_t)(xEnd & 0x0FF));
+  writeReg(RA8875_HEAW1, (uint8_t)(xEnd >> 8));
+  writeReg(RA8875_VEAW0, (uint8_t)(yEnd & 0x0FF));
+  writeReg(RA8875_VEAW1, (uint8_t)(yEnd >> 8));
+}
+
+/**************************************************************************/
+/*!
       HW accelerated function to push a chunk of raw pixel data
 
       @param num The number of pixels to push

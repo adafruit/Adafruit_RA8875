@@ -158,6 +158,8 @@ public:
   /* Graphics functions */
   void graphicsMode(void);
   void setXY(uint16_t x, uint16_t y);
+  void setWindow(uint16_t xStart, uint16_t xEnd, uint16_t yStart,
+                 uint16_t yEnd);
   void pushPixels(uint32_t num, uint16_t p);
   void fillRect(void);
 
