@@ -82,7 +82,6 @@ void bmpDraw(const char *filename, int x, int y) {
   uint8_t  r, g, b;
   uint32_t pos = 0, startTime = millis();
   uint8_t  lcdidx = 0;
-  boolean  first = true;
 
   if((x >= tft.width()) || (y >= tft.height())) return;
 
@@ -164,7 +163,6 @@ void bmpDraw(const char *filename, int x, int y) {
               if(lcdidx > 0) {
                 tft.drawPixel(col+x, row+y, lcdbuffer[lcdidx]);
                 lcdidx = 0;
-                first  = false;
               }
 
               bmpFile.read(sdbuffer, sizeof(sdbuffer));
