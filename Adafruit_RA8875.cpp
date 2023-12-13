@@ -503,8 +503,6 @@ void Adafruit_RA8875::cursorBlink(uint8_t rate) {
   temp |= RA8875_MWCR0_BLINK;
   writeData(temp);
 
-  if (rate > 255)
-    rate = 255;
   writeCommand(RA8875_BTCR);
   writeData(rate);
 }
