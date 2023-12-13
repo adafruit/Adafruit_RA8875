@@ -81,7 +81,8 @@ static inline void spi_end(void) { SPI.endTransaction(); }
 */
 /**************************************************************************/
 Adafruit_RA8875::Adafruit_RA8875(uint8_t CS, uint8_t RST)
-    : Adafruit_GFX(800, 480) {
+    : Adafruit_GFX(800, 480), _width(0), _height(0), _textScale(1),
+      _rotation(1), _voffset(0) {
   _cs = CS;
   _rst = RST;
 }
@@ -502,8 +503,6 @@ void Adafruit_RA8875::cursorBlink(uint8_t rate) {
   temp |= RA8875_MWCR0_BLINK;
   writeData(temp);
 
-  if (rate > 255)
-    rate = 255;
   writeCommand(RA8875_BTCR);
   writeData(rate);
 }
