@@ -1,0 +1,96 @@
+/**
+ * Copyright (c) 2011-2020 Bill Greiman
+ * This file is part of the SdFat library for SD memory cards.
+ *
+ * MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ */
+/**
+ * \file
+ * \brief configuration definitions. Adapted from SdFat-beta by Bill Greiman
+ */
+#ifndef _ADAFRUIT_RA8875_SPICONFIG_H
+#define _ADAFRUIT_RA8875_SPICONFIG_H
+
+#include <cstdint>
+#include <cstddef>
+#include <Arduino.h>
+#include <SPI.h>
+
+/**
+ * Which SPI Driver to use. Combines with HAS_CUSTOM_SPI to enable full custom SPI mode
+ * 0: Use optimized SPI Driver if available
+ * 1: Use default Arduino SPI regardless of other availabilities.
+ */
+#ifndef SPI_DRIVER
+#  define SPI_DRIVER 0
+#endif
+
+/**
+ * Determine the default SPI configuration.
+ */
+#if defined(ARDUINO_ARCH_APOLLO3)\
+  || (defined(__AVR__) && defined(SPDR) && defined(SPSR) && defined(SPIF))\
+  || (defined(__AVR__) && defined(SPI0) && defined(SPI_RXCIF_bm))\
+  || defined(ESP8266) || defined(ESP32)\
+ || defined(PLATFORM_ID)\
+ || defined(ARDUINO_SAM_DUE)\
+ || defined(__STM32F1__) || defined(__STM32F4__)\
+ || (defined(CORE_TEENSY) && defined(__arm__))
+#define HAS_CUSTOM_SPI 1
+#else  // HAS_CUSTOM_SPI
+// Use standard SPI library.
+#define HAS_CUSTOM_SPI 0
+#endif  // HAS_CUSTOM_SPI
+
+
+/**
+ * If Custom SPI is available, and we've selected to use it, enable it.
+ */
+#if HAS_CUSTOM_SPI && SPI_DRIVER == 0
+#define USE_CUSTOM_SPI
+#endif
+
+#ifdef USE_CUSTOM_SPI
+
+/**
+ * Time DMA Operations. Currently DUE Specific
+ */
+#ifndef PRINT_DMA_DEBUG
+#  define PRINT_DMA_DEBUG 0
+#endif
+
+/**
+ * Offer to use interrupt services.
+ */
+#ifndef USE_DMA_INTERRUPT
+#  define USE_DMA_INTERRUPT 1
+#endif
+
+/**
+ * Try to reuse DMA Frames based on the previous operation
+ */
+#ifndef REUSE_DMA_FRAMES_IF_AVAILABLE
+#  define REUSE_DMA_FRAMES_IF_AVAILABLE 1
+#endif
+
+#endif
+
+#endif // _ADAFRUIT_RA8875_SPICONFIG_H
