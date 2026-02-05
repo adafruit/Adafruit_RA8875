@@ -33,8 +33,8 @@
 #endif
 
 /// @cond DISABLE
-#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega1280__) ||              \
-    defined(__AVR_ATmega2560__) || defined(ESP8266) || defined(ESP32) ||       \
+#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega1280__) ||        \
+    defined(__AVR_ATmega2560__) || defined(ESP8266) || defined(ESP32) || \
     defined(DOXYGEN)
 /// @endcond
 #define EEPROM_SUPPORTED ///< Board supports EEPROM Storage
@@ -137,7 +137,7 @@ typedef struct // Matrix
  */
 /**************************************************************************/
 class Adafruit_RA8875 : public Adafruit_GFX {
-public:
+ public:
   Adafruit_RA8875(uint8_t cs, uint8_t rst);
 
   boolean begin(enum RA8875sizes s);
@@ -151,7 +151,7 @@ public:
   void textColor(uint16_t foreColor, uint16_t bgColor);
   void textTransparent(uint16_t foreColor);
   void textEnlarge(uint8_t scale);
-  void textWrite(const char *buffer, uint16_t len = 0);
+  void textWrite(const char* buffer, uint16_t len = 0);
   void cursorBlink(uint8_t rate);
 
   /* Graphics functions */
@@ -162,7 +162,7 @@ public:
 
   /* Adafruit_GFX functions */
   void drawPixel(int16_t x, int16_t y, uint16_t color);
-  void drawPixels(uint16_t *p, uint32_t count, int16_t x, int16_t y);
+  void drawPixels(uint16_t* p, uint32_t count, int16_t x, int16_t y);
   void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color);
   void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color);
 
@@ -206,7 +206,7 @@ public:
   /* Touch screen */
   void touchEnable(boolean on);
   boolean touched(void);
-  boolean touchRead(uint16_t *x, uint16_t *y);
+  boolean touchRead(uint16_t* x, uint16_t* y);
 
 /// @cond DISABLE
 #if defined(EEPROM_SUPPORTED)
@@ -214,8 +214,8 @@ public:
   /* Touch screen calibration persistence*/
   uint32_t eepromReadS32(int location);
   void eepromWriteS32(int location, int32_t value);
-  bool readCalibration(int location, tsMatrix_t *matrixPtr);
-  void writeCalibration(int location, tsMatrix_t *matrixPtr);
+  bool readCalibration(int location, tsMatrix_t* matrixPtr);
+  void writeCalibration(int location, tsMatrix_t* matrixPtr);
 /// @cond DISABLE
 #endif
   /// @endcond
@@ -244,7 +244,7 @@ public:
    */
   /**************************************************************************/
   virtual size_t write(uint8_t b) {
-    textWrite((const char *)&b, 1);
+    textWrite((const char*)&b, 1);
     return 1;
   }
 
@@ -258,13 +258,13 @@ public:
        @return The number of bytes written
    */
   /**************************************************************************/
-  virtual size_t write(const uint8_t *buffer, size_t size) {
-    textWrite((const char *)buffer, size);
+  virtual size_t write(const uint8_t* buffer, size_t size) {
+    textWrite((const char*)buffer, size);
     return size;
   }
 #endif
 
-private:
+ private:
   void PLLinit(void);
   void initialize(void);
 
@@ -287,7 +287,7 @@ private:
   int16_t applyRotationX(int16_t x);
   int16_t applyRotationY(int16_t y);
 
-  void swap(int16_t &x, int16_t &y) {
+  void swap(int16_t& x, int16_t& y) {
     int16_t temp = x;
     x = y;
     y = temp;
