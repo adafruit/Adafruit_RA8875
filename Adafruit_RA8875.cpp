@@ -66,7 +66,9 @@ static inline void spi_begin(void) {
   SPI.beginTransaction(SPISettings(spi_speed, MSBFIRST, SPI_MODE0));
 }
 static inline void spi_end(void) __attribute__((always_inline));
-static inline void spi_end(void) { SPI.endTransaction(); }
+static inline void spi_end(void) {
+  SPI.endTransaction();
+}
 #else
 #define spi_begin() ///< Create dummy Macro Function
 #define spi_end()   ///< Create dummy Macro Function
@@ -270,9 +272,9 @@ void Adafruit_RA8875::initialize(void) {
   writeReg(RA8875_HNDR, (hsync_nondisp - hsync_finetune - 2) /
                             8); // H non-display: HNDR * 8 + HNDFTR + 2 = 10
   writeReg(RA8875_HSTR, hsync_start / 8 - 1); // Hsync start: (HSTR + 1)*8
-  writeReg(RA8875_HPWR,
-           RA8875_HPWR_LOW +
-               (hsync_pw / 8 - 1)); // HSync pulse width = (HPWR+1) * 8
+  writeReg(
+      RA8875_HPWR,
+      RA8875_HPWR_LOW + (hsync_pw / 8 - 1)); // HSync pulse width = (HPWR+1) * 8
 
   /* Vertical settings registers */
   writeReg(RA8875_VDHR0, (uint16_t)(_height - 1 + _voffset) & 0xFF);
@@ -311,7 +313,9 @@ void Adafruit_RA8875::initialize(void) {
       @return  The 1-based display width in pixels
 */
 /**************************************************************************/
-uint16_t Adafruit_RA8875::width(void) { return _width; }
+uint16_t Adafruit_RA8875::width(void) {
+  return _width;
+}
 
 /**************************************************************************/
 /*!
@@ -320,7 +324,9 @@ uint16_t Adafruit_RA8875::width(void) { return _width; }
       @return  The 1-based display height in pixels
 */
 /**************************************************************************/
-uint16_t Adafruit_RA8875::height(void) { return _height; }
+uint16_t Adafruit_RA8875::height(void) {
+  return _height;
+}
 
 /**************************************************************************/
 /*!
@@ -329,7 +335,9 @@ uint16_t Adafruit_RA8875::height(void) { return _height; }
  @return  The Rotation Setting
  */
 /**************************************************************************/
-int8_t Adafruit_RA8875::getRotation(void) { return _rotation; }
+int8_t Adafruit_RA8875::getRotation(void) {
+  return _rotation;
+}
 
 /**************************************************************************/
 /*!
@@ -340,12 +348,12 @@ int8_t Adafruit_RA8875::getRotation(void) { return _rotation; }
 /**************************************************************************/
 void Adafruit_RA8875::setRotation(int8_t rotation) {
   switch (rotation) {
-  case 2:
-    _rotation = rotation;
-    break;
-  default:
-    _rotation = 0;
-    break;
+    case 2:
+      _rotation = rotation;
+      break;
+    default:
+      _rotation = 0;
+      break;
   }
 }
 
@@ -491,7 +499,6 @@ void Adafruit_RA8875::textEnlarge(uint8_t scale) {
 /**************************************************************************/
 
 void Adafruit_RA8875::cursorBlink(uint8_t rate) {
-
   writeCommand(RA8875_MWCR0);
   uint8_t temp = readData();
   temp |= RA8875_MWCR0_CURSOR;
@@ -516,7 +523,7 @@ void Adafruit_RA8875::cursorBlink(uint8_t rate) {
       @param len       The size of the buffer in bytes
 */
 /**************************************************************************/
-void Adafruit_RA8875::textWrite(const char *buffer, uint16_t len) {
+void Adafruit_RA8875::textWrite(const char* buffer, uint16_t len) {
   if (len == 0)
     len = strlen(buffer);
   writeCommand(RA8875_MRWC);
@@ -629,9 +636,9 @@ void Adafruit_RA8875::fillRect(void) {
 /**************************************************************************/
 int16_t Adafruit_RA8875::applyRotationX(int16_t x) {
   switch (_rotation) {
-  case 2:
-    x = _width - 1 - x;
-    break;
+    case 2:
+      x = _width - 1 - x;
+      break;
   }
 
   return x;
@@ -646,9 +653,9 @@ int16_t Adafruit_RA8875::applyRotationX(int16_t x) {
 /**************************************************************************/
 int16_t Adafruit_RA8875::applyRotationY(int16_t y) {
   switch (_rotation) {
-  case 2:
-    y = _height - 1 - y;
-    break;
+    case 2:
+      y = _height - 1 - y;
+      break;
   }
 
   return y + _voffset;
@@ -689,7 +696,7 @@ void Adafruit_RA8875::drawPixel(int16_t x, int16_t y, uint16_t color) {
  @param y     The 0-base y location
  */
 /**************************************************************************/
-void Adafruit_RA8875::drawPixels(uint16_t *p, uint32_t num, int16_t x,
+void Adafruit_RA8875::drawPixels(uint16_t* p, uint32_t num, int16_t x,
                                  int16_t y) {
   x = applyRotationX(x);
   y = applyRotationY(y);
@@ -1463,7 +1470,9 @@ void Adafruit_RA8875::GPIOX(boolean on) {
     @param p The duty Cycle (0-255)
 */
 /**************************************************************************/
-void Adafruit_RA8875::PWM1out(uint8_t p) { writeReg(RA8875_P1DCR, p); }
+void Adafruit_RA8875::PWM1out(uint8_t p) {
+  writeReg(RA8875_P1DCR, p);
+}
 
 /**************************************************************************/
 /*!
@@ -1472,7 +1481,9 @@ void Adafruit_RA8875::PWM1out(uint8_t p) { writeReg(RA8875_P1DCR, p); }
      @param p The duty Cycle (0-255)
 */
 /**************************************************************************/
-void Adafruit_RA8875::PWM2out(uint8_t p) { writeReg(RA8875_P2DCR, p); }
+void Adafruit_RA8875::PWM2out(uint8_t p) {
+  writeReg(RA8875_P2DCR, p);
+}
 
 /**************************************************************************/
 /*!
@@ -1564,7 +1575,7 @@ boolean Adafruit_RA8875::touched(void) {
             the RA8875, resetting the flag used by the 'touched' function
 */
 /**************************************************************************/
-boolean Adafruit_RA8875::touchRead(uint16_t *x, uint16_t *y) {
+boolean Adafruit_RA8875::touchRead(uint16_t* x, uint16_t* y) {
   uint16_t tx, ty;
   uint8_t temp;
 
@@ -1746,7 +1757,7 @@ void Adafruit_RA8875::eepromWriteS32(int location, int32_t value) {
   EEPROM.write(location, (value >> 24) & 0xff);
   EEPROM.write(location + 1, (value >> 16) & 0xff);
   EEPROM.write(location + 2, (value >> 8) & 0xff);
-  EEPROM.write(location + 3, (value)&0xff);
+  EEPROM.write(location + 3, (value) & 0xff);
 }
 
 /**************************************************************************/
@@ -1759,7 +1770,7 @@ void Adafruit_RA8875::eepromWriteS32(int location, int32_t value) {
      @return success
  */
 /**************************************************************************/
-bool Adafruit_RA8875::readCalibration(int location, tsMatrix_t *matrixPtr) {
+bool Adafruit_RA8875::readCalibration(int location, tsMatrix_t* matrixPtr) {
   if (location + sizeof(tsMatrix_t) > EEPROMSIZE) {
     return false; // readCalibration::Calibration location outside of EEPROM
                   // memory bound
@@ -1786,7 +1797,7 @@ bool Adafruit_RA8875::readCalibration(int location, tsMatrix_t *matrixPtr) {
      @param matrixPtr The pointer to the Matrix Variable
  */
 /**************************************************************************/
-void Adafruit_RA8875::writeCalibration(int location, tsMatrix_t *matrixPtr) {
+void Adafruit_RA8875::writeCalibration(int location, tsMatrix_t* matrixPtr) {
   if (location + sizeof(tsMatrix_t) <
       EEPROMSIZE) { // Check to see it calibration location outside of EEPROM
                     // memory bound
